@@ -8,7 +8,7 @@ trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
 cd ${WORKSPACE}/${OAID}/config/${PROJECT}/solutions/${ENVIRONMENT}
 
-${BIN_DIR}/createApplicationTemplate.sh -c ${CONFIG_REFERENCE} -s ${SLICE}
+${BIN_DIR}/createApplicationTemplate.sh -c ${PROJECT_CONFIG_COMMIT} -s ${SLICE}
 RESULT=$?
 if [[ ${RESULT} -ne 0 ]]; then
 	echo "Template build failed, exiting..."
