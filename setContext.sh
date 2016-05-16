@@ -134,14 +134,14 @@ export GIT_USER="${GIT_USER}"
 export GIT_EMAIL="${GIT_EMAIL}"
 
 # Save for future steps
-echo "OAID=\"${OAID}\"" >> ${WORKSPACE}/context.ref
-echo "PROJECT=\"${PROJECT}\"" >> ${WORKSPACE}/context.ref
-echo "AWS_ACCESS_KEY_ID=\"${AWS_ACCESS_KEY_ID}\"" >> ${WORKSPACE}/context.ref
-echo "AWS_SECRET_ACCESS_KEY=\"${AWS_SECRET_ACCESS_KEY}\"" >> ${WORKSPACE}/context.ref
-echo "OAID_CONFIG_REPO=\"${OAID_CONFIG_REPO}\"" >> ${WORKSPACE}/context.ref
-echo "OAID_INFRASTRUCTURE_REPO=\"${OAID_INFRASTRUCTURE_REPO}\"" >> ${WORKSPACE}/context.ref
-echo "PROJECT_CONFIG_REPO=\"${PROJECT_CONFIG_REPO}\"" >> ${WORKSPACE}/context.ref
-echo "PROJECT_INFRASTRUCTURE_REPO=\"${PROJECT_INFRASTRUCTURE_REPO}\"" >> ${WORKSPACE}/context.ref
-echo "GIT_USER=\"${GIT_USER}\"" >> ${WORKSPACE}/context.ref
-echo "GIT_EMAIL=\"${GIT_EMAIL}\"" >> ${WORKSPACE}/context.ref
+echo "OAID=${OAID}" >> ${WORKSPACE}/context.ref
+echo "PROJECT=${PROJECT}" >> ${WORKSPACE}/context.ref
+echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> ${WORKSPACE}/context.ref
+echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> ${WORKSPACE}/context.ref
+echo "OAID_CONFIG_REPO=${OAID_CONFIG_REPO}" >> ${WORKSPACE}/context.ref
+echo "OAID_INFRASTRUCTURE_REPO=${OAID_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.ref
+echo "PROJECT_CONFIG_REPO=${PROJECT_CONFIG_REPO}" >> ${WORKSPACE}/context.ref
+echo "PROJECT_INFRASTRUCTURE_REPO=${PROJECT_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.ref
+echo "GIT_USER=${GIT_USER}" >> ${WORKSPACE}/context.ref
+echo "GIT_EMAIL=${GIT_EMAIL}" >> ${WORKSPACE}/context.ref
 
