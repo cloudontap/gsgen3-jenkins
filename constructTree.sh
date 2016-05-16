@@ -5,48 +5,53 @@ trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 PROJECT_CONFIG_REFERENCE_DEFAULT="master"
 PROJECT_INFRASTRUCTURE_REFERENCE_DEFAULT="master"
 function usage() {
-  echo -e "\nConstruct the account directory tree" 
-  echo -e "\nUsage: $(basename $0) -c CONFIG_REFERENCE -i INFRASTRUCTURE_REFERENCE -x"
-  echo -e "\nwhere\n"
-  echo -e "(o) -c CONFIG_REFERENCE is the git reference for the config repo"
-  echo -e "    -h shows this text"
-  echo -e "(o) -i INFRASTRUCTURE_REFERENCE is the git reference for the config repo"
-  echo -e "(o) -x if the project tree should not be included"
-  echo -e "\nDEFAULTS:\n"
-  echo -e "CONFIG_REFERENCE = ${PROJECT_CONFIG_REFERENCE_DEFAULT}"
-  echo -e "INFRASTRUCTURE_REFERENCE = ${PROJECT_INFRASTRUCTURE_REFERENCE_DEFAULT}"
-  echo -e "\nNOTES:\n"
-  echo -e "1) OAID/PROJECT details are assumed to be already defined via environment variables"
-  echo -e ""
-  RESULT=1
-  exit
+    echo -e "\nConstruct the account directory tree" 
+    echo -e "\nUsage: $(basename $0) -c CONFIG_REFERENCE -i INFRASTRUCTURE_REFERENCE -a -p"
+    echo -e "\nwhere\n"
+    echo -e "(o) -a if the account directories should not be included"
+    echo -e "(o) -c CONFIG_REFERENCE is the git reference for the config repo"
+    echo -e "    -h shows this text"
+    echo -e "(o) -i INFRASTRUCTURE_REFERENCE is the git reference for the config repo"
+    echo -e "(o) -p if the project directories should not be included"
+    echo -e "\nDEFAULTS:\n"
+    echo -e "CONFIG_REFERENCE = ${PROJECT_CONFIG_REFERENCE_DEFAULT}"
+    echo -e "INFRASTRUCTURE_REFERENCE = ${PROJECT_INFRASTRUCTURE_REFERENCE_DEFAULT}"
+    echo -e "\nNOTES:\n"
+    echo -e "1) OAID/PROJECT details are assumed to be already defined via environment variables"
+    echo -e ""
+    RESULT=1
+    exit
 }
 
-EXCLUDE_PROJECT_TREE="false"
+EXCLUDE_OAID_DIRECTORIES="false"
+EXCLUDE_PROJECT_DIRECTORIES="false"
 # Parse options
-while getopts ":c:hi:x" opt; do
-  case $opt in
-    c)
-      PROJECT_CONFIG_REFERENCE="${OPTARG}"
-      ;;
-    h)
-      usage
-      ;;
-    i)
-      PROJECT_INFRASTRUCTURE_REFERENCE="${OPTARG}"
-      ;;
-    x)
-      EXCLUDE_PROJECT_TREE="true"
-      ;;
-    \?)
-      echo -e "\nInvalid option: -$OPTARG" 
-      usage
-      ;;
-    :)
-      echo -e "\nOption -$OPTARG requires an argument" 
-      usage
-      ;;
-   esac
+while getopts ":ac:hi:p" opt; do
+    case $opt in
+        a)
+            EXCLUDE_OAID_DIRECTORIES="true"
+            ;;
+        c)
+            PROJECT_CONFIG_REFERENCE="${OPTARG}"
+            ;;
+        h)
+            usage
+            ;;
+        i)
+            PROJECT_INFRASTRUCTURE_REFERENCE="${OPTARG}"
+            ;;
+        p)
+            EXCLUDE_PROJECT_DIRECTORIES="true"
+            ;;
+        \?)
+            echo -e "\nInvalid option: -$OPTARG" 
+            usage
+            ;;
+        :)
+            echo -e "\nOption -$OPTARG requires an argument" 
+            usage
+            ;;
+     esac
 done
 
 if [[ -z "${PROJECT_CONFIG_REFERENCE}" ]]; then
@@ -67,7 +72,7 @@ mkdir ${OAID}
 cd ${OAID}
 mkdir config infrastructure
 
-if [[ !("${EXCLUDE_PROJECT_TREE}" == "true") ]]; then
+if [[ !("${EXCLUDE_PROJECT_DIRECTORIES}" == "true") ]]; then
 
     # Pull in the project config repo
     git clone https://${GITHUB_USER}:${GITHUB_PASS}@${PROJECT_CONFIG_REPO} config/temp
@@ -99,13 +104,15 @@ if [[ !("${EXCLUDE_PROJECT_TREE}" == "true") ]]; then
     fi
 fi
 
-if [[ ! -d config/${OAID} ]]; then
-    # Pull in the account config repo
-    git clone https://${GITHUB_USER}:${GITHUB_PASS}@${OAID_CONFIG_REPO} -b master config/${OAID}
-    RESULT=$?
-    if [[ ${RESULT} -ne 0 ]]; then
-        echo "Can't fetch the ${OAID} config repo, exiting..."
-        exit
+if [[ !("${EXCLUDE_PROJECT_DIRECTORIES}" == "true") ]]; then
+    if [[ ! -d config/${OAID} ]]; then
+        # Pull in the account config repo
+        git clone https://${GITHUB_USER}:${GITHUB_PASS}@${OAID_CONFIG_REPO} -b master config/${OAID}
+        RESULT=$?
+        if [[ ${RESULT} -ne 0 ]]; then
+            echo "Can't fetch the ${OAID} config repo, exiting..."
+            exit
+        fi
     fi
 fi
 
@@ -156,13 +163,15 @@ if [[ !("${EXCLUDE_PROJECT_TREE}" == "true") ]]; then
     fi
 fi
 
-if [[ ! -d infrastructure/${OAID} ]]; then
-    # Pull in the account infrastructure repo
-    git clone https://${GITHUB_USER}:${GITHUB_PASS}@${OAID_INFRASTRUCTURE_REPO} -b master infrastructure/${OAID}
-    RESULT=$?
-    if [[ ${RESULT} -ne 0 ]]; then
-        echo "Can't fetch the ${OAID} infrastructure repo, exiting..."
-        exit
+if [[ !("${EXCLUDE_PROJECT_DIRECTORIES}" == "true") ]]; then
+    if [[ ! -d infrastructure/${OAID} ]]; then
+        # Pull in the account infrastructure repo
+        git clone https://${GITHUB_USER}:${GITHUB_PASS}@${OAID_INFRASTRUCTURE_REPO} -b master infrastructure/${OAID}
+        RESULT=$?
+        if [[ ${RESULT} -ne 0 ]]; then
+            echo "Can't fetch the ${OAID} infrastructure repo, exiting..."
+            exit
+        fi
     fi
 fi
 

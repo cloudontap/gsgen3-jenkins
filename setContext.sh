@@ -3,45 +3,45 @@
 trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 
 function usage() {
-  echo -e "\nDetermine key settings for an account/project" 
-  echo -e "\nUsage: $(basename $0) -a OAID -p PROJECT -c CONTAINER"
-  echo -e "\nwhere\n"
-  echo -e "(o) -a OAID is the organisation account id e.g. \"env01\""
-  echo -e "(o) -c CONTAINER is the container name e.g. \"production\""
-  echo -e "    -h shows this text"
-  echo -e "(o) -p PROJECT is the project id e.g. \"eticket"\""
-  echo -e "\nDEFAULTS:\n"
-  echo -e "\nNOTES:\n"
-  echo -e "1) The setting values are saved in context.ref in the current directory"
-  echo -e ""
-  RESULT=1
-  exit
+    echo -e "\nDetermine key settings for an account/project" 
+    echo -e "\nUsage: $(basename $0) -a OAID -p PROJECT -c CONTAINER"
+    echo -e "\nwhere\n"
+    echo -e "(o) -a OAID is the organisation account id e.g. \"env01\""
+    echo -e "(o) -c CONTAINER is the container name e.g. \"production\""
+    echo -e "    -h shows this text"
+    echo -e "(o) -p PROJECT is the project id e.g. \"eticket"\""
+    echo -e "\nDEFAULTS:\n"
+    echo -e "\nNOTES:\n"
+    echo -e "1) The setting values are saved in context.ref in the current directory"
+    echo -e ""
+    RESULT=1
+    exit
 }
 
 # Parse options
 while getopts ":a:p:h" opt; do
-  case $opt in
-    a)
-      OAID="${OPTARG}"
-      ;;
-    c)
-      CONTAINER="${OPTARG}"
-      ;;
-    h)
-      usage
-      ;;
-    p)
-      PROJECT="${OPTARG}"
-      ;;
-    \?)
-      echo -e "\nInvalid option: -$OPTARG" 
-      usage
-      ;;
-    :)
-      echo -e "\nOption -$OPTARG requires an argument" 
-      usage
-      ;;
-   esac
+    case $opt in
+        a)
+            OAID="${OPTARG}"
+            ;;
+        c)
+            CONTAINER="${OPTARG}"
+            ;;
+        h)
+            usage
+            ;;
+        p)
+            PROJECT="${OPTARG}"
+            ;;
+        \?)
+            echo -e "\nInvalid option: -$OPTARG" 
+            usage
+            ;;
+        :)
+            echo -e "\nOption -$OPTARG requires an argument" 
+            usage
+            ;;
+     esac
 done
 
 # Determine the project from the job name 
