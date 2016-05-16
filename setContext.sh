@@ -1,7 +1,5 @@
 #!/bin/bash
 
-trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
-
 function usage() {
     echo -e "\nDetermine key settings for an account/project" 
     echo -e "\nUsage: $(basename $0) -a OAID -p PROJECT -c CONTAINER"
@@ -13,7 +11,6 @@ function usage() {
     echo -e "\nNOTES:\n"
     echo -e "1) The setting values are saved in context.ref in the current directory"
     echo -e ""
-    RESULT=1
     exit
 }
 
@@ -33,11 +30,11 @@ while getopts ":a:p:h" opt; do
             PROJECT="${OPTARG}"
             ;;
         \?)
-            echo -e "\nInvalid option: -$OPTARG" 
+            echo -e "\nInvalid option: -$OPTARG"
             usage
             ;;
         :)
-            echo -e "\nOption -$OPTARG requires an argument" 
+            echo -e "\nOption -$OPTARG requires an argument"
             usage
             ;;
      esac
@@ -51,6 +48,12 @@ fi
 
 PROJECT=${PROJECT,,}
 PROJECT_UPPER=${PROJECT^^}
+
+# Determine the container - normally the same as the environment
+if [[ -z "${CONTAINER}" ]]; then
+    CONTAINER=${ENVIRONMENT}
+fi
+
 CONTAINER=${CONTAINER,,}
 CONTAINER_UPPER=${CONTAINER^^}
 
