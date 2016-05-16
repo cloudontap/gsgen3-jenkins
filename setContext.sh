@@ -118,6 +118,18 @@ if [[ -z "${GIT_EMAIL}" ]]; then
     GIT_EMAIL="${GIT_EMAIL_DEFAULT}"
 fi
 
+# Export for Save for future steps
+export OAID="${OAID}"
+export PROJECT="${PROJECT}"
+export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
+export OAID_CONFIG_REPO="${OAID_CONFIG_REPO}"
+export OAID_INFRASTRUCTURE_REPO="${OAID_INFRASTRUCTURE_REPO}"
+export PROJECT_CONFIG_REPO="${PROJECT_CONFIG_REPO}"
+export PROJECT_INFRASTRUCTURE_REPO="${PROJECT_INFRASTRUCTURE_REPO}"
+export GIT_USER="${GIT_USER}"
+export GIT_EMAIL="${GIT_EMAIL}"
+
 # Save for future steps
 echo "OAID=\"${OAID}\"" >> ${WORKSPACE}/context.ref
 echo "PROJECT=\"${PROJECT}\"" >> ${WORKSPACE}/context.ref
