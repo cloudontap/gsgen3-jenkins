@@ -104,7 +104,7 @@ if [[ !("${EXCLUDE_PROJECT_DIRECTORIES}" == "true") ]]; then
     fi
 fi
 
-if [[ !("${EXCLUDE_PROJECT_DIRECTORIES}" == "true") ]]; then
+if [[ !("${EXCLUDE_OAID_DIRECTORIES}" == "true") ]]; then
     if [[ ! -d config/${OAID} ]]; then
         # Pull in the account config repo
         git clone https://${GITHUB_USER}:${GITHUB_PASS}@${OAID_CONFIG_REPO} -b master config/${OAID}
@@ -131,7 +131,7 @@ if [[ ! -d config/bin ]]; then
     fi
 fi
 
-if [[ !("${EXCLUDE_PROJECT_TREE}" == "true") ]]; then
+if [[ !("${EXCLUDE_PROJECT_DIRECTORIES}" == "true") ]]; then
     
     # Pull in the project infrastructure repo
     git clone https://${GITHUB_USER}:${GITHUB_PASS}@${PROJECT_INFRASTRUCTURE_REPO} infrastructure/temp
@@ -163,7 +163,7 @@ if [[ !("${EXCLUDE_PROJECT_TREE}" == "true") ]]; then
     fi
 fi
 
-if [[ !("${EXCLUDE_PROJECT_DIRECTORIES}" == "true") ]]; then
+if [[ !("${EXCLUDE_OAID_DIRECTORIES}" == "true") ]]; then
     if [[ ! -d infrastructure/${OAID} ]]; then
         # Pull in the account infrastructure repo
         git clone https://${GITHUB_USER}:${GITHUB_PASS}@${OAID_INFRASTRUCTURE_REPO} -b master infrastructure/${OAID}
