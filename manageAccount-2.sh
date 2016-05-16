@@ -46,8 +46,6 @@ fi
 # Update the code and credentials buckets if required
 if [[ "${SYNC_ACCOUNT_BUCKETS}" == "true" ]]; then
     cd ${WORKSPACE}/${OAID}
-    echo $AWS_ACCESS_KEY_ID
-    echo $AWS_SECRET_ACCESS_KEY
     ${BIN_DIR}/syncAccountBuckets.sh -a ${OAID}
 fi
 
