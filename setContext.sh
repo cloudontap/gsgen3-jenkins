@@ -105,6 +105,20 @@ if [[ -z "${PROJECT_INFRASTRUCTURE_REPO}" ]]; then
     PROJECT_INFRASTRUCTURE_REPO="${!PROJECT_INFRASTRUCTURE_REPO_VAR}"
 fi
 
+# Determine who to include as the author if git updates required
+if [[ -z "${GIT_USER}" ]]; then
+    GIT_USER="${BUILD_USER}"
+fi
+if [[ -z "${GIT_USER}" ]]; then
+    GIT_USER="${GIT_USER_DEFAULT}"
+fi
+if [[ -z "${GIT_EMAIL}" ]]; then
+    GIT_EMAIL="${BUILD_USER_EMAIL}"
+fi
+if [[ -z "${GIT_EMAIL}" ]]; then
+    GIT_EMAIL="${GIT_EMAIL_DEFAULT}"
+fi
+
 # Save for future steps
 echo "OAID=${OAID}" >> ${WORKSPACE}/context.ref
 echo "PROJECT=${PROJECT}" >> ${WORKSPACE}/context.ref
@@ -114,4 +128,6 @@ echo "OAID_CONFIG_REPO=${OAID_CONFIG_REPO}" >> ${WORKSPACE}/context.ref
 echo "OAID_INFRASTRUCTURE_REPO=${OAID_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.ref
 echo "PROJECT_CONFIG_REPO=${PROJECT_CONFIG_REPO}" >> ${WORKSPACE}/context.ref
 echo "PROJECT_INFRASTRUCTURE_REPO=${PROJECT_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.ref
+echo "GIT_USER=${GIT_USER}" >> ${WORKSPACE}/context.ref
+echo "GIT_EMAIL=${GET_EMAIL}" >> ${WORKSPACE}/context.ref
 
