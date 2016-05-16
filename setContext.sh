@@ -1,0 +1,117 @@
+#!/bin/bash
+
+trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
+
+function usage() {
+  echo -e "\nDetermine key settings for an account/project" 
+  echo -e "\nUsage: $(basename $0) -a OAID -p PROJECT -c CONTAINER"
+  echo -e "\nwhere\n"
+  echo -e "(o) -a OAID is the organisation account id e.g. \"env01\""
+  echo -e "(o) -c CONTAINER is the container name e.g. \"production\""
+  echo -e "    -h shows this text"
+  echo -e "(o) -p PROJECT is the project id e.g. \"eticket"\""
+  echo -e "\nDEFAULTS:\n"
+  echo -e "\nNOTES:\n"
+  echo -e "1) The setting values are saved in context.ref in the current directory"
+  echo -e ""
+  RESULT=1
+  exit
+}
+
+# Parse options
+while getopts ":a:p:h" opt; do
+  case $opt in
+    a)
+      OAID="${OPTARG}"
+      ;;
+    c)
+      CONTAINER="${OPTARG}"
+      ;;
+    h)
+      usage
+      ;;
+    p)
+      PROJECT="${OPTARG}"
+      ;;
+    \?)
+      echo -e "\nInvalid option: -$OPTARG" 
+      usage
+      ;;
+    :)
+      echo -e "\nOption -$OPTARG requires an argument" 
+      usage
+      ;;
+   esac
+done
+
+# Determine the project from the job name 
+# if not already defined or provided on the command line
+if [[ -z "${PROJECT}" ]]; then
+    PROJECT=$(echo ${JOB_NAME} | cut -d '-' -f 1)
+fi
+
+PROJECT=${PROJECT,,}
+PROJECT_UPPER=${PROJECT^^}
+CONTAINER=${CONTAINER,,}
+CONTAINER_UPPER=${CONTAINER^^}
+
+# Determine the account from the project/container combination
+# if not already defined or provided on the command line
+if [[ -z "${OAID}" ]]; then
+    OAID_VAR="${PROJECT_UPPER}_${CONTAINER_UPPER}_OAID"
+    if [[ "${!OAID_VAR}" == "" ]]; then 
+        OAID_VAR="${PROJECT_UPPER}_OAID"
+    fi
+    OAID="${!OAID_VAR}"
+fi
+
+OAID=${OAID,,}
+OAID_UPPER=${OAID^^}
+
+# Determine the access credentials for the target account
+if [[ -z "${AWS_ACCESS_KEY_ID}" ]]; then
+    AWS_ACCESS_KEY_ID_VAR="${OAID_UPPER}_AWS_ACCESS_KEY_ID"
+    AWS_ACCESS_KEY_ID="${!AWS_ACCESS_KEY_ID_VAR}"
+fi
+
+if [[ -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
+    AWS_SECRET_ACCESS_KEY_VAR="${OAID_UPPER}_AWS_SECRET_ACCESS_KEY"
+    AWS_SECRET_ACCESS_KEY="${!AWS_SECRET_ACCESS_KEY_VAR}"
+fi
+
+# Determine account repos
+if [[ -z "${OAID_CONFIG_REPO}" ]]; then
+    OAID_CONFIG_REPO_VAR="${OAID_UPPER}_CONFIG_REPO"
+    OAID_CONFIG_REPO="${!OAID_CONFIG_REPO_VAR}"
+fi
+if [[ -z "${OAID_INFRASTRUCTURE_REPO}" ]]; then
+    OAID_INFRASTRUCTURE_REPO_VAR="${OAID_UPPER}_INFRASTRUCTURE_REPO"
+    OAID_INFRASTRUCTURE_REPO="${!OAID_INFRASTRUCTURE_REPO_VAR}"
+fi
+
+# Determine project repos
+if [[ -z "${PROJECT_CONFIG_REPO}" ]]; then
+    PROJECT_CONFIG_REPO_VAR="${PROJECT_UPPER}_${CONTAINER_UPPER}_CONFIG_REPO"
+    if [[ "${!PROJECT_CONFIG_REPO_VAR}" == "" ]]; then 
+        PROJECT_CONFIG_REPO_VAR="${PROJECT_UPPER}_CONFIG_REPO"
+    fi
+    PROJECT_CONFIG_REPO="${!PROJECT_CONFIG_REPO_VAR}"
+fi
+if [[ -z "${PROJECT_INFRASTRUCTURE_REPO}" ]]; then
+    PROJECT_INFRASTRUCTURE_REPO_VAR="${PROJECT_UPPER}_${CONTAINER_UPPER}_INFRASTRUCTURE_REPO"
+    if [[ "${!PROJECT_INFRASTRUCTURE_REPO_VAR}" == "" ]]; then 
+        PROJECT_INFRASTRUCTURE_REPO_VAR="${PROJECT_UPPER}_INFRASTRUCTURE_REPO"
+    fi
+    PROJECT_INFRASTRUCTURE_REPO="${!PROJECT_INFRASTRUCTURE_REPO_VAR}"
+fi
+
+# Save for future steps
+echo "OAID=${OAID}" >> ${WORKSPACE}/context.ref
+echo "PROJECT=${PROJECT}" >> ${WORKSPACE}/context.ref
+echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> ${WORKSPACE}/context.ref
+echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> ${WORKSPACE}/context.ref
+echo "OAID_CONFIG_REPO=${OAID_CONFIG_REPO}" >> ${WORKSPACE}/context.ref
+echo "OAID_INFRASTRUCTURE_REPO=${OAID_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.ref
+echo "PROJECT_CONFIG_REPO=${PROJECT_CONFIG_REPO}" >> ${WORKSPACE}/context.ref
+echo "PROJECT_INFRASTRUCTURE_REPO=${PROJECT_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.ref
+
