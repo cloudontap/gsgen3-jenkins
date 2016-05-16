@@ -1,5 +1,7 @@
 #!/bin/bash
 
+if [[ -n "${GSGEN_DEBUG}" ]]; then set -x; fi
+
 function usage() {
     echo -e "\nDetermine key settings for an account/project" 
     echo -e "\nUsage: $(basename $0) -a OAID -p PROJECT -c CONTAINER"

@@ -1,4 +1,6 @@
-#!/bin/bash -x
+#!/bin/bash
+
+if [[ -n "${GSGEN_DEBUG}" ]]; then set -x; fi
 
 trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 
