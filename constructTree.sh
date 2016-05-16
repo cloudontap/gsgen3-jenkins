@@ -180,7 +180,7 @@ if [[ ! -d infrastructure/startup ]]; then
     if [[ -d infrastructure/${PROJECT}/startup ]]; then
         cp -rp infrastructure/${PROJECT}/startup infrastructure/startup
     else
-        git clone https://${GSGEN_BIN_REPO} -b master infrastructure/startup
+        git clone https://${GSGEN_STARTUP_REPO} -b master infrastructure/startup
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
             echo "Can't fetch the GSGEN startup repo, exiting..."
