@@ -32,7 +32,7 @@ BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
 cd solutions/${ENVIRONMENT}
 
 for SLICE in ${SLICE_LIST}; do
-	${BIN}/createApplicationTemplate.sh -c ${DEPLOY_TAG} -s ${SLICE}
+	${BIN_DIR}/createApplicationTemplate.sh -c ${DEPLOY_TAG} -s ${SLICE}
 	RESULT=$?
 	if [[ ${RESULT} -ne 0 ]]; then
  		echo "Can't generate the template for the ${SLICE} application slice, exiting..."
