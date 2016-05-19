@@ -69,6 +69,10 @@ if [[ -z "${OAID}" ]]; then
     usage
 fi
 
+# Save for later steps
+echo "PROJECT_CONFIG_REFERENCE=${PROJECT_CONFIG_REFERENCE}" >> ${WORKSPACE}/context.ref
+echo "PROJECT_INFRASTRUCTURE_REFERENCE=${PROJECT_INFRASTRUCTURE_REFERENCE}" >> ${WORKSPACE}/context.ref
+
 # Create the top level directory representing the account
 mkdir ${OAID}
 cd ${OAID}
