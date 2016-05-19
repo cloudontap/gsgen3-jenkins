@@ -13,7 +13,7 @@ cd ${WORKSPACE}/${OAID}/config/${PROJECT}
 
 # Ensure git knows who we are
 git config user.name  "${GIT_USER}"
-git config user.email "${GIT_USER_EMAIL}"
+git config user.email "${GIT_EMAIL}"
 
 # Ensure build.ref aligns with the requested code tag
 BUILD_REFERENCE=$(echo -n "${GIT_COMMIT} ${CODE_TAG}")
@@ -60,7 +60,7 @@ cd ${WORKSPACE}/${OAID}/infrastructure/${PROJECT}
 
 # Ensure git knows who we are
 git config user.name  "${GIT_USER}"
-git config user.email "${GIT_USER_EMAIL}"
+git config user.email "${GIT_EMAIL}"
 
 # Commit the generated application templates
 echo "Committing application templates to the infrastructure repo..."
