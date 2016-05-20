@@ -82,5 +82,5 @@ if [[ -z "${SLICE}" ]]; then
     fi
 fi
 
-echo "PROJECT=$PROJECT" >> $WORKSPACE/context.ref
-echo "SLICE=$SLICE" >> $WORKSPACE/context.ref
+echo "PROJECT=$PROJECT" >> $WORKSPACE/context.properties
+echo "SLICE=$SLICE" >> $WORKSPACE/context.properties

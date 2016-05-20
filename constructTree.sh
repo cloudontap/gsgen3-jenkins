@@ -70,8 +70,8 @@ if [[ -z "${OAID}" ]]; then
 fi
 
 # Save for later steps
-echo "PROJECT_CONFIG_REFERENCE=${PROJECT_CONFIG_REFERENCE}" >> ${WORKSPACE}/context.ref
-echo "PROJECT_INFRASTRUCTURE_REFERENCE=${PROJECT_INFRASTRUCTURE_REFERENCE}" >> ${WORKSPACE}/context.ref
+echo "PROJECT_CONFIG_REFERENCE=${PROJECT_CONFIG_REFERENCE}" >> ${WORKSPACE}/context.properties
+echo "PROJECT_INFRASTRUCTURE_REFERENCE=${PROJECT_INFRASTRUCTURE_REFERENCE}" >> ${WORKSPACE}/context.properties
 
 # Create the top level directory representing the account
 mkdir ${OAID}
@@ -96,7 +96,7 @@ if [[ !("${EXCLUDE_PROJECT_DIRECTORIES}" == "true") ]]; then
 	    echo "Can't checkout ${PROJECT_CONFIG_REFERENCE} in the config repo, exiting..."
 	    exit
     fi
-    echo "PROJECT_CONFIG_COMMIT=$(git rev-parse HEAD)" >> ${WORKSPACE}/context.ref
+    echo "PROJECT_CONFIG_COMMIT=$(git rev-parse HEAD)" >> ${WORKSPACE}/context.properties
     popd > /dev/null 2>&1
 
     if [[ -d config/temp/${PROJECT} ]]; then
@@ -155,7 +155,7 @@ if [[ !("${EXCLUDE_PROJECT_DIRECTORIES}" == "true") ]]; then
 	    echo "Can't checkout ${PROJECT_INFRASTRUCTURE_REFERENCE} in the infrastructure repo, exiting..."
 	    exit
     fi
-    echo "PROJECT_INFRASTRUCTURE_COMMIT=$(git rev-parse HEAD)" >> ${WORKSPACE}/context.ref
+    echo "PROJECT_INFRASTRUCTURE_COMMIT=$(git rev-parse HEAD)" >> ${WORKSPACE}/context.properties
     popd > /dev/null 2>&1
 
     if [[ -d infrastructure/temp/${PROJECT} ]]; then

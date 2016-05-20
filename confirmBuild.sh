@@ -33,8 +33,8 @@ GIT_COMMIT=$(git rev-list -n 1 ${CODE_TAG})
 GIT_COMMIT_SHORT=$(git rev-list -n 1 --abbrev-commit ${CODE_TAG})
 
 # Save for future steps
-echo "GIT_COMMIT=${GIT_COMMIT}" >> ${WORKSPACE}/context.ref
-echo "GIT_COMMIT_SHORT=${GIT_COMMIT_SHORT}" >> ${WORKSPACE}/context.ref
+echo "GIT_COMMIT=${GIT_COMMIT}" >> ${WORKSPACE}/context.properties
+echo "GIT_COMMIT_SHORT=${GIT_COMMIT_SHORT}" >> ${WORKSPACE}/context.properties
 
 # Confirm the commit built successfully into a docker image
 export IMAGE="${PROJECT}/${GIT_COMMIT}"

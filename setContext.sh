@@ -11,7 +11,7 @@ function usage() {
     echo -e "    -h shows this text"
     echo -e "(o) -p PROJECT is the project id e.g. \"eticket\""
     echo -e "\nNOTES:\n"
-    echo -e "1) The setting values are saved in context.ref in the current directory"
+    echo -e "1) The setting values are saved in context.properties in the current directory"
     echo -e ""
     exit
 }
@@ -147,15 +147,15 @@ export GIT_USER="${GIT_USER}"
 export GIT_EMAIL="${GIT_EMAIL}"
 
 # Save for future steps
-echo "OAID=${OAID}" >> ${WORKSPACE}/context.ref
-echo "PROJECT=${PROJECT}" >> ${WORKSPACE}/context.ref
-echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> ${WORKSPACE}/context.ref
-echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> ${WORKSPACE}/context.ref
-echo "OAID_CONFIG_REPO=${OAID_CONFIG_REPO}" >> ${WORKSPACE}/context.ref
-echo "OAID_INFRASTRUCTURE_REPO=${OAID_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.ref
-echo "PROJECT_CODE_REPO=${PROJECT_CODE_REPO}" >> ${WORKSPACE}/context.ref
-echo "PROJECT_CONFIG_REPO=${PROJECT_CONFIG_REPO}" >> ${WORKSPACE}/context.ref
-echo "PROJECT_INFRASTRUCTURE_REPO=${PROJECT_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.ref
-echo "GIT_USER=${GIT_USER}" >> ${WORKSPACE}/context.ref
-echo "GIT_EMAIL=${GIT_EMAIL}" >> ${WORKSPACE}/context.ref
+echo "OAID=${OAID}" >> ${WORKSPACE}/context.properties
+echo "PROJECT=${PROJECT}" >> ${WORKSPACE}/context.properties
+echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> ${WORKSPACE}/context.properties
+echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> ${WORKSPACE}/context.properties
+echo "OAID_CONFIG_REPO=${OAID_CONFIG_REPO}" >> ${WORKSPACE}/context.properties
+echo "OAID_INFRASTRUCTURE_REPO=${OAID_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.properties
+echo "PROJECT_CODE_REPO=${PROJECT_CODE_REPO}" >> ${WORKSPACE}/context.properties
+echo "PROJECT_CONFIG_REPO=${PROJECT_CONFIG_REPO}" >> ${WORKSPACE}/context.properties
+echo "PROJECT_INFRASTRUCTURE_REPO=${PROJECT_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.properties
+echo "GIT_USER=${GIT_USER}" >> ${WORKSPACE}/context.properties
+echo "GIT_EMAIL=${GIT_EMAIL}" >> ${WORKSPACE}/context.properties
 

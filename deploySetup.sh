@@ -16,13 +16,13 @@ fi
 cd ${WORKSPACE}/${OAID}/config/${PROJECT}
 BUILD_FILE="deployments/${ENVIRONMENT}/${SLICE}/build.ref"
 if [[ -e ${BUILD_FILE} ]]; then
-    echo "BUILD_REFERENCE=$(cat ${BUILD_FILE})" >> ${WORKSPACE}/context.ref
+    echo "BUILD_REFERENCE=$(cat ${BUILD_FILE})" >> ${WORKSPACE}/context.properties
 fi
 
 # Generate the notification message information
 if [[ -n "${BUILD_REFERENCE}" ]]; then
-    echo "MESSAGE=Slice $SLICE (build $BUILD_REFERENCE) to $ENVIRONMENT environment" >> ${WORKSPACE}/context.ref
+    echo "MESSAGE=Slice $SLICE (build $BUILD_REFERENCE) to $ENVIRONMENT environment" >> ${WORKSPACE}/context.properties
 else
-    echo "MESSAGE=Slice $SLICE to $ENVIRONMENT environment" >> ${WORKSPACE}/context.ref
+    echo "MESSAGE=Slice $SLICE to $ENVIRONMENT environment" >> ${WORKSPACE}/context.properties
 fi
 
