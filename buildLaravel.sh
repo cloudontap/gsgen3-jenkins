@@ -8,28 +8,16 @@ if [[ -z "${PROJECT}" ]]; then
     PROJECT=$(echo ${JOB_NAME,,} | cut -d '-' -f 1)
 fi
 
-if [[ -z "${IMAGE}" ]]; then
-    IMAGE="${PROJECT}/${GIT_COMMIT}"
+if [[ -z "${REMOTE_REPO}" ]]; then
+    REMOTE_REPO="${PROJECT}/${GIT_COMMIT}"
 fi
 
-FULL_IMAGE="${DOCKER_REGISTRY}/${IMAGE}"
-
-sudo docker login -u $DOCKER_USER -p $DOCKER_PASS -e $DOCKER_EMAIL $DOCKER_REGISTRY
+FULL_IMAGE="${DOCKER_REGISTRY}/${REMOTE_REPO}"
+${GSGEN_JENKINS}/manageDockerImage.sh -c
 RESULT=$?
-if [ "$RESULT" -ne 0 ] ;  
-  then  
-   echo "Cannot login to docker, exiting..."
-   exit
-fi
-
-sudo docker pull ${FULL_IMAGE}
-RESULT=$?
-if [ "$RESULT" -eq 0 ] ;  
-  then  
-   echo "Image ${IMAGE} already exists"  
-   IMAGEID=`docker images|grep $GIT_COMMIT|head -1|awk '{print($3)}'`
-   docker rmi -f $IMAGEID
-   exit
+if [[ "${RESULT}" -eq 0 ]]; then
+    echo "Image ${REMOTE_REPO} already exists"
+    exit
 fi
 
 cd laravel/
@@ -53,14 +41,14 @@ cd ../
 sudo docker build -t ${FULL_IMAGE} .
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
-   echo "Cannot build image ${IMAGE}, exiting..."
+   echo "Cannot build image ${REMOTE_REPO}, exiting..."
    exit
 fi
 
 sudo docker push ${FULL_IMAGE}
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
-   echo "Unable to push ${IMAGE} to registry"  
+   echo "Unable to push ${REMOTE_REPO} to registry"
    IMAGEID=`docker images|grep $GIT_COMMIT|head -1|awk '{print($3)}'`
    docker rmi -f $IMAGEID
    exit
@@ -69,7 +57,7 @@ fi
 # Cleanup images locally
 IMAGEID=`sudo docker images|grep $GIT_COMMIT|head -1|awk '{print($3)}'`
 sudo docker rmi -f $IMAGEID
-echo "GIT_COMMIT=$GIT_COMMIT" > $WORKSPACE/image_ref
+echo "GIT_COMMIT=$GIT_COMMIT" > $WORKSPACE/context.properties
 
 if [[ -z "${SLICE}" ]]; then
     if [ -e slice.ref ]; then
