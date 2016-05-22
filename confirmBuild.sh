@@ -29,17 +29,22 @@ if [[ "${CODE_TAG_MESSAGE}" == "" ]]; then
 fi
 
 # Determine the commit matching the tag in the code repo 
-GIT_COMMIT=$(git rev-list -n 1 ${CODE_TAG})
-GIT_COMMIT_SHORT=$(git rev-list -n 1 --abbrev-commit ${CODE_TAG})
+CODE_COMMIT=$(git rev-list -n 1 ${CODE_TAG})
+CODE_COMMIT_SHORT=$(git rev-list -n 1 --abbrev-commit ${CODE_TAG})
+
+# Details of job
+DETAIL_MESSAGE="${DETAIL_MESSAGE}, code ${CODE_TAG} (${CODE_COMMIT_SHORT})"
 
 # Save for future steps
-echo "GIT_COMMIT=${GIT_COMMIT}" >> ${WORKSPACE}/context.properties
-echo "GIT_COMMIT_SHORT=${GIT_COMMIT_SHORT}" >> ${WORKSPACE}/context.properties
+echo "CODE_TAG_MESSAGE=${CODE_TAG_MESSAGE}" >> ${WORKSPACE}/context.properties
+echo "CODE_COMMIT=${CODE_COMMIT}" >> ${WORKSPACE}/context.properties
+echo "CODE_COMMIT_SHORT=${CODE_COMMIT_SHORT}" >> ${WORKSPACE}/context.properties
+echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
 
 # Confirm the commit built successfully into a docker image
-export IMAGE="${PROJECT}/${GIT_COMMIT}"
+export REMOTE_REPO="${PROJECT}/${CODE_COMMIT}"
 ${GSGEN_JENKINS}/manageDockerImage.sh -c
 RESULT=$?
 if [[ "${RESULT}" -ne 0 ]]; then
-    echo "Image ${IMAGE} not found. Was the build successful?"
+    echo "Image ${REMOTE_REPO} not found. Was the build successful?"
 fi

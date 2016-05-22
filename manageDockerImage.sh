@@ -88,15 +88,20 @@ fi
 # Formulate the remote image details
 REMOTE_REPOSITORY="${REMOTE_REPO}:${REMOTE_TAG}"
 FULL_REMOTE_REPOSITORY="${REMOTE_REPOSITORY}"
-if [[ "${SOURCE}" == "remote" ]]; then
-    FULL_REMOTE_REPOSITORY="${REMOTE_DOCKER_REGISTRY}/${REMOTE_REPOSITORY}"
-    sudo docker login -u ${REMOTE_DOCKER_USER} -p ${REMOTE_DOCKER_PASS} -e ${REMOTE_DOCKER_EMAIL} ${REMOTE_DOCKER_REGISTRY}
-    RESULT=$?
-    if [[ "$RESULT" -ne 0 ]]; then  
-	    echo "Can't log in to ${REMOTE_DOCKER_REGISTRY}"
-        exit
-    fi
-fi
+case ${IMAGE_SOURCE} in
+    remote)
+        FULL_REMOTE_REPOSITORY="${REMOTE_DOCKER_REGISTRY}/${REMOTE_REPOSITORY}"
+        sudo docker login -u ${REMOTE_DOCKER_USER} -p ${REMOTE_DOCKER_PASS} -e ${REMOTE_DOCKER_EMAIL} ${REMOTE_DOCKER_REGISTRY}
+        RESULT=$?
+        if [[ "$RESULT" -ne 0 ]]; then
+            echo "Can't log in to ${REMOTE_DOCKER_REGISTRY}"
+            exit
+        fi
+        ;;
+    local)
+        FULL_REMOTE_REPOSITORY="${DOCKER_REGISTRY}/${REMOTE_REPOSITORY}"
+        ;;
+esac
 
 # Formulate the local image details
 LOCAL_REPOSITORY="${LOCAL_REPO}:${LOCAL_TAG}"
