@@ -133,22 +133,35 @@ if [[ -z "${GIT_EMAIL}" ]]; then
     GIT_EMAIL="${GIT_EMAIL_DEFAULT}"
 fi
 
-# Export for Save for future steps
-export OAID="${OAID}"
-export PROJECT="${PROJECT}"
-export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
-export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
-export OAID_CONFIG_REPO="${OAID_CONFIG_REPO}"
-export OAID_INFRASTRUCTURE_REPO="${OAID_INFRASTRUCTURE_REPO}"
-export PROJECT_CODE_REPO="${PROJECT_CODE_REPO}"
-export PROJECT_CONFIG_REPO="${PROJECT_CONFIG_REPO}"
-export PROJECT_INFRASTRUCTURE_REPO="${PROJECT_INFRASTRUCTURE_REPO}"
-export GIT_USER="${GIT_USER}"
-export GIT_EMAIL="${GIT_EMAIL}"
+# Determine the deployment tag
+if [[ -z "${DEPLOYMENT_NUMBER}" ]] then
+    DEPLOYMENT_NUMBER="${BUILD_NUMBER}"
+fi
+DEPLOYMENT_TAG="d${DEPLOYMENT_NUMBER}-${ENVIRONMENT}"
+
+# Basic details for git commits/slack notification (enhanced by other scripts)
+DETAIL_MESSAGE="project ${PROJECT}, environment ${ENVIRONMENT}, user ${GIT_USER}"
+
+# Export for any sub-shells
+export OAID
+export PROJECT
+export CONTAINER
+export AWS_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY
+export OAID_CONFIG_REPO
+export OAID_INFRASTRUCTURE_REPO
+export PROJECT_CODE_REPO
+export PROJECT_CONFIG_REPO
+export PROJECT_INFRASTRUCTURE_REPO
+export GIT_USER
+export GIT_EMAIL
+export DEPLOYMENT_TAG
+export DETAIL_MESSAGE
 
 # Save for future steps
 echo "OAID=${OAID}" >> ${WORKSPACE}/context.properties
 echo "PROJECT=${PROJECT}" >> ${WORKSPACE}/context.properties
+echo "CONTAINER=${CONTAINER}" >> ${WORKSPACE}/context.properties
 echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> ${WORKSPACE}/context.properties
 echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> ${WORKSPACE}/context.properties
 echo "OAID_CONFIG_REPO=${OAID_CONFIG_REPO}" >> ${WORKSPACE}/context.properties
@@ -158,4 +171,6 @@ echo "PROJECT_CONFIG_REPO=${PROJECT_CONFIG_REPO}" >> ${WORKSPACE}/context.proper
 echo "PROJECT_INFRASTRUCTURE_REPO=${PROJECT_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.properties
 echo "GIT_USER=${GIT_USER}" >> ${WORKSPACE}/context.properties
 echo "GIT_EMAIL=${GIT_EMAIL}" >> ${WORKSPACE}/context.properties
+echo "DEPLOYMENT_TAG=${DEPLOYMENT_TAG}" >> ${WORKSPACE}/context.properties
+echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
 
