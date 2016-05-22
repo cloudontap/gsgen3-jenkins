@@ -134,13 +134,17 @@ if [[ -z "${GIT_EMAIL}" ]]; then
 fi
 
 # Determine the deployment tag
-if [[ -z "${DEPLOYMENT_NUMBER}" ]] then
-    DEPLOYMENT_NUMBER="${BUILD_NUMBER}"
+if [[ -n "${DEPLOYMENT_NUMBER}" ]] then
+    DEPLOYMENT_TAG="d${DEPLOYMENT_NUMBER}-${ENVIRONMENT}"
+else
+    DEPLOYMENT_TAG="d${BUILD_NUMBER}-${ENVIRONMENT}"
 fi
-DEPLOYMENT_TAG="d${DEPLOYMENT_NUMBER}-${ENVIRONMENT}"
 
 # Basic details for git commits/slack notification (enhanced by other scripts)
-DETAIL_MESSAGE="project ${PROJECT}, environment ${ENVIRONMENT}, user ${GIT_USER}"
+DETAIL_MESSAGE="project ${PROJECT}, environment ${ENVIRONMENT}"
+if [[ -n "${TIER}" ]];      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, tier ${TIER}"; fi
+if [[ -n "${COMPONENT}" ]]; then DETAIL_MESSAGE="${DETAIL_MESSAGE}, component ${COMPONENT}"; fi
+if [[ -n "${GIT_USER}" ]];  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, user ${GIT_USER}"; fi
 
 # Export for any sub-shells
 export OAID
