@@ -134,7 +134,7 @@ if [[ -z "${GIT_EMAIL}" ]]; then
 fi
 
 # Determine the deployment tag
-if [[ -n "${DEPLOYMENT_NUMBER}" ]] then
+if [[ -n "${DEPLOYMENT_NUMBER}" ]]; then
     DEPLOYMENT_TAG="d${DEPLOYMENT_NUMBER}-${ENVIRONMENT}"
 else
     DEPLOYMENT_TAG="d${BUILD_NUMBER}-${ENVIRONMENT}"
