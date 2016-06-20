@@ -11,9 +11,5 @@ if [[ "${DEPLOYMENT_NUMBER}" == "" ]]; then
     exit
 fi
 
-. ${GSGEN_JENKINS}/setContext.sh
-
-# Construct the tree based on the deployment tag
-${GSGEN_JENKINS}/constructTree.sh -c ${DEPLOYMENT_TAG} -i ${DEPLOYMENT_TAG}
-RESULT=$?
+# Don't forget -c ${DEPLOYMENT_TAG} -i ${DEPLOYMENT_TAG} on constructTree.sh
 

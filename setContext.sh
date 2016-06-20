@@ -5,7 +5,7 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 
 function usage() {
-    echo -e "\nDetermine key settings for an account/project" 
+    echo -e "\nDetermine key settings for an account/project/segment" 
     echo -e "\nUsage: $(basename $0) -a OAID -p PROJECT -c SEGMENT"
     echo -e "\nwhere\n"
     echo -e "(o) -a OAID is the organisation account id e.g. \"env01\""
