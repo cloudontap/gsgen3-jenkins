@@ -6,7 +6,7 @@ trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 
 # Generate the deployment template for the required slice
 BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
-cd ${WORKSPACE}/${OAID}/config/${PROJECT}/solutions/${ENVIRONMENT}
+cd ${WORKSPACE}/${OAID}/config/${PROJECT}/solutions/${SEGMENT}
 
 ${BIN_DIR}/createApplicationTemplate.sh -c ${PROJECT_CONFIG_COMMIT} -s ${SLICE}
 RESULT=$?

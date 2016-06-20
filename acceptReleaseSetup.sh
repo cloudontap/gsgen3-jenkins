@@ -21,7 +21,7 @@ if [[ ${RESULT} -ne 0 ]]; then
 fi
 
 # Determine the code commit used
-BUILD_REFERENCE="$(cat ${WORKSPACE}/${OAID}/config/${PROJECT}/deployments/$ENVIRONMENT/${BUILD_SLICE}/build.ref)"
+BUILD_REFERENCE="$(cat ${WORKSPACE}/${OAID}/config/${PROJECT}/deployments/$SEGMENT/${BUILD_SLICE}/build.ref)"
 
 CODE_COMMIT="$(echo ${BUILD_REFERENCE} | cut -d' ' -f 1)"
 CODE_TAG="$(echo ${BUILD_REFERENCE} | cut -d' ' -f 2)"

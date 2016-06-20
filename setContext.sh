@@ -2,17 +2,20 @@
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
+trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
+
 function usage() {
     echo -e "\nDetermine key settings for an account/project" 
-    echo -e "\nUsage: $(basename $0) -a OAID -p PROJECT -c CONTAINER"
+    echo -e "\nUsage: $(basename $0) -a OAID -p PROJECT -c SEGMENT"
     echo -e "\nwhere\n"
     echo -e "(o) -a OAID is the organisation account id e.g. \"env01\""
-    echo -e "(o) -c CONTAINER is the container name e.g. \"production\""
+    echo -e "(o) -c SEGMENT is the SEGMENT name e.g. \"production\""
     echo -e "    -h shows this text"
     echo -e "(o) -p PROJECT is the project id e.g. \"eticket\""
     echo -e "\nNOTES:\n"
     echo -e "1) The setting values are saved in context.properties in the current directory"
     echo -e ""
+    RESULT=1
     exit
 }
 
@@ -23,7 +26,7 @@ while getopts ":a:p:h" opt; do
             OAID="${OPTARG}"
             ;;
         c)
-            CONTAINER="${OPTARG}"
+            SEGMENT="${OPTARG}"
             ;;
         h)
             usage
@@ -51,18 +54,18 @@ fi
 PROJECT=${PROJECT,,}
 PROJECT_UPPER=${PROJECT^^}
 
-# Determine the container - normally the same as the environment
-if [[ -z "${CONTAINER}" ]]; then
-    CONTAINER=${ENVIRONMENT}
+# Determine the SEGMENT - normally the same as the environment
+if [[ -z "${SEGMENT}" ]]; then
+    SEGMENT=${ENVIRONMENT}
 fi
 
-CONTAINER=${CONTAINER,,}
-CONTAINER_UPPER=${CONTAINER^^}
+SEGMENT=${SEGMENT,,}
+SEGMENT_UPPER=${SEGMENT^^}
 
-# Determine the account from the project/container combination
+# Determine the account from the project/SEGMENT combination
 # if not already defined or provided on the command line
 if [[ -z "${OAID}" ]]; then
-    OAID_VAR="${PROJECT_UPPER}_${CONTAINER_UPPER}_OAID"
+    OAID_VAR="${PROJECT_UPPER}_${SEGMENT_UPPER}_OAID"
     if [[ "${!OAID_VAR}" == "" ]]; then 
         OAID_VAR="${PROJECT_UPPER}_OAID"
     fi
@@ -98,21 +101,21 @@ fi
 
 # Determine project repos
 if [[ -z "${PROJECT_CODE_REPO}" ]]; then
-    PROJECT_CODE_REPO_VAR="${PROJECT_UPPER}_${CONTAINER_UPPER}_CODE_REPO"
+    PROJECT_CODE_REPO_VAR="${PROJECT_UPPER}_${SEGMENT_UPPER}_CODE_REPO"
     if [[ "${!PROJECT_CODE_REPO_VAR}" == "" ]]; then
         PROJECT_CODE_REPO_VAR="${PROJECT_UPPER}_CODE_REPO"
     fi
     PROJECT_CODE_REPO="${!PROJECT_CODE_REPO_VAR}"
 fi
 if [[ -z "${PROJECT_CONFIG_REPO}" ]]; then
-    PROJECT_CONFIG_REPO_VAR="${PROJECT_UPPER}_${CONTAINER_UPPER}_CONFIG_REPO"
+    PROJECT_CONFIG_REPO_VAR="${PROJECT_UPPER}_${SEGMENT_UPPER}_CONFIG_REPO"
     if [[ "${!PROJECT_CONFIG_REPO_VAR}" == "" ]]; then
         PROJECT_CONFIG_REPO_VAR="${PROJECT_UPPER}_CONFIG_REPO"
     fi
     PROJECT_CONFIG_REPO="${!PROJECT_CONFIG_REPO_VAR}"
 fi
 if [[ -z "${PROJECT_INFRASTRUCTURE_REPO}" ]]; then
-    PROJECT_INFRASTRUCTURE_REPO_VAR="${PROJECT_UPPER}_${CONTAINER_UPPER}_INFRASTRUCTURE_REPO"
+    PROJECT_INFRASTRUCTURE_REPO_VAR="${PROJECT_UPPER}_${SEGMENT_UPPER}_INFRASTRUCTURE_REPO"
     if [[ "${!PROJECT_INFRASTRUCTURE_REPO_VAR}" == "" ]]; then
         PROJECT_INFRASTRUCTURE_REPO_VAR="${PROJECT_UPPER}_INFRASTRUCTURE_REPO"
     fi
@@ -135,37 +138,23 @@ fi
 
 # Determine the deployment tag
 if [[ -n "${DEPLOYMENT_NUMBER}" ]]; then
-    DEPLOYMENT_TAG="d${DEPLOYMENT_NUMBER}-${ENVIRONMENT}"
+    DEPLOYMENT_TAG="d${DEPLOYMENT_NUMBER}-${SEGMENT}"
 else
-    DEPLOYMENT_TAG="d${BUILD_NUMBER}-${ENVIRONMENT}"
+    DEPLOYMENT_TAG="d${BUILD_NUMBER}-${SEGMENT}"
 fi
 
 # Basic details for git commits/slack notification (enhanced by other scripts)
 DETAIL_MESSAGE="project ${PROJECT}, environment ${ENVIRONMENT}"
+if [[ "${SEGMENT}" != "${ENVIRONMENT}" ]]; then DETAIL_MESSAGE="${DETAIL_MESSAGE}, segment ${SEGMENT}"; fi
 if [[ -n "${TIER}" ]];      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, tier ${TIER}"; fi
 if [[ -n "${COMPONENT}" ]]; then DETAIL_MESSAGE="${DETAIL_MESSAGE}, component ${COMPONENT}"; fi
+if [[ -n "${SLICE}" ]];     then DETAIL_MESSAGE="${DETAIL_MESSAGE}, slice ${SLICE}"; fi
 if [[ -n "${GIT_USER}" ]];  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, user ${GIT_USER}"; fi
-
-# Export for any sub-shells
-export OAID
-export PROJECT
-export CONTAINER
-export AWS_ACCESS_KEY_ID
-export AWS_SECRET_ACCESS_KEY
-export OAID_CONFIG_REPO
-export OAID_INFRASTRUCTURE_REPO
-export PROJECT_CODE_REPO
-export PROJECT_CONFIG_REPO
-export PROJECT_INFRASTRUCTURE_REPO
-export GIT_USER
-export GIT_EMAIL
-export DEPLOYMENT_TAG
-export DETAIL_MESSAGE
 
 # Save for future steps
 echo "OAID=${OAID}" >> ${WORKSPACE}/context.properties
 echo "PROJECT=${PROJECT}" >> ${WORKSPACE}/context.properties
-echo "CONTAINER=${CONTAINER}" >> ${WORKSPACE}/context.properties
+echo "SEGMENT=${SEGMENT}" >> ${WORKSPACE}/context.properties
 echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> ${WORKSPACE}/context.properties
 echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> ${WORKSPACE}/context.properties
 echo "OAID_CONFIG_REPO=${OAID_CONFIG_REPO}" >> ${WORKSPACE}/context.properties

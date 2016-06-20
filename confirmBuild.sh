@@ -12,7 +12,7 @@ if [[ "${CODE_TAG}" == "" ]]; then
 fi
 
 # Pull in the code repo
-git clone https://${GITHUB_USER}:${GITHUB_PASS}@${PROJECT_CODE_REPO} -b ${BRANCH} code
+git clone https://${GITHUB_USER}:${GITHUB_PASS}@${PROJECT_CODE_REPO} -b ${CODE_BRANCH} code
 RESULT=$?
 if [[ ${RESULT} -ne 0 ]]; then
  	echo "Can't fetch the code repo, exiting..."

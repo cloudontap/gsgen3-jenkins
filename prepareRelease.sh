@@ -17,8 +17,8 @@ git config user.email "${GIT_EMAIL}"
 
 # Ensure build.ref aligns with the requested code tag
 BUILD_REFERENCE=$(echo -n "${CODE_COMMIT} ${CODE_TAG}")
-if [[ "$(cat deployments/${ENVIRONMENT}/${BUILD_SLICE}/build.ref)" != "${BUILD_REFERENCE}" ]]; then
-	echo -n "${BUILD_REFERENCE}" > deployments/${ENVIRONMENT}/${BUILD_SLICE}/build.ref
+if [[ "$(cat deployments/${SEGMENT}/${BUILD_SLICE}/build.ref)" != "${BUILD_REFERENCE}" ]]; then
+	echo -n "${BUILD_REFERENCE}" > deployments/${SEGMENT}/${BUILD_SLICE}/build.ref
 	git add *; git commit -m "${DETAIL_MESSAGE}"
 	RESULT=$?
 	if [[ ${RESULT} -ne 0 ]]; then
@@ -29,7 +29,7 @@ fi
 
 # Generate the application level templates
 BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
-cd solutions/${ENVIRONMENT}
+cd solutions/${SEGMENT}
 
 for SLICE in ${SLICE_LIST}; do
 	${BIN_DIR}/createApplicationTemplate.sh -c ${DEPLOYMENT_TAG} -s ${SLICE}

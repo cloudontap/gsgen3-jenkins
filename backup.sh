@@ -15,13 +15,13 @@ fi
 
 # Snapshot the database
 BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
-cd ${WORKSPACE}/${OAID}/config/solutions/${PROJECT}/${ENVIRONMENT}
+cd ${WORKSPACE}/${OAID}/config/solutions/${PROJECT}/${SEGMENT}
 
 ${BIN_DIR}/snapshotRDSDatabase.sh -i ${COMPONENT} -s b${BUILD_NUMBER} ${SNAPSHOT_OPTS}
 RESULT=$?
 
 if [[ ${RESULT} -ne 0 ]]; then
-	echo "Snapshot of ${ENVIRONMENT}/${COMPONENT} failed, exiting..."
+	echo "Snapshot of ${SEGMENT}/${COMPONENT} failed, exiting..."
 	exit
 fi
 

@@ -34,11 +34,11 @@ if [[ "${CREATE_ACCOUNT_BUCKETS}" == "true" ]]; then
 
     # Record changes
     git add *
-    git commit -m "Stack changes as a result of applying ${MODE} mode to the ${LEVEL} level stack for the ${SLICE} slice of the ${ENVIRONMENT} environment"
+    git commit -m "Stack changes as a result of creating the ${OAID} account stack"
     git push origin master
 	RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
-        echo "Unable to save the changes resulting from applying ${MODE} mode to the ${LEVEL} level stack for the ${SLICE} slice of the ${ENVIRONMENT} environment"
+        echo "Unable to save the changes resulting from creating the ${OAID} account stack"
         exit
     fi
 fi

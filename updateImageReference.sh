@@ -10,21 +10,10 @@ if [[ -z ${GIT_COMMIT} ]]; then
   exit
 fi
 
-. ${GSGEN_JENKINS}/setContext.sh
-
-${GSGEN_JENKINS}/constructTree.sh
-RESULT=$?
-if [[ "${RESULT}" -ne 0 ]]; then
-    echo "Construction of the account/project directory tree failed"
-    exit
-fi
-
-cd ${WORKSPACE}/${OAID}/config/${PROJECT}/deployments/${ENVIRONMENT}/${SLICE}
-
-REFFILE="build.ref"
-REF=`cat ${REFFILE}`
-
-if [[ "${REF}" == "${GIT_COMMIT}" ]]; then
+# Check the current reference value
+cd ${WORKSPACE}/${OAID}/config/${PROJECT}
+BUILD_FILE="deployments/${SEGMENT}/${SLICE}/build.ref"
+if [[ "$(cat ${BUILD_FILE})" == "${GIT_COMMIT}" ]]; then
   echo "The current reference is the same, exiting..."
   RESULT=1
   exit
@@ -34,8 +23,8 @@ fi
 git config user.name  "${GIT_USER}"
 git config user.email "${GIT_EMAIL}"
 
-echo ${GIT_COMMIT} > ${REFFILE}
-git commit -a -m "Change build.ref for ${ENVIRONMENT}/${SLICE} to the value: ${GIT_COMMIT}"
+echo ${GIT_COMMIT} > ${BUILD_FILE}
+git commit -a -m "Change build.ref for ${SEGMENT}/${SLICE} to the value: ${GIT_COMMIT}"
 git push origin ${PROJECT_CONFIG_REFERENCE}
 
 if [[ "$AUTODEPLOY" != "true" ]]; then
