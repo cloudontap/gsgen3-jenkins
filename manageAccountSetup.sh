@@ -25,6 +25,9 @@ if [[ "${CREATE_ACCOUNT_REPOS}" == "true" ]]; then
     git config user.name  "${GIT_USER}"
     git config user.email "${GIT_EMAIL}"
     git add *
+    if [[ -f .git* ]]; then 
+        git add .git*
+    fi
     git commit -m "Initial version"
     git remote add origin https://${GITHUB_USER}:${GITHUB_PASS}@${OAID_CONFIG_REPO}
 	git push origin master
@@ -46,6 +49,9 @@ if [[ "${CREATE_ACCOUNT_REPOS}" == "true" ]]; then
     git config user.name  "${GIT_USER}"
     git config user.email "${GIT_EMAIL}"
     git add *
+    if [[ -f .git* ]]; then 
+        git add .git*
+    fi
     git commit -m "Initial version"
     git remote add origin https://${GITHUB_USER}:${GITHUB_PASS}@${OAID_INFRASTRUCTURE_REPO}
 	git push origin master
@@ -63,5 +69,6 @@ else
     fi
 fi
 
-find ${OAID}/infrastructure/startup -name ".git*" -exec rm -rf {} \;
+# TODO: confirm if this is still required?
+# find ${OAID}/infrastructure/startup -name ".git*" -exec rm -rf {} \;
 
