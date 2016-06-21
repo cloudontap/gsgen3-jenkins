@@ -6,18 +6,24 @@ trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 
 PROJECT_CONFIG_REFERENCE_DEFAULT="master"
 PROJECT_INFRASTRUCTURE_REFERENCE_DEFAULT="master"
+GSGEN_BIN_REFERENCE_DEFAULT="master"
+GSGEN_STARTUP_REFERENCE_DEFAULT="master"
 function usage() {
     echo -e "\nConstruct the account directory tree" 
-    echo -e "\nUsage: $(basename $0) -c CONFIG_REFERENCE -i INFRASTRUCTURE_REFERENCE -a -p"
+    echo -e "\nUsage: $(basename $0) -c CONFIG_REFERENCE -i INFRASTRUCTURE_REFERENCE -g GSGEN_BIN_REFERENCE -s GSGEN_STARTUP_REFERENCE -a -p"
     echo -e "\nwhere\n"
     echo -e "(o) -a if the account directories should not be included"
     echo -e "(o) -c CONFIG_REFERENCE is the git reference for the config repo"
+    echo -e "(o) -g GSGEN_BIN_REFERENCE is the git reference for the GSGEN3 framework bin repo"
     echo -e "    -h shows this text"
     echo -e "(o) -i INFRASTRUCTURE_REFERENCE is the git reference for the config repo"
     echo -e "(o) -p if the project directories should not be included"
+    echo -e "(o) -s GSGEN_STARTUP_REFERENCE is the git reference for the GSGEN3 framework startup repo"
     echo -e "\nDEFAULTS:\n"
     echo -e "CONFIG_REFERENCE = ${PROJECT_CONFIG_REFERENCE_DEFAULT}"
     echo -e "INFRASTRUCTURE_REFERENCE = ${PROJECT_INFRASTRUCTURE_REFERENCE_DEFAULT}"
+    echo -e "GSGEN_BIN_REFERENCE = ${GSGEN_BIN_REFERENCE_DEFAULT}"
+    echo -e "GSGEN_STARTUP_REFERENCE = ${GSGEN_STARTUP_REFERENCE_DEFAULT}"
     echo -e "\nNOTES:\n"
     echo -e "1) OAID/PROJECT details are assumed to be already defined via environment variables"
     echo -e ""
@@ -28,13 +34,16 @@ function usage() {
 EXCLUDE_OAID_DIRECTORIES="false"
 EXCLUDE_PROJECT_DIRECTORIES="false"
 # Parse options
-while getopts ":ac:hi:p" opt; do
+while getopts ":ac:g:hi:ps:" opt; do
     case $opt in
         a)
             EXCLUDE_OAID_DIRECTORIES="true"
             ;;
         c)
             PROJECT_CONFIG_REFERENCE="${OPTARG}"
+            ;;
+        g)
+            GSGEN_BIN_REFERENCE="${OPTARG}"
             ;;
         h)
             usage
@@ -44,6 +53,9 @@ while getopts ":ac:hi:p" opt; do
             ;;
         p)
             EXCLUDE_PROJECT_DIRECTORIES="true"
+            ;;
+        g)
+            GSGEN_STARTUP_REFERENCE="${OPTARG}"
             ;;
         \?)
             echo -e "\nInvalid option: -$OPTARG" 
@@ -61,6 +73,12 @@ if [[ -z "${PROJECT_CONFIG_REFERENCE}" ]]; then
 fi
 if [[ -z "${PROJECT_INFRASTRUCTURE_REFERENCE}" ]]; then
     PROJECT_INFRASTRUCTURE_REFERENCE="${PROJECT_INFRASTRUCTURE_REFERENCE_DEFAULT}"
+fi
+if [[ -z "${GSGEN_BIN_REFERENCE}" ]]; then
+    GSGEN_BIN_REFERENCE="${GSGEN_BIN_REFERENCE_DEFAULT}"
+fi
+if [[ -z "${GSGEN_STARTUP_REFERENCE}" ]]; then
+    GSGEN_STARTUP_REFERENCE="${GSGEN_STARTUP_REFERENCE_DEFAULT}"
 fi
 
 # Check for required context
@@ -128,7 +146,7 @@ if [[ ! -d config/bin ]]; then
         mkdir config/bin
         cp -rp config/${PROJECT}/bin config/bin
     else
-        git clone https://${GSGEN_BIN_REPO} -b master config/bin
+        git clone https://${GSGEN_BIN_REPO} -b ${GSGEN_BIN_REFERENCE} config/bin
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
             echo "Can't fetch the GSGEN repo, exiting..."
@@ -186,7 +204,7 @@ if [[ ! -d infrastructure/startup ]]; then
     if [[ -d infrastructure/${PROJECT}/startup ]]; then
         cp -rp infrastructure/${PROJECT}/startup infrastructure/startup
     else
-        git clone https://${GSGEN_STARTUP_REPO} -b master infrastructure/startup
+        git clone https://${GSGEN_STARTUP_REPO} -b ${GSGEN_STARTUP_REFERENCE} infrastructure/startup
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
             echo "Can't fetch the GSGEN startup repo, exiting..."
