@@ -11,7 +11,7 @@ CODE_COMMIT="$(echo ${BUILD_REFERENCE} | cut -d' ' -f 1)"
 CODE_TAG="$(echo ${BUILD_REFERENCE} | cut -d' ' -f 2)"
 
 # Add extra details
-DETAIL_MESSAGE="Deployment ${DEPLOYMENT_TAG}, ${DETAIL_MESSAGE}, code ${CODE_TAG} (${CODE_COMMIT})"
+DETAIL_MESSAGE="deployment=${DEPLOYMENT_TAG}, ${DETAIL_MESSAGE}, code=${CODE_TAG} (${CODE_COMMIT})"
 
 # Save for next step
 echo "BUILD_REFERENCE=${BUILD_REFERENCE}" >> ${WORKSPACE}/context.properties

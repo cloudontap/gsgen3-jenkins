@@ -5,7 +5,7 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 
 # Add deployment number to details
-DETAIL_MESSAGE="Deployment ${DEPLOYMENT_TAG}, ${DETAIL_MESSAGE}"
+DETAIL_MESSAGE="deployment=${DEPLOYMENT_TAG}, ${DETAIL_MESSAGE}"
 echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
 
 # Process the config repo

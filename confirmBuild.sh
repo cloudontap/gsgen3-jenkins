@@ -33,7 +33,7 @@ CODE_COMMIT=$(git rev-list -n 1 ${CODE_TAG})
 CODE_COMMIT_SHORT=$(git rev-list -n 1 --abbrev-commit ${CODE_TAG})
 
 # Details of job
-DETAIL_MESSAGE="${DETAIL_MESSAGE}, code ${CODE_TAG} (${CODE_COMMIT_SHORT})"
+DETAIL_MESSAGE="${DETAIL_MESSAGE}, code=${CODE_TAG} (${CODE_COMMIT_SHORT})"
 
 # Save for future steps
 echo "CODE_TAG_MESSAGE=${CODE_TAG_MESSAGE}" >> ${WORKSPACE}/context.properties

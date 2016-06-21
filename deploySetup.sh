@@ -13,6 +13,6 @@ fi
 
 # Generate the notification message information
 if [[ -n "${BUILD_REFERENCE}" ]]; then
-    echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}, build ${BUILD_REFERENCE}" >> ${WORKSPACE}/context.properties
+    echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}, build=${BUILD_REFERENCE}" >> ${WORKSPACE}/context.properties
 fi
 
