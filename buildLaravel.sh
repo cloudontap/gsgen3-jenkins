@@ -8,8 +8,18 @@ if [[ -z "${PROJECT}" ]]; then
     PROJECT=$(echo ${JOB_NAME,,} | cut -d '-' -f 1)
 fi
 
+if [[ -z "${SLICE}" ]]; then
+    if [ -e slice.ref ]; then
+        SLICE=`cat slice.ref`
+    fi
+fi
+
 if [[ -z "${REMOTE_REPO}" ]]; then
-    REMOTE_REPO="${PROJECT}/${GIT_COMMIT}"
+    if [[ "${SLICE}" == "" ]]; then
+        REMOTE_REPO="${PROJECT}/${GIT_COMMIT}"
+    else
+        REMOTE_REPO="${PROJECT}/${SLICE}/${GIT_COMMIT}"
+    fi
 fi
 
 FULL_IMAGE="${DOCKER_REGISTRY}/${REMOTE_REPO}"
@@ -60,14 +70,7 @@ sudo docker rmi -f $IMAGEID
 echo "GIT_COMMIT=$GIT_COMMIT" > $WORKSPACE/context.properties
 
 if [[ -z "${SLICE}" ]]; then
-    if [ -e slice.ref ]; then
-        SLICE=`cat slice.ref`
-        if [ -z "${SLICE}" ]; then
-            SLICE="www"
-        fi
-    else
-        SLICE="www"
-    fi
+    SLICE="www"
 fi
 
 echo "PROJECT=$PROJECT" >> $WORKSPACE/context.properties
