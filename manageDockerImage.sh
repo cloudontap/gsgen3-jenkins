@@ -31,7 +31,7 @@ function usage() {
 
 PULL_IF_ABSENT="true"
 # Parse options
-while getopts ":chr:t:" opt; do
+while getopts ":chr:s:t:" opt; do
     case $opt in
         c)
             PULL_IF_ABSENT="false"
@@ -47,6 +47,9 @@ while getopts ":chr:t:" opt; do
             ;;
         r)
             REMOTE_TAG="${OPTARG}"
+            ;;
+        s)
+            IMAGE_SOURCE="${OPTARG}"
             ;;
         t)
             LOCAL_TAG="${OPTARG}"
