@@ -20,7 +20,7 @@ if [[ -f Dockerfile ]]; then
         if [[ "${SLICE}" == "" ]]; then
             REMOTE_REPO="${PROJECT}/${GIT_COMMIT}"
         else
-            REMOTE_REPO="${PROJECT}/${SLICE}/${GIT_COMMIT}"
+            REMOTE_REPO="${PROJECT}/${SLICE}-${GIT_COMMIT}"
         fi
     fi
     
