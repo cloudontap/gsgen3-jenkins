@@ -69,6 +69,7 @@ npm prune --production &&   npm install --production --unsafe-perm &&   npm rebu
 
 # Package for docker if required
 if [[ -f Dockerfile ]]; then
+    FULL_IMAGE=${DOCKER_REGISTRY}/${REMOTE_REPO}
     sudo docker build -t ${FULL_IMAGE} .
     RESULT=$?
     if [ $RESULT -ne 0 ]; then
