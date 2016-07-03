@@ -58,6 +58,7 @@ if [[ "${CHECK_CREDENTIALS}" == "true" ]]; then
     SEGMENT_OPTION=""
     if [[ -n "${SEGMENT}" ]]; then
        SEGMENT_OPTION="-s ${SEGMENT}"
+    fi 
     ${BIN_DIR}/initProjectCredentials.sh -a ${OAID} -p ${PROJECT} ${SEGMENT_OPTION}
 
     # Update the infrastructure repo to capture any credential changes
