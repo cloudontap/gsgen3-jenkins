@@ -55,7 +55,10 @@ done
 # Check credentials if required
 if [[ "${CHECK_CREDENTIALS}" == "true" ]]; then
     cd ${WORKSPACE}/${OAID}
-    ${BIN_DIR}/initProjectCredentials.sh -a ${OAID} -p ${PROJECT} -s ${SEGMENT}
+    SEGMENT_OPTION=""
+    if [[ -n "${SEGMENT}" ]]; then
+       SEGMENT_OPTION="-s ${SEGMENT}"
+    ${BIN_DIR}/initProjectCredentials.sh -a ${OAID} -p ${PROJECT} ${SEGMENT_OPTION}
 
     # Update the infrastructure repo to capture any credential changes
     cd ${WORKSPACE}/${OAID}/infrastructure/${PROJECT}
