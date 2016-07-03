@@ -31,7 +31,7 @@ function usage() {
 
 PULL_IF_ABSENT="true"
 # Parse options
-while getopts ":chr:s:t:" opt; do
+while getopts ":chi:l:r:s:t:" opt; do
     case $opt in
         c)
             PULL_IF_ABSENT="false"
