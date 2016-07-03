@@ -24,8 +24,7 @@ if [[ -f Dockerfile ]]; then
         fi
     fi
     
-    FULL_IMAGE="${DOCKER_REGISTRY}/${REMOTE_REPO}"
-    ${GSGEN_JENKINS}/manageDockerImage.sh -c
+    ${GSGEN_JENKINS}/manageDockerImage.sh -c -s local -i ${REMOTE_REPO}
     RESULT=$?
     if [[ "${RESULT}" -eq 0 ]]; then
         echo "Image ${REMOTE_REPO} already exists"
