@@ -98,5 +98,5 @@ fi
 
 # TODO: Package for AWS Lambda if required - not sure yet what to check for as a marker
 
-echo PROJECT=\"$PROJECT\" >> $WORKSPACE/context.properties
-echo SLICE=\"$SLICE\" >> $WORKSPACE/context.properties
+echo "PROJECT=$PROJECT" >> $WORKSPACE/context.properties
+echo "SLICE=$SLICE" >> $WORKSPACE/context.properties
