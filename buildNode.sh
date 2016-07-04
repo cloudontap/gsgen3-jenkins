@@ -51,10 +51,10 @@ fi
 # TODO: Confirm if required and add check for error code
 # grunt test
 
-npm rebuild
+npm install
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
-   echo "npm rebuild failed, exiting..."
+   echo "npm install failed, exiting..."
    exit
 fi
 
@@ -65,7 +65,12 @@ if [ $RESULT -ne 0 ]; then
    exit
 fi
 
-npm prune --production &&   npm install --production --unsafe-perm &&   npm rebuild
+npm prune --production
+RESULT=$?
+if [ $RESULT -ne 0 ]; then
+   echo "npm prune failed, exiting..."
+   exit
+fi
 
 # Package for docker if required
 if [[ -f Dockerfile ]]; then
