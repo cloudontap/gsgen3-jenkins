@@ -18,7 +18,7 @@ for i in "" $(seq 2 20); do
 done
 
 # Create the required task
-${BIN_DIR}/runTask.sh -t "${TASK_TIER}" -i "${TASK_COMPONENT}" -w "${TASK_NAME}" ${ENVS}
+${BIN_DIR}/runTask.sh -t "${TASK_TIER}" -i "${TASK_COMPONENT}" -w "${TASK}" ${ENVS}
 RESULT=$?
 if [[ ${RESULT} -ne 0 ]]; then
 	echo "Running of task failed, exiting..."
