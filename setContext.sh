@@ -157,6 +157,8 @@ if [[ -n "${GIT_USER}" ]];  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, user=${GIT_U
 echo "OAID=${OAID}" >> ${WORKSPACE}/context.properties
 echo "PROJECT=${PROJECT}" >> ${WORKSPACE}/context.properties
 echo "SEGMENT=${SEGMENT}" >> ${WORKSPACE}/context.properties
+echo "SLICE=${SEGMENT}" >> ${WORKSPACE}/context.properties
+echo "SLICES=${SEGMENT}" >> ${WORKSPACE}/context.properties
 echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> ${WORKSPACE}/context.properties
 echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> ${WORKSPACE}/context.properties
 echo "OAID_CONFIG_REPO=${OAID_CONFIG_REPO}" >> ${WORKSPACE}/context.properties
