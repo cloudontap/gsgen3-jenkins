@@ -17,7 +17,7 @@ fi
 # Perform checks for Docker packaging
 if [[ -f Dockerfile ]]; then
     if [[ -z "${REMOTE_REPO}" ]]; then
-        if [[ "${SLICE}" == "" ]]; then
+        if [[ (-z "${SLICE}" ) || ( -n "${DOCKER_INHIBIT_SLICE_IN_REPO}" ) ]]; then
             REMOTE_REPO="${PROJECT}/${GIT_COMMIT}"
         else
             REMOTE_REPO="${PROJECT}/${SLICE}-${GIT_COMMIT}"
