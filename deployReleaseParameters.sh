@@ -11,5 +11,12 @@ if [[ "${DEPLOYMENT_NUMBER}" == "" ]]; then
     exit
 fi
 
+# Ensure at least one slice has been provided
+if [[ ( -z "${SLICE}" ) && ( -z "${SLICES}" ) ]]; then
+	echo "Job requires at least one slice, exiting..."
+    RESULT=1
+    exit
+fi
+
 # Don't forget -c ${DEPLOYMENT_TAG} -i ${DEPLOYMENT_TAG} on constructTree.sh
 
