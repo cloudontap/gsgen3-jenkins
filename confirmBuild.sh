@@ -2,12 +2,11 @@
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
-trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
+trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Ensure CODE_TAG have been provided
 if [[ "${CODE_TAG}" == "" ]]; then
 	echo "Job requires the code tag, exiting..."
-    RESULT=1
     exit
 fi
 
@@ -42,8 +41,12 @@ echo "CODE_COMMIT_SHORT=${CODE_COMMIT_SHORT}" >> ${WORKSPACE}/context.properties
 echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
 
 # Confirm the commit built successfully into a docker image
-export REMOTE_REPO="${PROJECT}/${CODE_COMMIT}"
-${GSGEN_JENKINS}/manageDockerImage.sh -c
+if [[ (-z "${SLICE}" ) || ( -n "${DOCKER_INHIBIT_SLICE_IN_REPO}" ) ]]; then
+    export REMOTE_REPO="${PROJECT}/${CODE_COMMIT}"
+else
+    export REMOTE_REPO="${PROJECT}/${SLICE}-${CODE_COMMIT}"
+fi
+${GSGEN_JENKINS}/manageDockerImage.sh -c -s local -i ${REMOTE_REPO}
 RESULT=$?
 if [[ "${RESULT}" -ne 0 ]]; then
     echo "Image ${REMOTE_REPO} not found. Was the build successful?"
