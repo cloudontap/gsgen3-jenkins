@@ -17,6 +17,8 @@ for i in "" $(seq 2 20); do
     fi 
 done
 
+if [[ -n "${GSGEN_DEBUG}" ]]; then echo ${ENVS}; fi
+
 # Create the required task
 ${BIN_DIR}/runTask.sh -t "${TASK_TIER}" -i "${TASK_COMPONENT}" -w "${TASK}" ${ENVS}
 RESULT=$?
