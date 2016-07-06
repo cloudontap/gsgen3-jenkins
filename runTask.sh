@@ -14,8 +14,6 @@ for i in "" $(seq 2 20); do
     ENV_VALUE="TASK_VALUE${i}"
     if [[ -n "${!ENV_NAME}" ]]; then
         ENVS="${ENVS} -e ${!ENV_NAME} -v \"${!ENV_VALUE}\""
-    else
-        break
     fi 
 done
 
