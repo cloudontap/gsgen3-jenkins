@@ -15,14 +15,14 @@ for i in "" $(seq 2 20); do
     if [[ -n "${!ENV_NAME}" ]]; then
         if [[ -n "${GSGEN_DEBUG}" ]]; then echo ${!ENV_NAME}; fi
         if [[ -n "${GSGEN_DEBUG}" ]]; then echo ${!ENV_VALUE}; fi
-        ENVS+=( "${!ENV_NAME}", "${!ENV_VALUE}")
+        ENVS+=( "-e" "${!ENV_NAME}" "-v" "${!ENV_VALUE}")
     fi 
 done
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then echo ${ENVS}; fi
 
 # Create the required task
-${BIN_DIR}/runTask.sh -t "${TASK_TIER}" -i "${TASK_COMPONENT}" -w "${TASK}" ${ENVS[*]}
+${BIN_DIR}/runTask.sh -t "${TASK_TIER}" -i "${TASK_COMPONENT}" -w "${TASK}" "${ENVS[@]}"
 RESULT=$?
 if [[ ${RESULT} -ne 0 ]]; then
 	echo "Running of task failed, exiting..."
