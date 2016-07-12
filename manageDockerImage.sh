@@ -117,7 +117,7 @@ fi
 # RESULT=$?
 # if [[ "$RESULT" -eq 0 ]]; then
 DOCKER_USER_API=$(echo ${DOCKER_USER} | sed "s/@/%40/")
-DOCKER_IMAGE_COMMIT=$(curl -s https://${DOCKER_USER_API}:${DOCKER_PASS}@${DOCKER_REGISTRY}/v1/repositories/${DOCKER_REPO}/tags | jq ".$DOCKER_TAG")
+DOCKER_IMAGE_COMMIT=$(curl -s https://${DOCKER_USER_API}:${DOCKER_PASS}@${DOCKER_REGISTRY}/v1/repositories/${DOCKER_REPO}/tags | jq ".[\"$DOCKER_TAG\"]")
 if [[ -n "DOCKER_IMAGE_COMMIT" ]]; then
 	echo "Image ${REPOSITORY} present in the registry."
 else
