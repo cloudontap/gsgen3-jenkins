@@ -119,7 +119,7 @@ fi
 DOCKER_USER_API=$(echo ${DOCKER_USER} | sed "s/@/%40/")
 DOCKER_PASS_API=$(echo ${DOCKER_PASS} | sed "s/@/%40/")
 DOCKER_IMAGE_COMMIT=$(curl -s https://${DOCKER_USER_API}:${DOCKER_PASS_API}@${DOCKER_REGISTRY}/v1/repositories/${DOCKER_REPO}/tags | jq ".[\"${DOCKER_TAG}\"]")
-if [[ -n "DOCKER_IMAGE_COMMIT" ]]; then
+if [[ -n "${DOCKER_IMAGE_COMMIT}" && ("${DOCKER_IMAGE_COMMIT}" != "null") ]]; then
 	echo "Image ${REPOSITORY} present in the registry."
 else
     if [[ "${PULL_IF_ABSENT}" == "true" ]]; then
