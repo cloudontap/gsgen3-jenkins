@@ -4,10 +4,6 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-# Determine the slice or slices to process
-SLICE_LIST="${SLICE_LIST:-$SLICE}"
-SLICE_LIST="${SLICE_LIST:-$SLICES}"    
-
 BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
 cd ${WORKSPACE}/${OAID}/config/${PROJECT}/solutions/${SEGMENT}
 
@@ -23,6 +19,7 @@ for CURRENT_SLICE in $SLICE_LIST; do
     	echo "Stack deployment for ${CURRENT_SLICE} slice failed, exiting..."
         exit
     fi
+done
 
 #Finished
 RESULT=0
