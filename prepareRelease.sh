@@ -8,15 +8,6 @@ trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 DETAIL_MESSAGE="deployment=${DEPLOYMENT_TAG}, ${DETAIL_MESSAGE}"
 echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
 
-# Determine the slice or slices to process
-# SLICE_LIST and BUILD_SLICE may already be defined in which case SLICE and SLICES
-# are ignored.
-SLICE_LIST="${SLICE_LIST:-$SLICE}"
-SLICE_LIST="${SLICE_LIST:-$SLICES}"  
-BUILD_SLICE="${BUILD_SLICE:-$SLICE}"
-SLICE_ARRAY=($SLICE_LIST)
-BUILD_SLICE="${BUILD_SLICE:-${SLICE_ARRAY[0]}}"
-
 # Process the config repo
 cd ${WORKSPACE}/${OAID}/config/${PROJECT}
 

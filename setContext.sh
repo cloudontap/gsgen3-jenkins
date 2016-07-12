@@ -99,12 +99,16 @@ if [[ -z "${OAID_INFRASTRUCTURE_REPO}" ]]; then
     OAID_INFRASTRUCTURE_REPO="${!OAID_INFRASTRUCTURE_REPO_VAR}"
 fi
 
+# Determine slices
+SLICE_LIST="${SLICE_LIST:-$SLICES}"
+SLICE_LIST="${SLICE_LIST:-$SLICE}"
+SLICE_ARRAY=($SLICE_LIST)
+BUILD_SLICE="${BUILD_SLICE:-$SLICE}"
+BUILD_SLICE="${BUILD_SLICE:-${SLICE_ARRAY[0]}}"
+CODE_SLICE=$(echo "${BUILD_SLICE:-NOSLICE}" | tr "-" "_")
+
 # Determine project repos
 if [[ -z "${PROJECT_CODE_REPO}" ]]; then
-    SLICE_LIST="${SLICE_LIST:-$SLICE}"
-    SLICE_LIST="${SLICE_LIST:-$SLICES}"
-    SLICE_ARRAY=($SLICE_LIST)
-    CODE_SLICE=$(echo "${CODE_SLICE:-${SLICE_ARRAY[0]}}" | tr "-" "_")
     PROJECT_CODE_REPO_VAR="${PROJECT_UPPER}_${CODE_SLICE^^}_CODE_REPO"
     if [[ -z "${!PROJECT_CODE_REPO_VAR}" ]]; then
         PROJECT_CODE_REPO_VAR="${PROJECT_UPPER}_CODE_REPO"
@@ -163,6 +167,8 @@ echo "PROJECT=${PROJECT}" >> ${WORKSPACE}/context.properties
 echo "SEGMENT=${SEGMENT}" >> ${WORKSPACE}/context.properties
 echo "SLICE=${SLICE}" >> ${WORKSPACE}/context.properties
 echo "SLICES=${SLICES}" >> ${WORKSPACE}/context.properties
+echo "SLICE_LIST=${SLICE_LIST}" >> ${WORKSPACE}/context.properties
+echo "BUILD_SLICE=${BUILD_SLICE}" >> ${WORKSPACE}/context.properties
 echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> ${WORKSPACE}/context.properties
 echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> ${WORKSPACE}/context.properties
 echo "OAID_CONFIG_REPO=${OAID_CONFIG_REPO}" >> ${WORKSPACE}/context.properties
