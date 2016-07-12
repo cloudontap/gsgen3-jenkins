@@ -2,29 +2,31 @@
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
-trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
+trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-REMOTE_TAG_DEFAULT="latest"
-IMAGE_SOURCE_DEFAULT="remote"
+REMOTE_DOCKER_TAG_DEFAULT="latest"
+DOCKER_IMAGE_SOURCE_DEFAULT="local"
 function usage() {
     echo -e "\nManage docker images"
-    echo -e "\nUsage: $(basename $0) -c -i REMOTE_REPO -l LOCAL_REPO -r REMOTE_TAG -s IMAGE_SOURCE -t LOCAL_TAG"
+    echo -e "\nUsage: $(basename $0) -c -i REMOTE_DOCKER_REPO -l DOCKER_REPO -r REMOTE_DOCKER_TAG -s DOCKER_IMAGE_SOURCE -t DOCKER_TAG"
     echo -e "\nwhere\n"
     echo -e "(o) -c only check if image present, don't try and pull it if not"
     echo -e "    -h shows this text"
-    echo -e "(o) -i REMOTE_REPO to use when pulling in the image"
-    echo -e "(o) -l LOCAL_REPO to use when saving image"
-    echo -e "(o) -r REMOTE_TAG to use when pulling in the image"
-    echo -e "(o) -s IMAGE_SOURCE is the location to pull from"
-    echo -e "(o) -t LOCAL_TAG to use when saving image"
+    echo -e "(m) -i REMOTE_DOCKER_REPO to use when pulling in the image"
+    echo -e "(o) -l DOCKER_REPO to use when saving image"
+    echo -e "(o) -r REMOTE_DOCKER_TAG to use when pulling in the image"
+    echo -e "(o) -s DOCKER_IMAGE_SOURCE is the location to pull from"
+    echo -e "(o) -t DOCKER_TAG to use when saving image"
     echo -e "\nDEFAULTS:\n"
-    echo -e "REMOTE_TAG=${REMOTE_TAG_DEFAULT}"
-    echo -e "LOCAL_REPO=REMOTE_REPO"
-    echo -e "LOCAL_TAG=REMOTE_TAG"
-    echo -e "IMAGE_SOURCE=${IMAGE_SOURCE_DEFAULT}"
+    echo -e "REMOTE_DOCKER_TAG=${REMOTE_DOCKER_TAG_DEFAULT}"
+    echo -e "DOCKER_REPO=REMOTE_DOCKER_REPO"
+    echo -e "DOCKER_TAG=REMOTE_DOCKER_TAG"
+    echo -e "DOCKER_IMAGE_SOURCE=${DOCKER_IMAGE_SOURCE_DEFAULT}"
     echo -e "\nNOTES:\n"
     echo -e "1) Default behaviour is to pull from the remote registry"
-    echo -e "2) If not provided, REMOTE_* values are used for LOCAL_*"
+    echo -e "2) If not explicitly provided on the command line, REMOTE_DOCKER_REPO"
+    echo -e "   MUST already be set in the environment"
+    echo -e "3) DOCKER_IMAGE_SOURCE can be \"remote\", \"local\" or \"dockerhub\""
     echo -e ""
     exit
 }
@@ -40,19 +42,19 @@ while getopts ":chi:l:r:s:t:" opt; do
             usage
             ;;
         i)
-            REMOTE_REPO="${OPTARG}"
+            REMOTE_DOCKER_REPO="${OPTARG}"
             ;;
         l)
-            LOCAL_REPO="${OPTARG}"
+            DOCKER_REPO="${OPTARG}"
             ;;
         r)
-            REMOTE_TAG="${OPTARG}"
+            REMOTE_DOCKER_TAG="${OPTARG}"
             ;;
         s)
-            IMAGE_SOURCE="${OPTARG}"
+            DOCKER_IMAGE_SOURCE="${OPTARG}"
             ;;
         t)
-            LOCAL_TAG="${OPTARG}"
+            DOCKER_TAG="${OPTARG}"
             ;;
         \?)
             echo -e "\nInvalid option: -$OPTARG"
@@ -66,32 +68,23 @@ while getopts ":chi:l:r:s:t:" opt; do
 done
 
 # Ensure the IMAGE has been provided
-if [[ "${REMOTE_REPO}" == "" ]]; then
+if [[ -z "${REMOTE_DOCKER_REPO}" ]]; then
 	echo "Job requires the remote repository name"
-    RESULT=1
     exit
 fi
 
 # Apply defaults
-if [[ "${REMOTE_TAG}" == "" ]]; then
-    REMOTE_TAG="${REMOTE_TAG_DEFAULT}"
-fi
-if [[ "${IMAGE_SOURCE}" == "" ]]; then
-    IMAGE_SOURCE="${IMAGE_SOURCE_DEFAULT}"
-fi
+REMOTE_DOCKER_TAG="${REMOTE_DOCKER_TAG:-$REMOTE_DOCKER_TAG_DEFAULT}"
+DOCKER_IMAGE_SOURCE="${DOCKER_IMAGE_SOURCE:-$DOCKER_IMAGE_SOURCE_DEFAULT}"
 
 # Confirm local image settings
-if [[ "${LOCAL_REPO}" == "" ]]; then
-    LOCAL_REPO="${REMOTE_REPO}"
-fi
-if [[ "${LOCAL_TAG}" == "" ]]; then
-    LOCAL_TAG="${REMOTE_TAG}"
-fi
+DOCKER_REPO="${DOCKER_REPO:-$REMOTE_DOCKER_REPO}"
+DOCKER_TAG="${DOCKER_TAG:-$REMOTE_DOCKER_TAG}"
 
 # Formulate the remote image details
-REMOTE_REPOSITORY="${REMOTE_REPO}:${REMOTE_TAG}"
+REMOTE_REPOSITORY="${REMOTE_DOCKER_REPO}:${REMOTE_DOCKER_TAG}"
 FULL_REMOTE_REPOSITORY="${REMOTE_REPOSITORY}"
-case ${IMAGE_SOURCE} in
+case ${DOCKER_IMAGE_SOURCE} in
     remote)
         FULL_REMOTE_REPOSITORY="${REMOTE_DOCKER_REGISTRY}/${REMOTE_REPOSITORY}"
         sudo docker login -u ${REMOTE_DOCKER_USER} -p ${REMOTE_DOCKER_PASS} -e ${REMOTE_DOCKER_EMAIL} ${REMOTE_DOCKER_REGISTRY}
@@ -104,11 +97,14 @@ case ${IMAGE_SOURCE} in
     local)
         FULL_REMOTE_REPOSITORY="${DOCKER_REGISTRY}/${REMOTE_REPOSITORY}"
         ;;
+    *)
+        # For any other value, use the docker command default = dockerhub
+        ;;
 esac
 
 # Formulate the local image details
-LOCAL_REPOSITORY="${LOCAL_REPO}:${LOCAL_TAG}"
-FULL_LOCAL_REPOSITORY="${DOCKER_REGISTRY}/${LOCAL_REPOSITORY}"
+REPOSITORY="${DOCKER_REPO}:${DOCKER_TAG}"
+FULL_REPOSITORY="${DOCKER_REGISTRY}/${REPOSITORY}"
 
 # Check if image has already been pulled
 sudo docker login -u ${DOCKER_USER} -p ${DOCKER_PASS} -e ${DOCKER_EMAIL} ${DOCKER_REGISTRY}
@@ -117,10 +113,10 @@ if [[ "$RESULT" -ne 0 ]]; then
    echo "Can't log in to ${DOCKER_REGISTRY}"
    exit
 fi
-sudo docker pull ${FULL_LOCAL_REPOSITORY}
+sudo docker pull ${FULL_REPOSITORY}
 RESULT=$?
 if [[ "$RESULT" -eq 0 ]]; then  
-	echo "Image ${LOCAL_REPOSITORY} present in the registry."
+	echo "Image ${REPOSITORY} present in the registry."
 else
     if [[ "${PULL_IF_ABSENT}" == "true" ]]; then
         sudo docker pull ${FULL_REMOTE_REPOSITORY}
@@ -129,25 +125,25 @@ else
             echo "Pull of ${REMOTE_REPOSITORY} from ${REMOTE_DOCKER_REGISTRY} failed"
         else
             # Tag the image ready to push to the registry
-            sudo docker tag ${FULL_REMOTE_REPOSITORY} ${FULL_LOCAL_REPOSITORY}
+            sudo docker tag ${FULL_REMOTE_REPOSITORY} ${FULL_REPOSITORY}
 
             # Push to registry
-            sudo docker push ${FULL_LOCAL_REPOSITORY}
+            sudo docker push ${FULL_REPOSITORY}
             RESULT=$?
             if [[ "$?" -ne 0 ]]; then
-                echo "Couldn't push image ${LOCAL_REPOSITORY} to ${FULL_LOCAL_REPOSITORY}"
+                echo "Couldn't push image ${REPOSITORY} to ${FULL_REPOSITORY}"
             fi
         fi
     fi
 fi
 
 if [[ "${PULL_IF_ABSENT}" == "true" ]]; then
-    IMAGEID=$(sudo docker images | grep "${REMOTE_REPO}" | grep "${REMOTE_TAG}" | head -1 |awk '{print($3)}')
+    IMAGEID=$(sudo docker images | grep "${REMOTE_DOCKER_REPO}" | grep "${REMOTE_DOCKER_TAG}" | head -1 |awk '{print($3)}')
     if [[ "${IMAGEID}" != "" ]]; then
         sudo docker rmi -f ${IMAGEID}
     fi
 fi
-IMAGEID=$(sudo docker images | grep "${LOCAL_REPO}" | grep "${LOCAL_TAG}" | head -1 |awk '{print($3)}')
+IMAGEID=$(sudo docker images | grep "${DOCKER_REPO}" | grep "${DOCKER_TAG}" | head -1 |awk '{print($3)}')
 if [[ "${IMAGEID}" != "" ]]; then
     sudo docker rmi -f ${IMAGEID}
 fi
