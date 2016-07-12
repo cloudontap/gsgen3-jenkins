@@ -24,8 +24,8 @@ fi
 CODE_COMMIT_SHORT="${CODE_COMMIT:0:8}"
 PROJECT_CODE_REPO_BASE="${PROJECT_CODE_REPO#*/}"
 PROJECT_CODE_REPO_BASE="${PROJECT_CODE_REPO_BASE%.git}"
-CODE_TAG_MESSAGE=$(curl https://${GITHUB_USER}:${GITHUB_PASS}@api.github.com/repos/${PROJECT_CODE_REPO_BASE}/tags/${TAG_COMMIT} | jq .message | tr -d '"')
-if [[ -z "${CODE_TAG_MESSAGE}" ]]; then
+CODE_TAG_MESSAGE=$(curl -s https://${GITHUB_USER}:${GITHUB_PASS}@api.github.com/repos/${PROJECT_CODE_REPO_BASE}/git/tags/${TAG_COMMIT} | jq .message | tr -d '"')
+if [[ -z "${CODE_TAG_MESSAGE}" || ("${CODE_TAG_MESSAGE}" == "Not Found") ]]; then
 	echo "Tag message not found in the code repo, exiting..."
 	exit
 fi
