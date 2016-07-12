@@ -109,13 +109,16 @@ FULL_REPOSITORY="${DOCKER_REGISTRY}/${REPOSITORY}"
 # Check if image has already been pulled
 sudo docker login -u ${DOCKER_USER} -p ${DOCKER_PASS} -e ${DOCKER_EMAIL} ${DOCKER_REGISTRY}
 RESULT=$?
-if [[ "$RESULT" -ne 0 ]]; then  
+if [[ "$RESULT" -ne 0 ]]; then
    echo "Can't log in to ${DOCKER_REGISTRY}"
    exit
 fi
-sudo docker pull ${FULL_REPOSITORY}
-RESULT=$?
-if [[ "$RESULT" -eq 0 ]]; then  
+# sudo docker pull ${FULL_REPOSITORY}
+# RESULT=$?
+# if [[ "$RESULT" -eq 0 ]]; then
+DOCKER_USER_API=$(echo ${DOCKER_USER} | sed "s/@/%40/")
+DOCKER_IMAGE_COMMIT=$(curl -s https://${DOCKER_USER_API}:${DOCKER_PASS}@${DOCKER_REGISTRY}/v1/repositories/${DOCKER_REPO}/tags | jq ".$DOCKER_TAG")
+if [[ -n "DOCKER_IMAGE_COMMIT" ]]; then
 	echo "Image ${REPOSITORY} present in the registry."
 else
     if [[ "${PULL_IF_ABSENT}" == "true" ]]; then
