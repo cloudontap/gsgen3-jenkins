@@ -17,11 +17,17 @@ for i in "" $(seq 2 20); do
     fi 
 done
 
-# Create the required task
-${BIN_DIR}/runTask.sh -t "${TASK_TIER}" -i "${TASK_COMPONENT}" -w "${TASK}" "${ENVS[@]}"
-RESULT=$?
-if [[ ${RESULT} -ne 0 ]]; then
-	echo "Running of task failed, exiting..."
-	exit
-fi
+# Determine the task list
+TASK_LIST="${TASK_LIST:-$TASKS}"
+TASK_LIST="${TASK_LIST:-$TASK}"
+
+# run the required tasks
+for CURRENT_TASK in $TASK_LIST; do
+    ${BIN_DIR}/runTask.sh -t "${TASK_TIER}" -i "${TASK_COMPONENT}" -w "${CURRENT_TASK}" "${ENVS[@]}"
+    RESULT=$?
+    if [[ ${RESULT} -ne 0 ]]; then
+        echo "Running of task ${CURRENT_TASK} failed, exiting..."
+        exit
+    fi
+done
 
