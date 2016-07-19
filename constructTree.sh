@@ -92,7 +92,7 @@ mkdir config infrastructure
 if [[ !("${EXCLUDE_PROJECT_DIRECTORIES}" == "true") ]]; then
 
     # Pull in the project config repo
-    git clone https://${GITHUB_USER}:${GITHUB_PASS}@${PROJECT_CONFIG_REPO} config/temp
+    git clone https://${!PROJECT_GIT_CREDENTIALS_VAR}@${PROJECT_GIT_DNS}/${PROJECT_GIT_ORG}/${PROJECT_CONFIG_REPO} config/temp
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
  	    echo "Can't fetch the ${PROJECT} config repo, exiting..."
@@ -124,7 +124,7 @@ fi
 if [[ !("${EXCLUDE_OAID_DIRECTORIES}" == "true") ]]; then
     if [[ ! -d config/${OAID} ]]; then
         # Pull in the account config repo
-        git clone https://${GITHUB_USER}:${GITHUB_PASS}@${OAID_CONFIG_REPO} -b master config/${OAID}
+        git clone https://${!OAID_GIT_CREDENTIALS_VAR}@${OAID_GIT_DNS}/${OAID_GIT_ORG}/${OAID_CONFIG_REPO} -b master config/${OAID}
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
             echo "Can't fetch the ${OAID} config repo, exiting..."
@@ -139,7 +139,7 @@ if [[ ! -d config/bin ]]; then
         mkdir config/bin
         cp -rp config/${PROJECT}/bin config/bin
     else
-        git clone https://${GSGEN_BIN_REPO} -b ${GSGEN_BIN_REFERENCE} config/bin
+        git clone https://${GSGEN_GIT_DNS}/${GSGEN_GIT_ORG}/${GSGEN_BIN_REPO} -b ${GSGEN_BIN_REFERENCE} config/bin
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
             echo "Can't fetch the GSGEN repo, exiting..."
@@ -151,7 +151,7 @@ fi
 if [[ !("${EXCLUDE_PROJECT_DIRECTORIES}" == "true") ]]; then
     
     # Pull in the project infrastructure repo
-    git clone https://${GITHUB_USER}:${GITHUB_PASS}@${PROJECT_INFRASTRUCTURE_REPO} infrastructure/temp
+    git clone https://${!PROJECT_GIT_CREDENTIALS_VAR}@${PROJECT_GIT_DNS}/${PROJECT_GIT_ORG}/${PROJECT_INFRASTRUCTURE_REPO} infrastructure/temp
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
 	    echo "Can't fetch the ${PROJECT} infrastructure repo, exiting..."
@@ -183,7 +183,7 @@ fi
 if [[ !("${EXCLUDE_OAID_DIRECTORIES}" == "true") ]]; then
     if [[ ! -d infrastructure/${OAID} ]]; then
         # Pull in the account infrastructure repo
-        git clone https://${GITHUB_USER}:${GITHUB_PASS}@${OAID_INFRASTRUCTURE_REPO} -b master infrastructure/${OAID}
+        git clone https://${!OAID_GIT_CREDENTIALS_VAR}@${OAID_GIT_DNS}/${OAID_GIT_ORG}/${OAID_INFRASTRUCTURE_REPO} -b master infrastructure/${OAID}
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
             echo "Can't fetch the ${OAID} infrastructure repo, exiting..."
@@ -197,7 +197,7 @@ if [[ ! -d infrastructure/startup ]]; then
     if [[ -d infrastructure/${PROJECT}/startup ]]; then
         cp -rp infrastructure/${PROJECT}/startup infrastructure/startup
     else
-        git clone https://${GSGEN_STARTUP_REPO} -b ${GSGEN_STARTUP_REFERENCE} infrastructure/startup
+        git clone https://${GSGEN_GIT_DNS}/${GSGEN_GIT_ORG}/${GSGEN_STARTUP_REPO} -b ${GSGEN_STARTUP_REFERENCE} infrastructure/startup
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
             echo "Can't fetch the GSGEN startup repo, exiting..."

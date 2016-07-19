@@ -86,16 +86,16 @@ REMOTE_REPOSITORY="${REMOTE_DOCKER_REPO}:${REMOTE_DOCKER_TAG}"
 FULL_REMOTE_REPOSITORY="${REMOTE_REPOSITORY}"
 case ${DOCKER_IMAGE_SOURCE} in
     remote)
-        FULL_REMOTE_REPOSITORY="${REMOTE_DOCKER_REGISTRY}/${REMOTE_REPOSITORY}"
-        sudo docker login -u ${REMOTE_DOCKER_USER} -p ${REMOTE_DOCKER_PASS} -e ${REMOTE_DOCKER_EMAIL} ${REMOTE_DOCKER_REGISTRY}
+        FULL_REMOTE_REPOSITORY="${!PROJECT_REMOTE_DOCKER_DNS}/${REMOTE_REPOSITORY}"
+        sudo docker login -u ${!PROJECT_REMOTE_DOCKER_USER_VAR} -p ${!PROJECT_REMOTE_DOCKER_PASSWORD_VAR} -e ${PROJECT_REMOTE_DOCKER_EMAIL} ${PROJECT_REMOTE_DOCKER_DNS}
         RESULT=$?
         if [[ "$RESULT" -ne 0 ]]; then
-            echo "Can't log in to ${REMOTE_DOCKER_REGISTRY}"
+            echo "Can't log in to ${PROJECT_REMOTE_DOCKER_DNS}"
             exit
         fi
         ;;
     local)
-        FULL_REMOTE_REPOSITORY="${DOCKER_REGISTRY}/${REMOTE_REPOSITORY}"
+        FULL_REMOTE_REPOSITORY="${PROJECT_DOCKER_DNS}/${REMOTE_REPOSITORY}"
         ;;
     *)
         # For any other value, use the docker command default = dockerhub
@@ -107,7 +107,7 @@ REPOSITORY="${DOCKER_REPO}:${DOCKER_TAG}"
 FULL_REPOSITORY="${DOCKER_REGISTRY}/${REPOSITORY}"
 
 # Check if image has already been pulled
-sudo docker login -u ${DOCKER_USER} -p ${DOCKER_PASS} -e ${DOCKER_EMAIL} ${DOCKER_REGISTRY}
+sudo docker login -u ${!PROJECT_DOCKER_USER_VAR} -p ${!PROJECT_REMOTE_DOCKER_PASSWORD_VAR} -e ${PROJECT_REMOTE_DOCKER_EMAIL} ${PROJECT_DOCKER_DNS}
 RESULT=$?
 if [[ "$RESULT" -ne 0 ]]; then
    echo "Can't log in to ${DOCKER_REGISTRY}"
@@ -116,9 +116,8 @@ fi
 
 # Use the docker API to avoid having to download the image to check for its existence
 # Be careful of @ characters in the username or password
-DOCKER_USER_API=$(echo ${DOCKER_USER} | sed "s/@/%40/")
-DOCKER_PASS_API=$(echo ${DOCKER_PASS} | sed "s/@/%40/")
-DOCKER_IMAGE_COMMIT=$(curl -s https://${DOCKER_USER_API}:${DOCKER_PASS_API}@${DOCKER_REGISTRY}/v1/repositories/${DOCKER_REPO}/tags | jq ".[\"${DOCKER_TAG}\"] | select(.!=null)")
+CREDENTIALS=$(echo ${!PROJECT_DOCKER_CREDENTIALS_VAR} | sed "s/@/%40/")
+DOCKER_IMAGE_COMMIT=$(curl -s https://${CREDENTIALS}@${PROJECT_DOCKER_API_DNS}/v1/repositories/${DOCKER_REPO}/tags | jq ".[\"${DOCKER_TAG}\"] | select(.!=null)")
 if [[ -n "${DOCKER_IMAGE_COMMIT}" ]]; then
 	echo "Image ${REPOSITORY} present in the registry."
 else
