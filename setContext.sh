@@ -278,6 +278,11 @@ echo "SLICES=${SLICES}" >> ${WORKSPACE}/context.properties
 echo "SLICE_LIST=${SLICE_LIST}" >> ${WORKSPACE}/context.properties
 echo "BUILD_SLICE=${BUILD_SLICE}" >> ${WORKSPACE}/context.properties
 
+echo "GSGEN_GIT_DNS=${GSGEN_GIT_DNS}" >> ${WORKSPACE}/context.properties
+echo "GSGEN_GIT_ORG=${GSGEN_GIT_ORG}" >> ${WORKSPACE}/context.properties
+echo "GSGEN_BIN_REPO=${GSGEN_BIN_REPO}" >> ${WORKSPACE}/context.properties
+echo "GSGEN_STARTUP_REPO=${GSGEN_STARTUP_REPO}" >> ${WORKSPACE}/context.properties
+
 echo "OAID_GIT_PROVIDER=${OAID_GIT_PROVIDER}" >> ${WORKSPACE}/context.properties
 echo "OAID_GIT_USER_VAR=${OAID_GIT_USER_VAR}" >> ${WORKSPACE}/context.properties
 echo "OAID_GIT_PASSWORD_VAR=${OAID_GIT_PASSWORD_VAR}" >> ${WORKSPACE}/context.properties
