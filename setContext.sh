@@ -79,6 +79,13 @@ GITHUB_API_DNS="${GITHUB_API_DNS:-api.$GITHUB_DNS}"
 DOCKER_DNS="${DOCKER_DNS:-docker.${OAID}.gosource.com.au}"
 DOCKER_API_DNS="${DOCKER_API_DNS:-$DOCKER_DNS}"
 
+# Defaults for gsgen
+# TODO: Add ability for OAID/PROJECT override
+GSGEN_GIT_DNS="${GSGEN_GIT_DNS:-github.com}"
+GSGEN_GIT_ORG="${GSGEN_GIT_ORG:-cloudontap}"
+GSGEN_BIN_REPO="${GSGEN_BIN_REPO:-gsgen3.git}"
+GSGEN_STARTUP_REPO="${GSGEN_STARTUP_REPO:-gsgen3-startup.git}"
+
 # Determine the account git provider
 if [[ -z "${OAID_GIT_PROVIDER}" ]]; then
     OAID_GIT_PROVIDER_VAR="${OAID_UPPER}_GIT_PROVIDER"
