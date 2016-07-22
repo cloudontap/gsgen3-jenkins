@@ -86,7 +86,7 @@ REMOTE_REPOSITORY="${REMOTE_DOCKER_REPO}:${REMOTE_DOCKER_TAG}"
 FULL_REMOTE_REPOSITORY="${REMOTE_REPOSITORY}"
 case ${DOCKER_IMAGE_SOURCE} in
     remote)
-        FULL_REMOTE_REPOSITORY="${!PROJECT_REMOTE_DOCKER_DNS}/${REMOTE_REPOSITORY}"
+        FULL_REMOTE_REPOSITORY="${PROJECT_REMOTE_DOCKER_DNS}/${REMOTE_REPOSITORY}"
         sudo docker login -u ${!PROJECT_REMOTE_DOCKER_USER_VAR} -p ${!PROJECT_REMOTE_DOCKER_PASSWORD_VAR} -e ${PROJECT_REMOTE_DOCKER_EMAIL} ${PROJECT_REMOTE_DOCKER_DNS}
         RESULT=$?
         if [[ "$RESULT" -ne 0 ]]; then
@@ -104,13 +104,13 @@ esac
 
 # Formulate the local image details
 REPOSITORY="${DOCKER_REPO}:${DOCKER_TAG}"
-FULL_REPOSITORY="${DOCKER_REGISTRY}/${REPOSITORY}"
+FULL_REPOSITORY="${PROJECT_DOCKER_DNS}/${REPOSITORY}"
 
 # Check if image has already been pulled
 sudo docker login -u ${!PROJECT_DOCKER_USER_VAR} -p ${!PROJECT_REMOTE_DOCKER_PASSWORD_VAR} -e ${PROJECT_REMOTE_DOCKER_EMAIL} ${PROJECT_DOCKER_DNS}
 RESULT=$?
 if [[ "$RESULT" -ne 0 ]]; then
-   echo "Can't log in to ${DOCKER_REGISTRY}"
+   echo "Can't log in to ${PROJECT_DOCKER_DNS}"
    exit
 fi
 
@@ -125,7 +125,7 @@ else
         sudo docker pull ${FULL_REMOTE_REPOSITORY}
         RESULT=$?
         if [[ "$RESULT" -ne 0 ]]; then
-            echo "Pull of ${REMOTE_REPOSITORY} from ${REMOTE_DOCKER_REGISTRY} failed"
+            echo "Can't pull ${REMOTE_REPOSITORY} from ${PROJECT_REMOTE_DOCKER_DNS}"
         else
             # Tag the image ready to push to the registry
             sudo docker tag ${FULL_REMOTE_REPOSITORY} ${FULL_REPOSITORY}
