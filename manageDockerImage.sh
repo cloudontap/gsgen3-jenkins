@@ -116,8 +116,9 @@ fi
 
 # Use the docker API to avoid having to download the image to check for its existence
 # Be careful of @ characters in the username or password
-CREDENTIALS=$(echo ${!PROJECT_DOCKER_CREDENTIALS_VAR} | sed "s/@/%40/")
-DOCKER_IMAGE_COMMIT=$(curl -s https://${CREDENTIALS}@${PROJECT_DOCKER_API_DNS}/v1/repositories/${DOCKER_REPO}/tags | jq ".[\"${DOCKER_TAG}\"] | select(.!=null)")
+DOCKER_USER=$(echo ${!PROJECT_DOCKER_USER_VAR} | sed "s/@/%40/g")
+DOCKER_PASSWORD=$(echo ${!PROJECT_DOCKER_PASSWORD_VAR} | sed "s/@/%40/g")
+DOCKER_IMAGE_COMMIT=$(curl -s https://${DOCKER_USER}:${DOCKER_PASSWORD}@${PROJECT_DOCKER_API_DNS}/v1/repositories/${DOCKER_REPO}/tags | jq ".[\"${DOCKER_TAG}\"] | select(.!=null)")
 if [[ -n "${DOCKER_IMAGE_COMMIT}" ]]; then
 	echo "Image ${REPOSITORY} present in the registry."
 else
