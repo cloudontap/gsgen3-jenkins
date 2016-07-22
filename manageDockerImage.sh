@@ -121,6 +121,7 @@ DOCKER_PASSWORD=$(echo ${!PROJECT_DOCKER_PASSWORD_VAR} | sed "s/@/%40/g")
 DOCKER_IMAGE_COMMIT=$(curl -s https://${DOCKER_USER}:${DOCKER_PASSWORD}@${PROJECT_DOCKER_API_DNS}/v1/repositories/${DOCKER_REPO}/tags | jq ".[\"${DOCKER_TAG}\"] | select(.!=null)")
 if [[ -n "${DOCKER_IMAGE_COMMIT}" ]]; then
 	echo "Image ${REPOSITORY} present in the registry."
+    RESULT=0
 else
     if [[ "${PULL_IF_ABSENT}" == "true" ]]; then
         sudo docker pull ${FULL_REMOTE_REPOSITORY}
