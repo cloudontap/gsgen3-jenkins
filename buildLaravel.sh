@@ -40,7 +40,7 @@ cd ../
 
 # Package for docker if required
 if [[ -f Dockerfile ]]; then
-    ${GSGEN_JENKINS}/manageDocker.sh -b
+    ${GSGEN_JENKINS}/manageDocker.sh -b -s ${SLICE}
     RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
         exit
