@@ -4,14 +4,10 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-# Determine the slice or slices to process
-SLICE_LIST="${SLICE_LIST:-$SLICE}"
-SLICE_LIST="${SLICE_LIST:-$SLICES}"    
-
 BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
 cd ${WORKSPACE}/${OAID}/config/${PROJECT}/solutions/${SEGMENT}
 
-for CURRENT_SLICE in $SLICE_LIST; do
+for CURRENT_SLICE in ${SLICE_LIST}; do
 
     # Generate the deployment template for the required slice
     ${BIN_DIR}/createApplicationTemplate.sh -c ${PROJECT_CONFIG_COMMIT} -s ${CURRENT_SLICE}

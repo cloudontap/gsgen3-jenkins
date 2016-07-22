@@ -13,7 +13,7 @@ function usage() {
     echo -e "    -h shows this text"
     echo -e "(o) -p PROJECT is the project id e.g. \"eticket\""
     echo -e "\nNOTES:\n"
-    echo -e "1) The setting values are saved in context.properties in the current directory"
+    echo -e "1. The setting values are saved in context.properties in the current directory"
     echo -e ""
     RESULT=1
     exit
@@ -86,6 +86,18 @@ GSGEN_GIT_ORG="${GSGEN_GIT_ORG:-codeontap}"
 GSGEN_BIN_REPO="${GSGEN_BIN_REPO:-gsgen3.git}"
 GSGEN_STARTUP_REPO="${GSGEN_STARTUP_REPO:-gsgen3-startup.git}"
 
+# Determine slices
+SLICE_LIST="${SLICES}"
+SLICE_LIST="${SLICE_LIST:-$SLICE}"
+SLICE_ARRAY=($SLICE_LIST)
+BUILD_SLICE="${SLICE}"
+BUILD_SLICE="${BUILD_SLICE:-${SLICE_ARRAY[0]}}"
+CODE_SLICE=$(echo "${BUILD_SLICE:-NOSLICE}" | tr "-" "_")
+
+# Determine the account access credentials
+OAID_AWS_ACCESS_KEY_ID_VAR="${OAID_UPPER}_AWS_ACCESS_KEY_ID"
+OAID_AWS_SECRET_ACCESS_KEY_VAR="${OAID_UPPER}_AWS_SECRET_ACCESS_KEY"
+
 # Determine the account git provider
 if [[ -z "${OAID_GIT_PROVIDER}" ]]; then
     OAID_GIT_PROVIDER_VAR="${OAID_UPPER}_GIT_PROVIDER"
@@ -106,10 +118,6 @@ OAID_GIT_DNS="${!OAID_GIT_DNS_VAR}"
 OAID_GIT_API_DNS_VAR="${OAID_GIT_PROVIDER}_API_DNS"
 OAID_GIT_API_DNS="${!OAID_GIT_API_DNS_VAR}"
 
-# Determine the account access credentials
-OAID_AWS_ACCESS_KEY_ID_VAR="${OAID_UPPER}_AWS_ACCESS_KEY_ID"
-OAID_AWS_SECRET_ACCESS_KEY_VAR="${OAID_UPPER}_AWS_SECRET_ACCESS_KEY"
-
 # Determine account repos
 if [[ -z "${OAID_CONFIG_REPO}" ]]; then
     OAID_CONFIG_REPO_VAR="${OAID_UPPER}_CONFIG_REPO"
@@ -119,14 +127,6 @@ if [[ -z "${OAID_INFRASTRUCTURE_REPO}" ]]; then
     OAID_INFRASTRUCTURE_REPO_VAR="${OAID_UPPER}_INFRASTRUCTURE_REPO"
     OAID_INFRASTRUCTURE_REPO="${!OAID_INFRASTRUCTURE_REPO_VAR}"
 fi
-
-# Determine slices
-SLICE_LIST="${SLICE_LIST:-$SLICES}"
-SLICE_LIST="${SLICE_LIST:-$SLICE}"
-SLICE_ARRAY=($SLICE_LIST)
-BUILD_SLICE="${BUILD_SLICE:-$SLICE}"
-BUILD_SLICE="${BUILD_SLICE:-${SLICE_ARRAY[0]}}"
-CODE_SLICE=$(echo "${BUILD_SLICE:-NOSLICE}" | tr "-" "_")
 
 # Determine the project git provider
 if [[ -z "${PROJECT_GIT_PROVIDER}" ]]; then
@@ -272,9 +272,9 @@ if [[ -n "${GIT_USER}" ]];  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, user=${GIT_U
 # Save for future steps
 echo "OAID=${OAID}" >> ${WORKSPACE}/context.properties
 echo "PROJECT=${PROJECT}" >> ${WORKSPACE}/context.properties
-echo "SEGMENT=${SEGMENT}" >> ${WORKSPACE}/context.properties
-echo "SLICE=${SLICE}" >> ${WORKSPACE}/context.properties
-echo "SLICES=${SLICES}" >> ${WORKSPACE}/context.properties
+if [[ -n "${SEGMENT}" ]]; then echo "SEGMENT=${SEGMENT}" >> ${WORKSPACE}/context.properties; fi
+if [[ -n "${SLICE}" ]]; then echo "SLICE=${SLICE}" >> ${WORKSPACE}/context.properties; fi
+if [[ -n "${SLICES}" ]]; then echo "SLICES=${SLICES}" >> ${WORKSPACE}/context.properties; fi
 echo "SLICE_LIST=${SLICE_LIST}" >> ${WORKSPACE}/context.properties
 echo "BUILD_SLICE=${BUILD_SLICE}" >> ${WORKSPACE}/context.properties
 

@@ -25,7 +25,7 @@ function usage() {
     echo -e "GSGEN_BIN_REFERENCE = ${GSGEN_BIN_REFERENCE_DEFAULT}"
     echo -e "GSGEN_STARTUP_REFERENCE = ${GSGEN_STARTUP_REFERENCE_DEFAULT}"
     echo -e "\nNOTES:\n"
-    echo -e "1) OAID/PROJECT details are assumed to be already defined via environment variables"
+    echo -e "1. OAID/PROJECT details are assumed to be already defined via environment variables"
     echo -e ""
     RESULT=1
     exit

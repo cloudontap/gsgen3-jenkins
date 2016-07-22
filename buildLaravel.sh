@@ -4,30 +4,20 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
 trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 
-if [[ -z "${PROJECT}" ]]; then
-    PROJECT=$(echo ${JOB_NAME,,} | cut -d '-' -f 1)
-fi
-
 if [[ -z "${SLICE}" ]]; then
     if [ -e slice.ref ]; then
         SLICE=`cat slice.ref`
     fi
 fi
 
-if [[ -z "${REMOTE_REPO}" ]]; then
-    if [[ "${SLICE}" == "" ]]; then
-        REMOTE_REPO="${PROJECT}/${GIT_COMMIT}"
-    else
-        REMOTE_REPO="${PROJECT}/${SLICE}/${GIT_COMMIT}"
+# Perform checks for Docker packaging
+if [[ -f Dockerfile ]]; then
+    ${GSGEN_JENKINS}/manageDocker.sh -c
+    RESULT=$?
+    if [[ "${RESULT}" -eq 0 ]]; then
+        RESULT=1
+        exit
     fi
-fi
-
-FULL_IMAGE="${DOCKER_REGISTRY}/${REMOTE_REPO}"
-${GSGEN_JENKINS}/manageDockerImage.sh -c
-RESULT=$?
-if [[ "${RESULT}" -eq 0 ]]; then
-    echo "Image ${REMOTE_REPO} already exists"
-    exit
 fi
 
 cd laravel/
@@ -48,29 +38,13 @@ fi
 
 cd ../
 
-sudo docker build -t ${FULL_IMAGE} .
-RESULT=$?
-if [ $RESULT -ne 0 ]; then
-   echo "Cannot build image ${REMOTE_REPO}, exiting..."
-   exit
-fi
-
-sudo docker push ${FULL_IMAGE}
-RESULT=$?
-if [ $RESULT -ne 0 ]; then
-   echo "Unable to push ${REMOTE_REPO} to registry"
-   IMAGEID=`docker images|grep $GIT_COMMIT|head -1|awk '{print($3)}'`
-   docker rmi -f $IMAGEID
-   exit
-fi
-
-# Cleanup images locally
-IMAGEID=`sudo docker images|grep $GIT_COMMIT|head -1|awk '{print($3)}'`
-sudo docker rmi -f $IMAGEID
-echo "GIT_COMMIT=$GIT_COMMIT" > $WORKSPACE/context.properties
-
-if [[ -z "${SLICE}" ]]; then
-    SLICE="www"
+# Package for docker if required
+if [[ -f Dockerfile ]]; then
+    ${GSGEN_JENKINS}/manageDocker.sh -b
+    RESULT=$?
+    if [[ "${RESULT}" -ne 0 ]]; then
+        exit
+    fi
 fi
 
 echo "PROJECT=$PROJECT" >> $WORKSPACE/context.properties

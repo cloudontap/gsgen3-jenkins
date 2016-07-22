@@ -12,18 +12,9 @@ fi
 
 # Perform checks for Docker packaging
 if [[ -f Dockerfile ]]; then
-    if [[ -z "${REMOTE_REPO}" ]]; then
-        if [[ (-z "${SLICE}" ) || ( -n "${DOCKER_INHIBIT_SLICE_IN_REPO}" ) ]]; then
-            REMOTE_REPO="${PROJECT}/${GIT_COMMIT}"
-        else
-            REMOTE_REPO="${PROJECT}/${SLICE}-${GIT_COMMIT}"
-        fi
-    fi
-    
-    ${GSGEN_JENKINS}/manageDockerImage.sh -c -i ${REMOTE_REPO}
+    ${GSGEN_JENKINS}/manageDocker.sh -c
     RESULT=$?
     if [[ "${RESULT}" -eq 0 ]]; then
-        echo "Image ${REMOTE_REPO} already exists"
         RESULT=1
         exit
     fi
@@ -71,29 +62,10 @@ fi
 
 # Package for docker if required
 if [[ -f Dockerfile ]]; then
-    FULL_IMAGE=${PROJECT_DOCKER_DNS}/${REMOTE_REPO}
-    sudo docker build -t ${FULL_IMAGE} .
+    ${GSGEN_JENKINS}/manageDocker.sh -b
     RESULT=$?
-    if [ $RESULT -ne 0 ]; then
-       echo "Cannot build image ${REMOTE_REPO}, exiting..."
-       exit
-    fi
-    
-    sudo docker push ${FULL_IMAGE}
-    RESULT=$?
-    if [ $RESULT -ne 0 ]; then
-       echo "Unable to push ${REMOTE_REPO} to registry"
-       IMAGEID=`sudo docker images|grep $GIT_COMMIT|head -1|awk '{print($3)}'`
-       sudo docker rmi -f $IMAGEID
-       exit
-    fi
-    
-    # Cleanup images locally
-    IMAGEID=`sudo docker images|grep $GIT_COMMIT|head -1|awk '{print($3)}'`
-    sudo docker rmi -f $IMAGEID
-    
-    if [[ -z "${SLICE}" ]]; then
-        SLICE="www"
+    if [[ "${RESULT}" -ne 0 ]]; then
+        exit
     fi
 fi
 

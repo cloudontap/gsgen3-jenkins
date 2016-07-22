@@ -38,14 +38,9 @@ echo "CODE_COMMIT_SHORT=${CODE_COMMIT_SHORT}" >> ${WORKSPACE}/context.properties
 echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
 
 # Confirm the commit built successfully into a docker image
-if [[ (-z "${BUILD_SLICE}" ) || ( -n "${DOCKER_INHIBIT_SLICE_IN_REPO}" ) ]]; then
-    export REMOTE_REPO="${PROJECT}/${CODE_COMMIT}"
-else
-    export REMOTE_REPO="${PROJECT}/${BUILD_SLICE}-${CODE_COMMIT}"
-fi
-${GSGEN_JENKINS}/manageDockerImage.sh -c -i ${REMOTE_REPO}
+${GSGEN_JENKINS}/manageDocker.sh -c
 RESULT=$?
 if [[ "${RESULT}" -ne 0 ]]; then
-    echo "Image ${REMOTE_REPO} not found. Was the build successful?"
+    echo "Docker image not found. Was the build successful?"
     exit
 fi

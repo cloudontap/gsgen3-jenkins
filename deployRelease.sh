@@ -7,7 +7,7 @@ trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
 cd ${WORKSPACE}/${OAID}/config/${PROJECT}/solutions/${SEGMENT}
 
-for CURRENT_SLICE in $SLICE_LIST; do
+for CURRENT_SLICE in ${SLICE_LIST}; do
 
     # Create the required Cloud Formation stack
     if [[ "${MODE}" != "update"    ]]; then ${BIN_DIR}/deleteStack.sh -t application -i -s ${CURRENT_SLICE}; fi
