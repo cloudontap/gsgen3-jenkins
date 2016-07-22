@@ -2,7 +2,7 @@
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
-trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
+trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 if [[ -z "${SLICE}" ]]; then
     if [ -e slice.ref ]; then
@@ -24,6 +24,7 @@ if [[ -f Dockerfile ]]; then
     RESULT=$?
     if [[ "${RESULT}" -eq 0 ]]; then
         echo "Image ${REMOTE_REPO} already exists"
+        RESULT=1
         exit
     fi
 fi
