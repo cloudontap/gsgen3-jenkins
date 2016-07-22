@@ -12,7 +12,7 @@ fi
 
 # Perform checks for Docker packaging
 if [[ -f Dockerfile ]]; then
-    ${GSGEN_JENKINS}/manageDocker.sh -c
+    ${GSGEN_JENKINS}/manageDocker.sh -c -s ${SLICE}
     RESULT=$?
     if [[ "${RESULT}" -eq 0 ]]; then
         RESULT=1
