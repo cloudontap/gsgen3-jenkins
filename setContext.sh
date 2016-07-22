@@ -259,7 +259,8 @@ else
 fi
 
 # Basic details for git commits/slack notification (enhanced by other scripts)
-DETAIL_MESSAGE="project=${PROJECT}, environment=${ENVIRONMENT}"
+DETAIL_MESSAGE="project=${PROJECT}"
+if [[ -n "${ENVIRONMENT}" ]]; then DETAIL_MESSAGE="${DETAIL_MESSAGE}, environment=${ENVIRONMENT}"; fi
 if [[ "${SEGMENT}" != "${ENVIRONMENT}" ]]; then DETAIL_MESSAGE="${DETAIL_MESSAGE}, segment=${SEGMENT}"; fi
 if [[ -n "${TIER}" ]];      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, tier=${TIER}"; fi
 if [[ -n "${COMPONENT}" ]]; then DETAIL_MESSAGE="${DETAIL_MESSAGE}, component=${COMPONENT}"; fi
