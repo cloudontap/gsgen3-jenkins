@@ -4,10 +4,6 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
 trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 
-if [[ -z "${PROJECT}" ]]; then
-    PROJECT=$(echo ${JOB_NAME,,} | cut -d '-' -f 1)
-fi
-
 if [[ -z "${SLICE}" ]]; then
     if [ -e slice.ref ]; then
         SLICE=`cat slice.ref`
@@ -74,7 +70,7 @@ fi
 
 # Package for docker if required
 if [[ -f Dockerfile ]]; then
-    FULL_IMAGE=${DOCKER_REGISTRY}/${REMOTE_REPO}
+    FULL_IMAGE=${PROJECT_DOCKER_DNS}/${REMOTE_REPO}
     sudo docker build -t ${FULL_IMAGE} .
     RESULT=$?
     if [ $RESULT -ne 0 ]; then
@@ -86,15 +82,14 @@ if [[ -f Dockerfile ]]; then
     RESULT=$?
     if [ $RESULT -ne 0 ]; then
        echo "Unable to push ${REMOTE_REPO} to registry"
-       IMAGEID=`docker images|grep $GIT_COMMIT|head -1|awk '{print($3)}'`
-       docker rmi -f $IMAGEID
+       IMAGEID=`sudo docker images|grep $GIT_COMMIT|head -1|awk '{print($3)}'`
+       sudo docker rmi -f $IMAGEID
        exit
     fi
     
     # Cleanup images locally
     IMAGEID=`sudo docker images|grep $GIT_COMMIT|head -1|awk '{print($3)}'`
     sudo docker rmi -f $IMAGEID
-    echo "GIT_COMMIT=$GIT_COMMIT" > $WORKSPACE/context.properties
     
     if [[ -z "${SLICE}" ]]; then
         SLICE="www"
@@ -103,5 +98,5 @@ fi
 
 # TODO: Package for AWS Lambda if required - not sure yet what to check for as a marker
 
-echo "PROJECT=$PROJECT" >> $WORKSPACE/context.properties
+echo "GIT_COMMIT=$GIT_COMMIT" >> $WORKSPACE/context.properties
 echo "SLICE=$SLICE" >> $WORKSPACE/context.properties
