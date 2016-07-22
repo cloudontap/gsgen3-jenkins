@@ -82,7 +82,7 @@ DOCKER_API_DNS="${DOCKER_API_DNS:-$DOCKER_DNS}"
 # Defaults for gsgen
 # TODO: Add ability for OAID/PROJECT override
 GSGEN_GIT_DNS="${GSGEN_GIT_DNS:-github.com}"
-GSGEN_GIT_ORG="${GSGEN_GIT_ORG:-cloudontap}"
+GSGEN_GIT_ORG="${GSGEN_GIT_ORG:-codeontap}"
 GSGEN_BIN_REPO="${GSGEN_BIN_REPO:-gsgen3.git}"
 GSGEN_STARTUP_REPO="${GSGEN_STARTUP_REPO:-gsgen3-startup.git}"
 
