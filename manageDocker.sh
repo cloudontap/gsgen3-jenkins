@@ -20,12 +20,14 @@ function usage() {
     echo -e "(o) -l DOCKER_REPO is the local repository "
     echo -e "(o) -p pull image from a remote to a local registry"
     echo -e "(o) -r REMOTE_DOCKER_TAG is the tag to pull"
-    echo -e "(o) -s DOCKER_IMAGE_SOURCE is the registry to pull from"
+    echo -e "(o) -s DOCKER_SLICE is the slice to use when defaulting the local repository"
     echo -e "(o) -t DOCKER_TAG is the local tag"
+    echo -e "(o) -u DOCKER_IMAGE_SOURCE is the registry to pull from"
     echo -e "\nDEFAULTS:\n"
-    echo -e "DOCKER_REPO=\"\$PROJECT/\$BUILD_SLICE-\$DOCKER_CODE_COMMIT\" or "
+    echo -e "DOCKER_REPO=\"\$PROJECT/\$DOCKER_SLICE-\$DOCKER_CODE_COMMIT\" or "
     echo -e "\"\$PROJECT/\$DOCKER_CODE_COMMIT\" if no build slice defined"
     echo -e "DOCKER_TAG=${DOCKER_TAG_DEFAULT}"
+    echo -e "DOCKER_SLICE=\$BUILD_SLICE"
     echo -e "REMOTE_DOCKER_REPO=DOCKER_REPO"
     echo -e "REMOTE_DOCKER_TAG=DOCKER_TAG"
     echo -e "DOCKER_IMAGE_SOURCE=${DOCKER_IMAGE_SOURCE_DEFAULT}"
@@ -39,7 +41,7 @@ function usage() {
 }
 
 # Parse options
-while getopts ":bchki:l:pr:s:t:" opt; do
+while getopts ":bchki:l:pr:s:t:u:" opt; do
     case $opt in
         b)
             DOCKER_OPERATION="build"
@@ -66,10 +68,13 @@ while getopts ":bchki:l:pr:s:t:" opt; do
             REMOTE_DOCKER_TAG="${OPTARG}"
             ;;
         s)
-            DOCKER_IMAGE_SOURCE="${OPTARG}"
+            DOCKER_SLICE="${OPTARG}"
             ;;
         t)
             DOCKER_TAG="${OPTARG}"
+            ;;
+        u)
+            DOCKER_IMAGE_SOURCE="${OPTARG}"
             ;;
         \?)
             echo -e "\nInvalid option: -$OPTARG"
@@ -82,14 +87,20 @@ while getopts ":bchki:l:pr:s:t:" opt; do
      esac
 done
 
+# Apply local registry defaults
+DOCKER_TAG="${DOCKER_TAG:-$DOCKER_TAG_DEFAULT}"
+DOCKER_IMAGE_SOURCE="${DOCKER_IMAGE_SOURCE:-$DOCKER_IMAGE_SOURCE_DEFAULT}"
+DOCKER_OPERATION="${DOCKER_OPERATION:-$DOCKER_OPERATION_DEFAULT}"
+DOCKER_SLICE="${DOCKER_SLICE:-$BUILD_SLICE}"
+
 # Default local repository is based on standard image naming conventions
 DOCKER_CODE_COMMIT="${DOCKER_CODE_COMMIT:-$CODE_COMMIT}"
 DOCKER_CODE_COMMIT="${DOCKER_CODE_COMMIT:-$GIT_COMMIT}"
 if [[ -z "${DOCKER_REPO}" ]]; then
-    if [[ (-z "${BUILD_SLICE}" ) || ( -n "${DOCKER_INHIBIT_SLICE_IN_REPO}" ) ]]; then
+    if [[ (-z "${DOCKER_SLICE}" ) || ( -n "${DOCKER_INHIBIT_SLICE_IN_REPO}" ) ]]; then
         DOCKER_REPO="${PROJECT}/${DOCKER_CODE_COMMIT}"
     else
-        DOCKER_REPO="${PROJECT}/${BUILD_SLICE}-${DOCKER_CODE_COMMIT}"
+        DOCKER_REPO="${PROJECT}/${DOCKER_SLICE}-${DOCKER_CODE_COMMIT}"
     fi
 fi
 
@@ -99,17 +110,13 @@ if [[ -z "${DOCKER_REPO}" ]]; then
     usage
 fi
 
-# Apply defaults
-DOCKER_TAG="${DOCKER_TAG:-$DOCKER_TAG_DEFAULT}"
-DOCKER_IMAGE_SOURCE="${DOCKER_IMAGE_SOURCE:-$DOCKER_IMAGE_SOURCE_DEFAULT}"
-DOCKER_OPERATION="${DOCKER_OPERATION:-$DOCKER_OPERATION_DEFAULT}"
-
+# Apply remote registry defaults
 REMOTE_DOCKER_REPO="${REMOTE_DOCKER_REPO:-$DOCKER_REPO}"
 REMOTE_DOCKER_TAG="${REMOTE_DOCKER_TAG:-$DOCKER_TAG}"
 
 # Formulate the local registry details
 DOCKER_IMAGE="${DOCKER_REPO}:${DOCKER_TAG}"
-FULL_DOCKER_IMAGE="${PROJECT_DOCKER_DNS}/${IMAGE}"
+FULL_DOCKER_IMAGE="${PROJECT_DOCKER_DNS}/${DOCKER_IMAGE}"
 
 # Confirm access to the local registry
 sudo docker login -u ${!PROJECT_DOCKER_USER_VAR} -p ${!PROJECT_REMOTE_DOCKER_PASSWORD_VAR} -e ${PROJECT_REMOTE_DOCKER_EMAIL} ${PROJECT_DOCKER_DNS}
