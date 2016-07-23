@@ -6,13 +6,12 @@ trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 DOCKER_TAG_DEFAULT="latest"
 DOCKER_IMAGE_SOURCE_DEFAULT="remote"
-DOCKER_OPERATION_DEFAULT="check"
+DOCKER_OPERATION_DEFAULT="verify"
 function usage() {
     echo -e "\nManage docker images"
-    echo -e "\nUsage: $(basename $0) -b -c -p -k -l DOCKER_REPO -t DOCKER_TAG -i REMOTE_DOCKER_REPO -r REMOTE_DOCKER_TAG -s DOCKER_IMAGE_SOURCE  -g DOCKER_CODE_COMMIT"
+    echo -e "\nUsage: $(basename $0) -b -v -p -k -l DOCKER_REPO -t DOCKER_TAG -i REMOTE_DOCKER_REPO -r REMOTE_DOCKER_TAG -s DOCKER_IMAGE_SOURCE  -g DOCKER_CODE_COMMIT"
     echo -e "\nwhere\n"
     echo -e "(o) -b perform docker build and save in local registry"
-    echo -e "(o) -c check if image present in local registry"
     echo -e "(o) -g DOCKER_CODE_COMMIT to use when defaulting the local repository"
     echo -e "    -h shows this text"
     echo -e "(o) -i REMOTE_DOCKER_REPO is the repository to pull"
@@ -23,6 +22,7 @@ function usage() {
     echo -e "(o) -s DOCKER_SLICE is the slice to use when defaulting the local repository"
     echo -e "(o) -t DOCKER_TAG is the local tag"
     echo -e "(o) -u DOCKER_IMAGE_SOURCE is the registry to pull from"
+    echo -e "(o) -v verify image is present in local registry"
     echo -e "\nDEFAULTS:\n"
     echo -e "DOCKER_REPO=\"\$PROJECT/\$DOCKER_SLICE-\$DOCKER_CODE_COMMIT\" or "
     echo -e "\"\$PROJECT/\$DOCKER_CODE_COMMIT\" if no build slice defined"
@@ -41,13 +41,10 @@ function usage() {
 }
 
 # Parse options
-while getopts ":bchki:l:pr:s:t:u:" opt; do
+while getopts ":bhki:l:pr:s:t:u:v" opt; do
     case $opt in
         b)
             DOCKER_OPERATION="build"
-            ;;
-        c)
-            DOCKER_OPERATION="check"
             ;;
         h)
             usage
@@ -75,6 +72,9 @@ while getopts ":bchki:l:pr:s:t:u:" opt; do
             ;;
         u)
             DOCKER_IMAGE_SOURCE="${OPTARG}"
+            ;;
+        v)
+            DOCKER_OPERATION="verify"
             ;;
         \?)
             echo -e "\nInvalid option: -$OPTARG"
@@ -142,9 +142,9 @@ case ${DOCKER_OPERATION} in
         fi
         ;;
 
-    check)
+    verify)
         # Check whether the image is already in the local registry
-        # Use the docker API to avoid having to download the image to check for its existence
+        # Use the docker API to avoid having to download the image to verify its existence
         # Be careful of @ characters in the username or password
         DOCKER_USER=$(echo ${!PROJECT_DOCKER_USER_VAR} | sed "s/@/%40/g")
         DOCKER_PASSWORD=$(echo ${!PROJECT_DOCKER_PASSWORD_VAR} | sed "s/@/%40/g")
