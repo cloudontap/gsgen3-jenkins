@@ -38,7 +38,7 @@ echo "CODE_COMMIT_SHORT=${CODE_COMMIT_SHORT}" >> ${WORKSPACE}/context.properties
 echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
 
 # Confirm the commit built successfully into a docker image
-${GSGEN_JENKINS}/manageDocker.sh -v
+${GSGEN_JENKINS}/manageDocker.sh -v -g "${CODE_COMMIT}"
 RESULT=$?
 if [[ "${RESULT}" -ne 0 ]]; then
     echo "Docker image not found. Was the build successful?"

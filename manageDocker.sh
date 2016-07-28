@@ -41,10 +41,13 @@ function usage() {
 }
 
 # Parse options
-while getopts ":bhki:l:pr:s:t:u:v" opt; do
+while getopts ":bg:hki:l:pr:s:t:u:v" opt; do
     case $opt in
         b)
             DOCKER_OPERATION="build"
+            ;;
+        g)
+            DOCKER_CODE_COMMIT="${OPTARG}"
             ;;
         h)
             usage
