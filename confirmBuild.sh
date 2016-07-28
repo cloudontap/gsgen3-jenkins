@@ -22,7 +22,7 @@ fi
 # We are using a github api here to avoid having to pull in the whole repo - 
 # git currently doesn't have a command to query the message of a remote tag
 CODE_COMMIT_SHORT="${CODE_COMMIT:0:8}"
-CODE_TAG_MESSAGE=$(curl -s https://${!PROJECT_CODE_GIT_CREDENTIALS_VAR}@${PROJECT_CODE_GIT_API_DNS}/repos/${PROJECT_CODE_REPO}/git/tags/${TAG_COMMIT} | jq .message | tr -d '"')
+CODE_TAG_MESSAGE=$(curl -s https://${!PROJECT_CODE_GIT_CREDENTIALS_VAR}@${PROJECT_CODE_GIT_API_DNS}/repos/${PROJECT_CODE_GIT_ORG}/${PROJECT_CODE_REPO}/git/tags/${TAG_COMMIT} | jq .message | tr -d '"')
 if [[ -z "${CODE_TAG_MESSAGE}" || ("${CODE_TAG_MESSAGE}" == "Not Found") ]]; then
 	echo "Tag message not found in the code repo, exiting..."
 	exit
