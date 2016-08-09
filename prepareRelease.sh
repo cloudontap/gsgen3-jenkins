@@ -9,7 +9,7 @@ DETAIL_MESSAGE="deployment=${DEPLOYMENT_TAG}, ${DETAIL_MESSAGE}"
 echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
 
 # Process the config repo
-cd ${WORKSPACE}/${OAID}/config/${PROJECT}
+cd ${WORKSPACE}/${AID}/config/${PRODUCT}
 
 # Ensure git knows who we are
 git config user.name  "${GIT_USER}"
@@ -33,7 +33,7 @@ if [[ -f deployments/${SEGMENT}/${BUILD_SLICE}/build.ref ]]; then
         fi
     fi
 fi
-BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
+BIN_DIR="${WORKSPACE}/${AID}/config/bin"
 cd solutions/${SEGMENT}
 
 for CURRENT_SLICE in ${SLICE_LIST}; do
@@ -54,7 +54,7 @@ if [[ ${RESULT} -ne 0 ]]; then
 	echo "Can't tag the config repo, exiting..."
 	exit
 fi
-git push --tags origin ${PROJECT_CONFIG_REFERENCE}
+git push --tags origin ${PRODUCT_CONFIG_REFERENCE}
 RESULT=$?
 if [[ ${RESULT} -ne 0 ]]; then
 	echo "Can't push the new tag to the config repo, exiting..."
@@ -62,7 +62,7 @@ if [[ ${RESULT} -ne 0 ]]; then
 fi
 
 # Process the infrastructure repo
-cd ${WORKSPACE}/${OAID}/infrastructure/${PROJECT}
+cd ${WORKSPACE}/${AID}/infrastructure/${PRODUCT}
 
 # Ensure git knows who we are
 git config user.name  "${GIT_USER}"
@@ -85,7 +85,7 @@ if [[ ${RESULT} -ne 0 ]]; then
 	echo "Can't tag the infrastructure repo, exiting..."
 	exit
 fi
-git push --tags origin ${PROJECT_INFRASTRUCTURE_REFERENCE}
+git push --tags origin ${PRODUCT_INFRASTRUCTURE_REFERENCE}
 RESULT=$?
 if [[ ${RESULT} -ne 0 ]]; then
 	echo "Can't push the new tag and application templates to the infrastructure repo, exiting..."

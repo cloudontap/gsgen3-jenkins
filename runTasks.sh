@@ -4,8 +4,8 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
 trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 
-BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
-cd ${WORKSPACE}/${OAID}/config/${PROJECT}/solutions/${SEGMENT}
+BIN_DIR="${WORKSPACE}/${AID}/config/bin"
+cd ${WORKSPACE}/${AID}/config/${PRODUCT}/solutions/${SEGMENT}
 
 # Build up the additional enviroment variables required
 ENVS=()

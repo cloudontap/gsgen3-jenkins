@@ -14,10 +14,10 @@ if [[ "${CREATE_ACCOUNT_REPOS}" == "true" ]]; then
     fi
 
     # Initialise the config tree
-    mkdir config/${OAID}
-    cd ${WORKSPACE}/${OAID}/config/${OAID}
+    mkdir config/${AID}
+    cd ${WORKSPACE}/${AID}/config/${AID}
     
-    # TODO: Populate the organisation.json and account.json files
+    # TODO: Populate the tenant.json and account.json files
     touch readme.md
 
     # Initialise the config repo
@@ -29,7 +29,7 @@ if [[ "${CREATE_ACCOUNT_REPOS}" == "true" ]]; then
         git add .git*
     fi
     git commit -m "Initial version"
-    git remote add origin https://${GITHUB_USER}:${GITHUB_PASS}@${OAID_CONFIG_REPO}
+    git remote add origin https://${GITHUB_USER}:${GITHUB_PASS}@${AID_CONFIG_REPO}
 	git push origin master
     RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
@@ -38,8 +38,8 @@ if [[ "${CREATE_ACCOUNT_REPOS}" == "true" ]]; then
     fi
 
     # Initialise the infrastructure tree
-    mkdir infrastructure/${OAID}
-    cd ${WORKSPACE}/${OAID}/infrastructure/${OAID}
+    mkdir infrastructure/${AID}
+    cd ${WORKSPACE}/${AID}/infrastructure/${AID}
 
     # TODO: Populate the credentials.json file for the account
     touch readme.md
@@ -53,7 +53,7 @@ if [[ "${CREATE_ACCOUNT_REPOS}" == "true" ]]; then
         git add .git*
     fi
     git commit -m "Initial version"
-    git remote add origin https://${GITHUB_USER}:${GITHUB_PASS}@${OAID_INFRASTRUCTURE_REPO}
+    git remote add origin https://${GITHUB_USER}:${GITHUB_PASS}@${AID_INFRASTRUCTURE_REPO}
 	git push origin master
     RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
@@ -70,5 +70,5 @@ else
 fi
 
 # TODO: confirm if this is still required?
-# find ${OAID}/infrastructure/startup -name ".git*" -exec rm -rf {} \;
+# find ${AID}/infrastructure/startup -name ".git*" -exec rm -rf {} \;
 

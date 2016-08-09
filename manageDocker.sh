@@ -24,8 +24,8 @@ function usage() {
     echo -e "(o) -u DOCKER_IMAGE_SOURCE is the registry to pull from"
     echo -e "(o) -v verify image is present in local registry"
     echo -e "\nDEFAULTS:\n"
-    echo -e "DOCKER_REPO=\"\$PROJECT/\$DOCKER_SLICE-\$DOCKER_CODE_COMMIT\" or "
-    echo -e "\"\$PROJECT/\$DOCKER_CODE_COMMIT\" if no build slice defined"
+    echo -e "DOCKER_REPO=\"\$PRODUCT/\$DOCKER_SLICE-\$DOCKER_CODE_COMMIT\" or "
+    echo -e "\"\$PRODUCT/\$DOCKER_CODE_COMMIT\" if no build slice defined"
     echo -e "DOCKER_TAG=${DOCKER_TAG_DEFAULT}"
     echo -e "DOCKER_SLICE=\$BUILD_SLICE"
     echo -e "REMOTE_DOCKER_REPO=DOCKER_REPO"
@@ -101,9 +101,9 @@ DOCKER_CODE_COMMIT="${DOCKER_CODE_COMMIT:-$CODE_COMMIT}"
 DOCKER_CODE_COMMIT="${DOCKER_CODE_COMMIT:-$GIT_COMMIT}"
 if [[ -z "${DOCKER_REPO}" ]]; then
     if [[ (-z "${DOCKER_SLICE}" ) || ( -n "${DOCKER_INHIBIT_SLICE_IN_REPO}" ) ]]; then
-        DOCKER_REPO="${PROJECT}/${DOCKER_CODE_COMMIT}"
+        DOCKER_REPO="${PRODUCT}/${DOCKER_CODE_COMMIT}"
     else
-        DOCKER_REPO="${PROJECT}/${DOCKER_SLICE}-${DOCKER_CODE_COMMIT}"
+        DOCKER_REPO="${PRODUCT}/${DOCKER_SLICE}-${DOCKER_CODE_COMMIT}"
     fi
 fi
 
@@ -119,13 +119,13 @@ REMOTE_DOCKER_TAG="${REMOTE_DOCKER_TAG:-$DOCKER_TAG}"
 
 # Formulate the local registry details
 DOCKER_IMAGE="${DOCKER_REPO}:${DOCKER_TAG}"
-FULL_DOCKER_IMAGE="${PROJECT_DOCKER_DNS}/${DOCKER_IMAGE}"
+FULL_DOCKER_IMAGE="${PRODUCT_DOCKER_DNS}/${DOCKER_IMAGE}"
 
 # Confirm access to the local registry
-sudo docker login -u ${!PROJECT_DOCKER_USER_VAR} -p ${!PROJECT_REMOTE_DOCKER_PASSWORD_VAR} -e ${PROJECT_REMOTE_DOCKER_EMAIL} ${PROJECT_DOCKER_DNS}
+sudo docker login -u ${!PRODUCT_DOCKER_USER_VAR} -p ${!PRODUCT_REMOTE_DOCKER_PASSWORD_VAR} -e ${PRODUCT_REMOTE_DOCKER_EMAIL} ${PRODUCT_DOCKER_DNS}
 RESULT=$?
 if [[ "$RESULT" -ne 0 ]]; then
-   echo "Can't log in to ${PROJECT_DOCKER_DNS}"
+   echo "Can't log in to ${PRODUCT_DOCKER_DNS}"
    exit
 fi
 
@@ -149,9 +149,9 @@ case ${DOCKER_OPERATION} in
         # Check whether the image is already in the local registry
         # Use the docker API to avoid having to download the image to verify its existence
         # Be careful of @ characters in the username or password
-        DOCKER_USER=$(echo ${!PROJECT_DOCKER_USER_VAR} | sed "s/@/%40/g")
-        DOCKER_PASSWORD=$(echo ${!PROJECT_DOCKER_PASSWORD_VAR} | sed "s/@/%40/g")
-        DOCKER_IMAGE_COMMIT=$(curl -s https://${DOCKER_USER}:${DOCKER_PASSWORD}@${PROJECT_DOCKER_API_DNS}/v1/repositories/${DOCKER_REPO}/tags | jq ".[\"${DOCKER_TAG}\"] | select(.!=null)")
+        DOCKER_USER=$(echo ${!PRODUCT_DOCKER_USER_VAR} | sed "s/@/%40/g")
+        DOCKER_PASSWORD=$(echo ${!PRODUCT_DOCKER_PASSWORD_VAR} | sed "s/@/%40/g")
+        DOCKER_IMAGE_COMMIT=$(curl -s https://${DOCKER_USER}:${DOCKER_PASSWORD}@${PRODUCT_DOCKER_API_DNS}/v1/repositories/${DOCKER_REPO}/tags | jq ".[\"${DOCKER_TAG}\"] | select(.!=null)")
 
         if [[ -n "${DOCKER_IMAGE_COMMIT}" ]]; then
             echo "Image ${DOCKER_IMAGE} present in the local registry"
@@ -165,13 +165,13 @@ case ${DOCKER_OPERATION} in
     tag)
         # Formulate the tag details
         REMOTE_DOCKER_IMAGE="${REMOTE_DOCKER_REPO}:${REMOTE_DOCKER_TAG}"
-        FULL_REMOTE_DOCKER_IMAGE="${PROJECT_DOCKER_DNS}/${REMOTE_DOCKER_IMAGE}"
+        FULL_REMOTE_DOCKER_IMAGE="${PRODUCT_DOCKER_DNS}/${REMOTE_DOCKER_IMAGE}"
 
         # Pull in the local image
         sudo docker pull ${FULL_DOCKER_IMAGE}
         RESULT=$?
         if [[ "$RESULT" -ne 0 ]]; then
-            echo "Can't pull ${DOCKER_IMAGE} from ${PROJECT_DOCKER_DNS}"
+            echo "Can't pull ${DOCKER_IMAGE} from ${PRODUCT_DOCKER_DNS}"
         else
             # Tag the image ready to push to the registry
             sudo docker tag ${FULL_DOCKER_IMAGE} ${FULL_REMOTE_DOCKER_IMAGE}
@@ -195,13 +195,13 @@ case ${DOCKER_OPERATION} in
 
         case ${DOCKER_IMAGE_SOURCE} in
             remote)
-                FULL_REMOTE_DOCKER_IMAGE="${PROJECT_REMOTE_DOCKER_DNS}/${REMOTE_DOCKER_IMAGE}"
+                FULL_REMOTE_DOCKER_IMAGE="${PRODUCT_REMOTE_DOCKER_DNS}/${REMOTE_DOCKER_IMAGE}"
 
                 # Confirm access to the remote registry
-                sudo docker login -u ${!PROJECT_REMOTE_DOCKER_USER_VAR} -p ${!PROJECT_REMOTE_DOCKER_PASSWORD_VAR} -e ${PROJECT_REMOTE_DOCKER_EMAIL} ${PROJECT_REMOTE_DOCKER_DNS}
+                sudo docker login -u ${!PRODUCT_REMOTE_DOCKER_USER_VAR} -p ${!PRODUCT_REMOTE_DOCKER_PASSWORD_VAR} -e ${PRODUCT_REMOTE_DOCKER_EMAIL} ${PRODUCT_REMOTE_DOCKER_DNS}
                 RESULT=$?
                 if [[ "$RESULT" -ne 0 ]]; then
-                    echo "Can't log in to ${PROJECT_REMOTE_DOCKER_DNS}"
+                    echo "Can't log in to ${PRODUCT_REMOTE_DOCKER_DNS}"
                     exit
                 fi
                 ;;
@@ -215,7 +215,7 @@ case ${DOCKER_OPERATION} in
         sudo docker pull ${FULL_REMOTE_DOCKER_IMAGE}
         RESULT=$?
         if [[ "$RESULT" -ne 0 ]]; then
-            echo "Can't pull ${REMOTE_DOCKER_IMAGE} from ${PROJECT_REMOTE_DOCKER_DNS}"
+            echo "Can't pull ${REMOTE_DOCKER_IMAGE} from ${PRODUCT_REMOTE_DOCKER_DNS}"
         else
             # Tag the image ready to push to the registry
             sudo docker tag ${FULL_REMOTE_DOCKER_IMAGE} ${FULL_DOCKER_IMAGE}

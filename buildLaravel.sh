@@ -47,5 +47,5 @@ if [[ -f Dockerfile ]]; then
     fi
 fi
 
-echo "PROJECT=$PROJECT" >> $WORKSPACE/context.properties
+echo "PRODUCT=$PRODUCT" >> $WORKSPACE/context.properties
 echo "SLICE=$SLICE" >> $WORKSPACE/context.properties

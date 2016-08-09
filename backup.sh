@@ -14,8 +14,8 @@ if [[ -n "${SNAPSHOT_AGE}" ]]; then
 fi
 
 # Snapshot the database
-BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
-cd ${WORKSPACE}/${OAID}/config/solutions/${PROJECT}/${SEGMENT}
+BIN_DIR="${WORKSPACE}/${AID}/config/bin"
+cd ${WORKSPACE}/${AID}/config/solutions/${PRODUCT}/${SEGMENT}
 
 ${BIN_DIR}/snapshotRDSDatabase.sh -i ${COMPONENT} -s b${BUILD_NUMBER} ${SNAPSHOT_OPTS}
 RESULT=$?

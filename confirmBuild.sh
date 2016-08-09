@@ -11,8 +11,8 @@ if [[ -z "${CODE_TAG}" ]]; then
 fi
 
 # Get the commit corresponding to the tag
-TAG_COMMIT=$(git ls-remote -t https://${!PROJECT_CODE_GIT_CREDENTIALS_VAR}@${PROJECT_CODE_GIT_DNS}/${PROJECT_CODE_GIT_ORG}/${PROJECT_CODE_REPO} "${CODE_TAG}" | cut -f 1)
-CODE_COMMIT=$(git ls-remote -t https://${!PROJECT_CODE_GIT_CREDENTIALS_VAR}@${PROJECT_CODE_GIT_DNS}/${PROJECT_CODE_GIT_ORG}/${PROJECT_CODE_REPO} "${CODE_TAG}^{}" | cut -f 1)
+TAG_COMMIT=$(git ls-remote -t https://${!PRODUCT_CODE_GIT_CREDENTIALS_VAR}@${PRODUCT_CODE_GIT_DNS}/${PRODUCT_CODE_GIT_ORG}/${PRODUCT_CODE_REPO} "${CODE_TAG}" | cut -f 1)
+CODE_COMMIT=$(git ls-remote -t https://${!PRODUCT_CODE_GIT_CREDENTIALS_VAR}@${PRODUCT_CODE_GIT_DNS}/${PRODUCT_CODE_GIT_ORG}/${PRODUCT_CODE_REPO} "${CODE_TAG}^{}" | cut -f 1)
 if [[ -z "${CODE_COMMIT}" ]]; then
     echo "Code tag not found in the code repo, exiting..."
  	exit
@@ -22,7 +22,7 @@ fi
 # We are using a github api here to avoid having to pull in the whole repo - 
 # git currently doesn't have a command to query the message of a remote tag
 CODE_COMMIT_SHORT="${CODE_COMMIT:0:8}"
-CODE_TAG_MESSAGE=$(curl -s https://${!PROJECT_CODE_GIT_CREDENTIALS_VAR}@${PROJECT_CODE_GIT_API_DNS}/repos/${PROJECT_CODE_GIT_ORG}/${PROJECT_CODE_REPO}/git/tags/${TAG_COMMIT} | jq .message | tr -d '"')
+CODE_TAG_MESSAGE=$(curl -s https://${!PRODUCT_CODE_GIT_CREDENTIALS_VAR}@${PRODUCT_CODE_GIT_API_DNS}/repos/${PRODUCT_CODE_GIT_ORG}/${PRODUCT_CODE_REPO}/git/tags/${TAG_COMMIT} | jq .message | tr -d '"')
 if [[ -z "${CODE_TAG_MESSAGE}" || ("${CODE_TAG_MESSAGE}" == "Not Found") ]]; then
 	echo "Tag message not found in the code repo, exiting..."
 	exit

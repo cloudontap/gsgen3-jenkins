@@ -5,7 +5,7 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
 
 # Generate the deployment template for the required slice
-BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
+BIN_DIR="${WORKSPACE}/${AID}/config/bin"
 
 # Process the slices
 for LEVEL in segment solution; do
@@ -13,7 +13,7 @@ for LEVEL in segment solution; do
     for SLICE in ${!SLICES}; do
     
     	# Generate the template if required
-        cd ${WORKSPACE}/${OAID}/config/${PROJECT}/solutions/${SEGMENT}
+        cd ${WORKSPACE}/${AID}/config/${PRODUCT}/solutions/${SEGMENT}
         case ${MODE} in
             create|update)
    	            ${BIN_DIR}/create${LEVEL^}Template.sh -s ${SLICE}
@@ -34,7 +34,7 @@ for LEVEL in segment solution; do
         fi
         
 		# Update the infrastructure repo to capture any stack changes
-        cd ${WORKSPACE}/${OAID}/infrastructure/${PROJECT}
+        cd ${WORKSPACE}/${AID}/infrastructure/${PRODUCT}
 
         # Ensure git knows who we are
         git config user.name  "${GIT_USER}"
@@ -54,15 +54,15 @@ done
 
 # Check credentials if required
 if [[ "${CHECK_CREDENTIALS}" == "true" ]]; then
-    cd ${WORKSPACE}/${OAID}
+    cd ${WORKSPACE}/${AID}
     SEGMENT_OPTION=""
     if [[ -n "${SEGMENT}" ]]; then
        SEGMENT_OPTION="-s ${SEGMENT}"
     fi 
-    ${BIN_DIR}/initProjectCredentials.sh -a ${OAID} -p ${PROJECT} ${SEGMENT_OPTION}
+    ${BIN_DIR}/initProductCredentials.sh -a ${AID} -p ${PRODUCT} ${SEGMENT_OPTION}
 
     # Update the infrastructure repo to capture any credential changes
-    cd ${WORKSPACE}/${OAID}/infrastructure/${PROJECT}
+    cd ${WORKSPACE}/${AID}/infrastructure/${PRODUCT}
 
 	# Ensure git knows who we are
     git config user.name  "${GIT_USER}"
@@ -81,8 +81,8 @@ fi
 
 # Update the code and credentials buckets if required
 if [[ "${SYNC_BUCKETS}" == "true" ]]; then
-    cd ${WORKSPACE}/${OAID}
-    ${BIN_DIR}/syncAccountBuckets.sh -a ${OAID}
+    cd ${WORKSPACE}/${AID}
+    ${BIN_DIR}/syncAccountBuckets.sh -a ${AID}
 fi
 
 

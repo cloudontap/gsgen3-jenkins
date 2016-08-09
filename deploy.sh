@@ -4,13 +4,13 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-BIN_DIR="${WORKSPACE}/${OAID}/config/bin"
-cd ${WORKSPACE}/${OAID}/config/${PROJECT}/solutions/${SEGMENT}
+BIN_DIR="${WORKSPACE}/${AID}/config/bin"
+cd ${WORKSPACE}/${AID}/config/${PRODUCT}/solutions/${SEGMENT}
 
 for CURRENT_SLICE in ${SLICE_LIST}; do
 
     # Generate the deployment template for the required slice
-    ${BIN_DIR}/createApplicationTemplate.sh -c ${PROJECT_CONFIG_COMMIT} -s ${CURRENT_SLICE}
+    ${BIN_DIR}/createApplicationTemplate.sh -c ${PRODUCT_CONFIG_COMMIT} -s ${CURRENT_SLICE}
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
 	    echo "Template build for ${CURRENT_SLICE} slice failed, exiting..."
