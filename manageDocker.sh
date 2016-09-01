@@ -122,7 +122,7 @@ DOCKER_IMAGE="${DOCKER_REPO}:${DOCKER_TAG}"
 FULL_DOCKER_IMAGE="${PRODUCT_DOCKER_DNS}/${DOCKER_IMAGE}"
 
 # Confirm access to the local registry
-sudo docker login -u ${!PRODUCT_DOCKER_USER_VAR} -p ${!PRODUCT_REMOTE_DOCKER_PASSWORD_VAR} -e ${PRODUCT_REMOTE_DOCKER_EMAIL} ${PRODUCT_DOCKER_DNS}
+sudo docker login -u ${!PRODUCT_DOCKER_USER_VAR} -p ${!PRODUCT_DOCKER_PASSWORD_VAR} -e NONE ${PRODUCT_DOCKER_DNS}
 RESULT=$?
 if [[ "$RESULT" -ne 0 ]]; then
    echo "Can't log in to ${PRODUCT_DOCKER_DNS}"
@@ -198,7 +198,7 @@ case ${DOCKER_OPERATION} in
                 FULL_REMOTE_DOCKER_IMAGE="${PRODUCT_REMOTE_DOCKER_DNS}/${REMOTE_DOCKER_IMAGE}"
 
                 # Confirm access to the remote registry
-                sudo docker login -u ${!PRODUCT_REMOTE_DOCKER_USER_VAR} -p ${!PRODUCT_REMOTE_DOCKER_PASSWORD_VAR} -e ${PRODUCT_REMOTE_DOCKER_EMAIL} ${PRODUCT_REMOTE_DOCKER_DNS}
+                sudo docker login -u ${!PRODUCT_REMOTE_DOCKER_USER_VAR} -p ${!PRODUCT_REMOTE_DOCKER_PASSWORD_VAR} -e NONE ${PRODUCT_REMOTE_DOCKER_DNS}
                 RESULT=$?
                 if [[ "$RESULT" -ne 0 ]]; then
                     echo "Can't log in to ${PRODUCT_REMOTE_DOCKER_DNS}"
