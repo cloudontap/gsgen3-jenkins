@@ -40,6 +40,55 @@ function usage() {
     exit
 }
 
+# Determine if a docker registry is hosted by AWS
+# $1 = registry
+function isAWSRegistry() {
+    if [[ "${1}" =~ ".amazonaws.com" ]]; then
+
+        # Determine the registry account id and region
+        AWS_REGISTRY_ID=$(echo "${1}" | cut -d '.' -f 1)
+        AWS_REGISTRY_REGION=$(echo "${1}" | cut -d '.' -f 4)
+
+        # Set up the AWS credentials
+        export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-${!AID_AWS_ACCESS_KEY_ID_VAR}}"
+        export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-${!AID_AWS_SECRET_ACCESS_KEY_VAR}}"
+
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Perform login logic required depending on the registry implementation
+# $1 = registry
+# $2 = user
+# $3 = password
+function dockerLogin() {
+    isAWSRegistry $1
+    if [[ $? -eq 0 ]]; then
+        $($(aws --region ${AWS_REGISTRY_REGION} ecr get-login --registry-ids ${AWS_REGISTRY_ID}))
+    else
+        sudo docker login -u ${2} -p ${3} -e NONE ${1}
+    fi
+    return $?
+}
+
+# Perform logic required to create a repository depending on the registry implementation
+# $1 = registry
+# $2 = repository
+function createRepository() {
+    isAWSRegistry $1
+    if [[ $? -eq 0 ]]; then
+        aws --region ${AWS_REGISTRY_REGION} ecr describe-repositories --registry-id ${AWS_REGISTRY_ID} --repository-names "${2}" > /dev/null 2>&1
+        if [[ $? -ne 0 ]]; then
+            # Not there yet so create it
+            aws --region ${AWS_REGISTRY_REGION} ecr create-repository --registry-id ${AWS_REGISTRY_ID} --repository-name "${2}" > /dev/null 2>&1
+            return $?
+        fi
+    fi
+    return 0
+}
+
 # Parse options
 while getopts ":bg:hki:l:pr:s:t:u:v" opt; do
     case $opt in
@@ -122,7 +171,7 @@ DOCKER_IMAGE="${DOCKER_REPO}:${DOCKER_TAG}"
 FULL_DOCKER_IMAGE="${PRODUCT_DOCKER_DNS}/${DOCKER_IMAGE}"
 
 # Confirm access to the local registry
-sudo docker login -u ${!PRODUCT_DOCKER_USER_VAR} -p ${!PRODUCT_DOCKER_PASSWORD_VAR} -e NONE ${PRODUCT_DOCKER_DNS}
+dockerLogin ${PRODUCT_DOCKER_DNS} ${!PRODUCT_DOCKER_USER_VAR} ${!PRODUCT_DOCKER_PASSWORD_VAR} 
 RESULT=$?
 if [[ "$RESULT" -ne 0 ]]; then
    echo "Can't log in to ${PRODUCT_DOCKER_DNS}"
@@ -138,6 +187,11 @@ case ${DOCKER_OPERATION} in
             echo "Cannot build image ${DOCKER_IMAGE}"
             exit
         fi
+        createRepository ${PRODUCT_DOCKER_DNS} ${DOCKER_REPO}
+        RESULT=$?
+        if [ $RESULT -ne 0 ]; then
+            echo "Unable to create repository ${DOCKER_REPO} in the local registry"
+        fi
         sudo docker push ${FULL_DOCKER_IMAGE}
         RESULT=$?
         if [ $RESULT -ne 0 ]; then
@@ -148,12 +202,17 @@ case ${DOCKER_OPERATION} in
     verify)
         # Check whether the image is already in the local registry
         # Use the docker API to avoid having to download the image to verify its existence
-        # Be careful of @ characters in the username or password
-        DOCKER_USER=$(echo ${!PRODUCT_DOCKER_USER_VAR} | sed "s/@/%40/g")
-        DOCKER_PASSWORD=$(echo ${!PRODUCT_DOCKER_PASSWORD_VAR} | sed "s/@/%40/g")
-        DOCKER_IMAGE_COMMIT=$(curl -s https://${DOCKER_USER}:${DOCKER_PASSWORD}@${PRODUCT_DOCKER_API_DNS}/v1/repositories/${DOCKER_REPO}/tags | jq ".[\"${DOCKER_TAG}\"] | select(.!=null)")
+        isAWSRegistry ${PRODUCT_DOCKER_DNS}
+        if [[ $? -eq 0 ]]; then
+            DOCKER_IMAGE_PRESENT=$(aws --region ${AWS_REGISTRY_REGION} ecr list-images --registry-id ${AWS_REGISTRY_ID} --repository-name "${DOCKER_REPO}" | jq ".imageIds[] | select(.imageTag==\"${DOCKER_TAG}\") | select(.!=null)")
+        else
+            # Be careful of @ characters in the username or password
+            DOCKER_USER=$(echo ${!PRODUCT_DOCKER_USER_VAR} | sed "s/@/%40/g")
+            DOCKER_PASSWORD=$(echo ${!PRODUCT_DOCKER_PASSWORD_VAR} | sed "s/@/%40/g")
+            DOCKER_IMAGE_PRESENT=$(curl -s https://${DOCKER_USER}:${DOCKER_PASSWORD}@${PRODUCT_DOCKER_API_DNS}/v1/repositories/${DOCKER_REPO}/tags | jq ".[\"${DOCKER_TAG}\"] | select(.!=null)")
+        fi
 
-        if [[ -n "${DOCKER_IMAGE_COMMIT}" ]]; then
+        if [[ -n "${DOCKER_IMAGE_PRESENT}" ]]; then
             echo "Image ${DOCKER_IMAGE} present in the local registry"
             RESULT=0
         else
@@ -180,6 +239,12 @@ case ${DOCKER_OPERATION} in
                 echo "Couldn't tag image ${FULL_DOCKER_IMAGE} with ${FULL_REMOTE_DOCKER_IMAGE}"
             else
                 # Push to registry
+                createRepository ${PRODUCT_DOCKER_DNS} ${REMOTE_DOCKER_REPO}
+                RESULT=$?
+                if [ $RESULT -ne 0 ]; then
+                    echo "Unable to create repository ${REMOTE_DOCKER_REPO} in the local registry"
+                fi
+
                 sudo docker push ${FULL_REMOTE_DOCKER_IMAGE}
                 RESULT=$?
                 if [[ "$?" -ne 0 ]]; then
@@ -198,7 +263,7 @@ case ${DOCKER_OPERATION} in
                 FULL_REMOTE_DOCKER_IMAGE="${PRODUCT_REMOTE_DOCKER_DNS}/${REMOTE_DOCKER_IMAGE}"
 
                 # Confirm access to the remote registry
-                sudo docker login -u ${!PRODUCT_REMOTE_DOCKER_USER_VAR} -p ${!PRODUCT_REMOTE_DOCKER_PASSWORD_VAR} -e NONE ${PRODUCT_REMOTE_DOCKER_DNS}
+                dockerLogin ${PRODUCT_REMOTE_DOCKER_DNS} ${!PRODUCT_REMOTE_DOCKER_USER_VAR} ${!PRODUCT_REMOTE_DOCKER_PASSWORD_VAR}
                 RESULT=$?
                 if [[ "$RESULT" -ne 0 ]]; then
                     echo "Can't log in to ${PRODUCT_REMOTE_DOCKER_DNS}"
@@ -224,10 +289,15 @@ case ${DOCKER_OPERATION} in
                 echo "Couldn't tag image ${FULL_REMOTE_DOCKER_IMAGE} with ${FULL_DOCKER_IMAGE}"
             else
                 # Push to registry
+                createRepository ${PRODUCT_DOCKER_DNS} ${DOCKER_REPO}
+                RESULT=$?
+                if [ $RESULT -ne 0 ]; then
+                    echo "Unable to create repository ${DOCKER_REPO} in the local registry"
+                fi
                 sudo docker push ${FULL_DOCKER_IMAGE}
                 RESULT=$?
                 if [[ "$?" -ne 0 ]]; then
-                    echo "Unable to push ${DOCKER_IMAGE} to the registry"
+                    echo "Unable to push ${DOCKER_IMAGE} to the local registry"
                 fi
             fi
         fi
