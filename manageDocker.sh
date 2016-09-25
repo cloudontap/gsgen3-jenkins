@@ -68,7 +68,7 @@ function dockerLogin() {
     if [[ $? -eq 0 ]]; then
         $($(aws --region ${AWS_REGISTRY_REGION} ecr get-login --registry-ids ${AWS_REGISTRY_ID}))
     else
-        sudo docker login -u ${2} -p ${3} ${1}
+        docker login -u ${2} -p ${3} ${1}
     fi
     return $?
 }
@@ -181,7 +181,7 @@ fi
 # Perform the required action
 case ${DOCKER_OPERATION} in
     build)
-        sudo docker build -t "${FULL_DOCKER_IMAGE}" .
+        docker build -t "${FULL_DOCKER_IMAGE}" .
         RESULT=$?
         if [ $RESULT -ne 0 ]; then
             echo "Cannot build image ${DOCKER_IMAGE}"
@@ -192,7 +192,7 @@ case ${DOCKER_OPERATION} in
         if [ $RESULT -ne 0 ]; then
             echo "Unable to create repository ${DOCKER_REPO} in the local registry"
         fi
-        sudo docker push ${FULL_DOCKER_IMAGE}
+        docker push ${FULL_DOCKER_IMAGE}
         RESULT=$?
         if [ $RESULT -ne 0 ]; then
             echo "Unable to push ${DOCKER_IMAGE} to the local registry"
@@ -227,13 +227,13 @@ case ${DOCKER_OPERATION} in
         FULL_REMOTE_DOCKER_IMAGE="${PRODUCT_DOCKER_DNS}/${REMOTE_DOCKER_IMAGE}"
 
         # Pull in the local image
-        sudo docker pull ${FULL_DOCKER_IMAGE}
+        docker pull ${FULL_DOCKER_IMAGE}
         RESULT=$?
         if [[ "$RESULT" -ne 0 ]]; then
             echo "Can't pull ${DOCKER_IMAGE} from ${PRODUCT_DOCKER_DNS}"
         else
             # Tag the image ready to push to the registry
-            sudo docker tag ${FULL_DOCKER_IMAGE} ${FULL_REMOTE_DOCKER_IMAGE}
+            docker tag ${FULL_DOCKER_IMAGE} ${FULL_REMOTE_DOCKER_IMAGE}
             RESULT=$?
             if [[ "$?" -ne 0 ]]; then
                 echo "Couldn't tag image ${FULL_DOCKER_IMAGE} with ${FULL_REMOTE_DOCKER_IMAGE}"
@@ -245,7 +245,7 @@ case ${DOCKER_OPERATION} in
                     echo "Unable to create repository ${REMOTE_DOCKER_REPO} in the local registry"
                 fi
 
-                sudo docker push ${FULL_REMOTE_DOCKER_IMAGE}
+                docker push ${FULL_REMOTE_DOCKER_IMAGE}
                 RESULT=$?
                 if [[ "$?" -ne 0 ]]; then
                     echo "Unable to push ${REMOTE_DOCKER_IMAGE} to the local registry"
@@ -277,13 +277,13 @@ case ${DOCKER_OPERATION} in
         esac
 
         # Pull in the remote image
-        sudo docker pull ${FULL_REMOTE_DOCKER_IMAGE}
+        docker pull ${FULL_REMOTE_DOCKER_IMAGE}
         RESULT=$?
         if [[ "$RESULT" -ne 0 ]]; then
             echo "Can't pull ${REMOTE_DOCKER_IMAGE} from ${PRODUCT_REMOTE_DOCKER_DNS}"
         else
             # Tag the image ready to push to the registry
-            sudo docker tag ${FULL_REMOTE_DOCKER_IMAGE} ${FULL_DOCKER_IMAGE}
+            docker tag ${FULL_REMOTE_DOCKER_IMAGE} ${FULL_DOCKER_IMAGE}
             RESULT=$?
             if [[ "$?" -ne 0 ]]; then
                 echo "Couldn't tag image ${FULL_REMOTE_DOCKER_IMAGE} with ${FULL_DOCKER_IMAGE}"
@@ -294,7 +294,7 @@ case ${DOCKER_OPERATION} in
                 if [ $RESULT -ne 0 ]; then
                     echo "Unable to create repository ${DOCKER_REPO} in the local registry"
                 fi
-                sudo docker push ${FULL_DOCKER_IMAGE}
+                docker push ${FULL_DOCKER_IMAGE}
                 RESULT=$?
                 if [[ "$?" -ne 0 ]]; then
                     echo "Unable to push ${DOCKER_IMAGE} to the local registry"
@@ -310,13 +310,13 @@ case ${DOCKER_OPERATION} in
         ;;
 esac
 
-IMAGEID=$(sudo docker images | grep "${REMOTE_DOCKER_REPO}" | grep "${REMOTE_DOCKER_TAG}" | head -1 |awk '{print($3)}')
+IMAGEID=$(docker images | grep "${REMOTE_DOCKER_REPO}" | grep "${REMOTE_DOCKER_TAG}" | head -1 |awk '{print($3)}')
 if [[ "${IMAGEID}" != "" ]]; then
-    sudo docker rmi -f ${IMAGEID}
+    docker rmi -f ${IMAGEID}
 fi
 
-IMAGEID=$(sudo docker images | grep "${DOCKER_REPO}" | grep "${DOCKER_TAG}" | head -1 |awk '{print($3)}')
+IMAGEID=$(docker images | grep "${DOCKER_REPO}" | grep "${DOCKER_TAG}" | head -1 |awk '{print($3)}')
 if [[ "${IMAGEID}" != "" ]]; then
-    sudo docker rmi -f ${IMAGEID}
+    docker rmi -f ${IMAGEID}
 fi
 
