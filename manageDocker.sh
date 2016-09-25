@@ -82,7 +82,7 @@ function createRepository() {
         aws --region ${AWS_REGISTRY_REGION} ecr describe-repositories --registry-id ${AWS_REGISTRY_ID} --repository-names "${2}" > /dev/null 2>&1
         if [[ $? -ne 0 ]]; then
             # Not there yet so create it
-            aws --region ${AWS_REGISTRY_REGION} ecr create-repository --registry-id ${AWS_REGISTRY_ID} --repository-name "${2}" > /dev/null 2>&1
+            aws --region ${AWS_REGISTRY_REGION} ecr create-repository --registry-id ${AWS_REGISTRY_ID} --repository-name "${2}"
             return $?
         fi
     fi
@@ -293,11 +293,12 @@ case ${DOCKER_OPERATION} in
                 RESULT=$?
                 if [ $RESULT -ne 0 ]; then
                     echo "Unable to create repository ${DOCKER_REPO} in the local registry"
-                fi
-                docker push ${FULL_DOCKER_IMAGE}
-                RESULT=$?
-                if [[ "$?" -ne 0 ]]; then
-                    echo "Unable to push ${DOCKER_IMAGE} to the local registry"
+                else
+                    docker push ${FULL_DOCKER_IMAGE}
+                    RESULT=$?
+                    if [[ "$?" -ne 0 ]]; then
+                        echo "Unable to push ${DOCKER_IMAGE} to the local registry"
+                    fi
                 fi
             fi
         fi
