@@ -68,7 +68,7 @@ function dockerLogin() {
     if [[ $? -eq 0 ]]; then
         $($(aws --region ${AWS_REGISTRY_REGION} ecr get-login --registry-ids ${AWS_REGISTRY_ID}))
     else
-        sudo docker login -u ${2} -p ${3} -e NONE ${1}
+        sudo docker login -u ${2} -p ${3} ${1}
     fi
     return $?
 }
