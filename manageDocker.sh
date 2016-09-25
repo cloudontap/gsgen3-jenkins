@@ -82,7 +82,7 @@ function createRepository() {
         aws --region ${AWS_REGISTRY_REGION} ecr describe-repositories --registry-id ${AWS_REGISTRY_ID} --repository-names "${2}" > /dev/null 2>&1
         if [[ $? -ne 0 ]]; then
             # Not there yet so create it
-            aws --region ${AWS_REGISTRY_REGION} ecr create-repository --registry-id ${AWS_REGISTRY_ID} --repository-name "${2}"
+            aws --region ${AWS_REGISTRY_REGION} ecr create-repository --repository-name "${2}"
             return $?
         fi
     fi
