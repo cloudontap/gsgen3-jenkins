@@ -45,9 +45,19 @@ while getopts ":a:p:h" opt; do
      esac
 done
 
-# Determine the product from the job name 
+# Determine the product/segment from the job name
 # if not already defined or provided on the command line
-PRODUCT=${PRODUCT:-$(echo ${JOB_NAME} | cut -d '-' -f 1)}
+JOB_PATH=($(cat ${JOB_NAME} | tr "/" " "))
+if [[ "${#JOB_PATH[@]}" -gt 2 ]]; then
+    PRODUCT=${PRODUCT:-${JOB_PATH[0]}}
+    SEGMENT=${SEGMENT:-${JOB_PATH[1]}}
+else
+    if [[ "${#JOB_PATH[@]}" -gt 1 ]]; then
+        PRODUCT=${PRODUCT:-${JOB_PATH[0]}}
+    else
+        PRODUCT=${PRODUCT:-$(echo ${JOB_NAME} | cut -d '-' -f 1)}
+    fi
+fi
 
 PRODUCT=${PRODUCT,,}
 PRODUCT_UPPER=${PRODUCT^^}
