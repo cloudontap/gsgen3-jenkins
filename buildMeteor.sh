@@ -31,13 +31,14 @@ if [ $RESULT -ne 0 ]; then
    exit
 fi
 
-# Build meteor 
-meteor build dist 
+# Build meteor but don't tar it
+meteor build ../dist --directory
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
    echo "meteor build failed, exiting..."
    exit
 fi
+cd ..
 
 # Install the required node modules
 (cd dist/bundle/programs/server && npm install)
@@ -46,9 +47,6 @@ if [ $RESULT -ne 0 ]; then
    echo "Installation of app node modules failed, exiting..."
    exit
 fi
-
-# Time for packaging
-cd ..
 
 # Package for docker if required
 if [[ -f Dockerfile ]]; then
