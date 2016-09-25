@@ -9,7 +9,7 @@ DOCKER_IMAGE_SOURCE_DEFAULT="remote"
 DOCKER_OPERATION_DEFAULT="verify"
 function usage() {
     echo -e "\nManage docker images"
-    echo -e "\nUsage: $(basename $0) -b -v -p -k -l DOCKER_REPO -t DOCKER_TAG -i REMOTE_DOCKER_REPO -r REMOTE_DOCKER_TAG -s DOCKER_IMAGE_SOURCE  -g DOCKER_CODE_COMMIT"
+    echo -e "\nUsage: $(basename $0) -b -v -p -k -l DOCKER_REPO -t DOCKER_TAG -i REMOTE_DOCKER_REPO -r REMOTE_DOCKER_TAG -u DOCKER_IMAGE_SOURCE  -s DOCKER_SLICE -g DOCKER_CODE_COMMIT"
     echo -e "\nwhere\n"
     echo -e "(o) -b perform docker build and save in local registry"
     echo -e "(o) -g DOCKER_CODE_COMMIT to use when defaulting the local repository"
