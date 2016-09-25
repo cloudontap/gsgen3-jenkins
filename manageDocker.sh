@@ -280,7 +280,7 @@ case ${DOCKER_OPERATION} in
         docker pull ${FULL_REMOTE_DOCKER_IMAGE}
         RESULT=$?
         if [[ "$RESULT" -ne 0 ]]; then
-            echo "Can't pull ${REMOTE_DOCKER_IMAGE} from ${PRODUCT_REMOTE_DOCKER_DNS}"
+            echo "Can't pull ${REMOTE_DOCKER_IMAGE} from ${DOCKER_IMAGE_SOURCE}"
         else
             # Tag the image ready to push to the registry
             docker tag ${FULL_REMOTE_DOCKER_IMAGE} ${FULL_DOCKER_IMAGE}
