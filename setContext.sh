@@ -47,7 +47,7 @@ done
 
 # Determine the product/segment from the job name
 # if not already defined or provided on the command line
-JOB_PATH=($(cat ${JOB_NAME} | tr "/" " "))
+JOB_PATH=($(echo "${JOB_NAME}" | tr "/" " "))
 if [[ "${#JOB_PATH[@]}" -gt 2 ]]; then
     PRODUCT=${PRODUCT:-${JOB_PATH[0]}}
     SEGMENT=${SEGMENT:-${JOB_PATH[1]}}
