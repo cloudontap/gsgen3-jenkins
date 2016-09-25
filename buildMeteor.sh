@@ -20,6 +20,9 @@ if [[ -f Dockerfile ]]; then
     fi
 fi
 
+# Change to the app directory
+cd app
+
 # Install required npm packages
 npm install --production
 RESULT=$?
@@ -43,6 +46,9 @@ if [ $RESULT -ne 0 ]; then
    echo "Installation of app node modules failed, exiting..."
    exit
 fi
+
+# Time for packaging
+cd ..
 
 # Package for docker if required
 if [[ -f Dockerfile ]]; then
