@@ -2,7 +2,7 @@
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
-trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
+trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 if [[ "${CREATE_ACCOUNT_REPOS}" == "true" ]]; then
 
@@ -71,4 +71,7 @@ fi
 
 # TODO: confirm if this is still required?
 # find ${AID}/infrastructure/startup -name ".git*" -exec rm -rf {} \;
+
+# All good
+RESULT=0
 

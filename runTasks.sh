@@ -2,7 +2,7 @@
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
-trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
+trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 BIN_DIR="${WORKSPACE}/${AID}/config/bin"
 cd ${WORKSPACE}/${AID}/config/${PRODUCT}/solutions/${SEGMENT}
@@ -30,4 +30,8 @@ for CURRENT_TASK in $TASK_LIST; do
         exit
     fi
 done
+
+# All good
+RESULT=0
+
 

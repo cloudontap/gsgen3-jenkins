@@ -2,7 +2,7 @@
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
-trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
+trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Location of scripts
 BIN_DIR="${WORKSPACE}/${AID}/config/bin"
@@ -48,6 +48,10 @@ if [[ "${SYNC_ACCOUNT_BUCKETS}" == "true" ]]; then
     cd ${WORKSPACE}/${AID}
     ${BIN_DIR}/syncAccountBuckets.sh -a ${AID}
 fi
+
+# All good
+RESULT=0
+
 
 
 

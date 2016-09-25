@@ -2,7 +2,7 @@
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
-trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
+trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 PRODUCT_CONFIG_REFERENCE_DEFAULT="master"
 PRODUCT_INFRASTRUCTURE_REFERENCE_DEFAULT="master"
@@ -205,4 +205,7 @@ if [[ ! -d infrastructure/startup ]]; then
         fi
     fi
 fi
+
+# All good
+RESULT=0
 

@@ -2,11 +2,11 @@
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
-trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
+trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Check the current reference value
 cd ${WORKSPACE}/${AID}/config/${PRODUCT}
-BUILD_FILE="deployments/${SEGMENT}/${SLICE}/build.ref"
+BUILD_FILE="appsettings/${SEGMENT}/${SLICE}/build.ref"
 if [[ "$(cat ${BUILD_FILE})" == "${GIT_COMMIT}" ]]; then
   echo "The current reference is the same, exiting..."
   RESULT=1
@@ -26,4 +26,8 @@ if [[ "$AUTODEPLOY" != "true" ]]; then
   RESULT=2
   exit
 fi
+
+# All good
+RESULT=0
+
 

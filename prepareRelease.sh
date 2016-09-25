@@ -2,7 +2,7 @@
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
-trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
+trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Add deployment number to details
 DETAIL_MESSAGE="deployment=${DEPLOYMENT_TAG}, ${DETAIL_MESSAGE}"
@@ -16,15 +16,15 @@ git config user.name  "${GIT_USER}"
 git config user.email "${GIT_EMAIL}"
 
 # Check for a deploy config reference
-if [[ -f deployments/${SEGMENT}/${BUILD_SLICE}/slice.ref ]]; then
-    BUILD_SLICE="$(cat deployments/${SEGMENT}/${BUILD_SLICE}/slice.ref)"
+if [[ -f appsettings/${SEGMENT}/${BUILD_SLICE}/slice.ref ]]; then
+    BUILD_SLICE="$(cat appsettings/${SEGMENT}/${BUILD_SLICE}/slice.ref)"
 fi
 
 # Ensure build.ref (if present) aligns with the requested code tag
-if [[ -f deployments/${SEGMENT}/${BUILD_SLICE}/build.ref ]]; then
+if [[ -f appsettings/${SEGMENT}/${BUILD_SLICE}/build.ref ]]; then
     BUILD_REFERENCE=$(echo -n "${CODE_COMMIT} ${CODE_TAG}")
-    if [[ "$(cat deployments/${SEGMENT}/${BUILD_SLICE}/build.ref)" != "${BUILD_REFERENCE}" ]]; then
-        echo -n "${BUILD_REFERENCE}" > deployments/${SEGMENT}/${BUILD_SLICE}/build.ref
+    if [[ "$(cat appsettings/${SEGMENT}/${BUILD_SLICE}/build.ref)" != "${BUILD_REFERENCE}" ]]; then
+        echo -n "${BUILD_REFERENCE}" > appsettings/${SEGMENT}/${BUILD_SLICE}/build.ref
         git add *; git commit -m "${DETAIL_MESSAGE}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then

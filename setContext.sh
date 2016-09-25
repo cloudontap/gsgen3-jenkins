@@ -2,7 +2,7 @@
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
-trap 'exit ${RESULT:-0}' EXIT SIGHUP SIGINT SIGTERM
+trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 function usage() {
     echo -e "\nDetermine key settings for an account/product/segment" 
@@ -15,7 +15,6 @@ function usage() {
     echo -e "\nNOTES:\n"
     echo -e "1. The setting values are saved in context.properties in the current directory"
     echo -e ""
-    RESULT=1
     exit
 }
 
@@ -341,4 +340,7 @@ echo "GIT_USER=${GIT_USER}" >> ${WORKSPACE}/context.properties
 echo "GIT_EMAIL=${GIT_EMAIL}" >> ${WORKSPACE}/context.properties
 echo "DEPLOYMENT_TAG=${DEPLOYMENT_TAG}" >> ${WORKSPACE}/context.properties
 echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
+
+# All good
+RESULT=0
 
