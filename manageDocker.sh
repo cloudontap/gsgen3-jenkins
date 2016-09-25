@@ -66,7 +66,7 @@ function isAWSRegistry() {
 function dockerLogin() {
     isAWSRegistry $1
     if [[ $? -eq 0 ]]; then
-        $($(aws --region ${AWS_REGISTRY_REGION} ecr get-login --registry-ids ${AWS_REGISTRY_ID}))
+        $(aws --region ${AWS_REGISTRY_REGION} ecr get-login --registry-ids ${AWS_REGISTRY_ID})
     else
         docker login -u ${2} -p ${3} ${1}
     fi
