@@ -19,7 +19,7 @@ function usage() {
 }
 
 # Parse options
-while getopts ":a:p:h" opt; do
+while getopts ":a:c:p:h" opt; do
     case $opt in
         a)
             AID="${OPTARG}"
