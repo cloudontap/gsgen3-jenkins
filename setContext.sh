@@ -5,13 +5,14 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 function usage() {
-    echo -e "\nDetermine key settings for an account/product/segment" 
-    echo -e "\nUsage: $(basename $0) -a AID -p PRODUCT -c SEGMENT"
+    echo -e "\nDetermine key settings for an tenant/account/product/segment" 
+    echo -e "\nUsage: $(basename $0) -a AID -t TENANT -p PRODUCT -c SEGMENT"
     echo -e "\nwhere\n"
     echo -e "(o) -a AID is the tenant account id e.g. \"env01\""
     echo -e "(o) -c SEGMENT is the SEGMENT name e.g. \"production\""
     echo -e "    -h shows this text"
     echo -e "(o) -p PRODUCT is the product id e.g. \"eticket\""
+    echo -e "(o) -t TENANT is the tenant id e.g. \"env\""
     echo -e "\nNOTES:\n"
     echo -e "1. The setting values are saved in context.properties in the current directory"
     echo -e ""
@@ -19,7 +20,7 @@ function usage() {
 }
 
 # Parse options
-while getopts ":a:c:p:h" opt; do
+while getopts ":a:c:hp:t:" opt; do
     case $opt in
         a)
             AID="${OPTARG}"
@@ -32,6 +33,9 @@ while getopts ":a:c:p:h" opt; do
             ;;
         p)
             PRODUCT="${OPTARG}"
+            ;;
+        t)
+            TENANT="${OPTARG}"
             ;;
         \?)
             echo -e "\nInvalid option: -$OPTARG"
@@ -47,16 +51,25 @@ done
 # Determine the product/segment from the job name
 # if not already defined or provided on the command line
 JOB_PATH=($(echo "${JOB_NAME}" | tr "/" " "))
-if [[ "${#JOB_PATH[@]}" -gt 2 ]]; then
-    PRODUCT=${PRODUCT:-${JOB_PATH[0]}}
-    SEGMENT=${SEGMENT:-${JOB_PATH[1]}}
+if [[ "${#JOB_PATH[@]}" -gt 3 ]]; then
+    TENANT=${TENANT:-${JOB_PATH[0]}}
+    PRODUCT=${PRODUCT:-${JOB_PATH[1]}}
+    SEGMENT=${SEGMENT:-${JOB_PATH[2]}}
 else
-    if [[ "${#JOB_PATH[@]}" -gt 1 ]]; then
+    if [[ "${#JOB_PATH[@]}" -gt 2 ]]; then
         PRODUCT=${PRODUCT:-${JOB_PATH[0]}}
+        SEGMENT=${SEGMENT:-${JOB_PATH[1]}}
     else
-        PRODUCT=${PRODUCT:-$(echo ${JOB_NAME} | cut -d '-' -f 1)}
+        if [[ "${#JOB_PATH[@]}" -gt 1 ]]; then
+            PRODUCT=${PRODUCT:-${JOB_PATH[0]}}
+        else
+            PRODUCT=${PRODUCT:-$(echo ${JOB_NAME} | cut -d '-' -f 1)}
+        fi
     fi
 fi
+
+TENANT=${TENANT,,}
+TENANT_UPPER=${TENANT^^}
 
 PRODUCT=${PRODUCT,,}
 PRODUCT_UPPER=${PRODUCT^^}
@@ -275,6 +288,7 @@ if [[ -n "${TASKS}" ]];     then DETAIL_MESSAGE="${DETAIL_MESSAGE}, tasks=${TASK
 if [[ -n "${GIT_USER}" ]];  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, user=${GIT_USER}"; fi
 
 # Save for future steps
+echo "TENANT=${TENANT}" >> ${WORKSPACE}/context.properties
 echo "AID=${AID}" >> ${WORKSPACE}/context.properties
 echo "PRODUCT=${PRODUCT}" >> ${WORKSPACE}/context.properties
 if [[ -n "${SEGMENT}" ]]; then echo "SEGMENT=${SEGMENT}" >> ${WORKSPACE}/context.properties; fi
