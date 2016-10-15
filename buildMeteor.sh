@@ -49,10 +49,10 @@ if [ $RESULT -ne 0 ]; then
 fi
 
 # Sanity check on final size of build
-MAX_BUILD_SIZE=100
-if [[ $(du -s -m ./dist) -gt ${MAX_BUILD_SIZE} ]]; then
+MAX_METEOR_BUILD_SIZE=${MAX_METEOR_BUILD_SIZE:-100}
+if [[ $(du -s -m ./dist) -gt ${MAX_METEOR_BUILD_SIZE} ]]; then
     RESULT=1
-    echo "Build size exceeds ${MAX_BUILD_SIZE}M"
+    echo "Build size exceeds ${MAX_METEOR_BUILD_SIZE}M"
     exit
 fi
 
