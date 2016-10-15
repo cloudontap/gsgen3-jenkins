@@ -251,6 +251,7 @@ fi
 # Determine who to include as the author if git updates required
 GIT_USER="${GIT_USER:-$BUILD_USER}"
 GIT_USER="${GIT_USER:-$GIT_USER_DEFAULT}"
+GIT_USER="${GIT_USER:-alm}"
 GIT_EMAIL="${GIT_EMAIL:-$BUILD_USER_EMAIL}"
 GIT_EMAIL="${GIT_EMAIL:-$GIT_EMAIL_DEFAULT}"
 
