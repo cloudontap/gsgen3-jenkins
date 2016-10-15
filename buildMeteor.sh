@@ -48,6 +48,15 @@ if [ $RESULT -ne 0 ]; then
    exit
 fi
 
+# Sanity check on final size of build
+MAX_BUILD_SIZE=100
+if [[ $(du -s -m ./dist) -gt ${MAX_BUILD_SIZE} ]]; then
+    RESULT=1
+    echo "Build size exceeds ${MAX_BUILD_SIZE}M"
+    exit
+fi
+
+
 # Package for docker if required
 if [[ -f Dockerfile ]]; then
     ${GSGEN_JENKINS}/manageDocker.sh -b -s ${SLICE}
