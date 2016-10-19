@@ -41,7 +41,7 @@ fi
 cd ..
 
 # Install the required node modules
-(cd dist/bundle/programs/server && npm install)
+(cd dist/bundle/programs/server && npm install --production)
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
    echo "Installation of app node modules failed, exiting..."
