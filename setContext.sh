@@ -286,6 +286,7 @@ if [[ -n "${SLICES}" ]];    then DETAIL_MESSAGE="${DETAIL_MESSAGE}, slices=${SLI
 if [[ -n "${TASK}" ]];      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, task=${TASK}"; fi
 if [[ -n "${TASKS}" ]];     then DETAIL_MESSAGE="${DETAIL_MESSAGE}, tasks=${TASKS}"; fi
 if [[ -n "${GIT_USER}" ]];  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, user=${GIT_USER}"; fi
+if [[ -n "${MODE}" ]];      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, mode=${MODE}"; fi
 
 # Save for future steps
 echo "TENANT=${TENANT}" >> ${WORKSPACE}/context.properties
