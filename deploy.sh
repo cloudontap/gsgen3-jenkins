@@ -18,10 +18,15 @@ for CURRENT_SLICE in ${SLICE_LIST}; do
     fi
 
     if [[ "${MODE}" != "update"    ]]; then ${BIN_DIR}/deleteStack.sh -t application -i -s ${CURRENT_SLICE}; fi
-    if [[ "${MODE}" == "stopstart" ]]; then ${BIN_DIR}/createStack.sh -t application -s ${CURRENT_SLICE}; fi
-    if [[ "${MODE}" == "update"    ]]; then ${BIN_DIR}/updateStack.sh -t application -s ${CURRENT_SLICE}; fi
+    if [[ "${MODE}" == "stopstart" ]]; then 
+        ${BIN_DIR}/createStack.sh -t application -s ${CURRENT_SLICE}
+        RESULT=$?
+    fi
+    if [[ "${MODE}" == "update"    ]]; then 
+        ${BIN_DIR}/updateStack.sh -t application -s ${CURRENT_SLICE}
+        RESULT=$?
+    fi
 
-    RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
     	echo "Stack deployment for ${CURRENT_SLICE} slice failed, exiting..."
 	    exit
