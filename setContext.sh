@@ -117,8 +117,25 @@ BUILD_SLICE="${BUILD_SLICE:-${SLICE_ARRAY[0]}}"
 CODE_SLICE=$(echo "${BUILD_SLICE:-NOSLICE}" | tr "-" "_")
 
 # Determine the account access credentials
-AID_AWS_ACCESS_KEY_ID_VAR="${AID_UPPER}_AWS_ACCESS_KEY_ID"
-AID_AWS_SECRET_ACCESS_KEY_VAR="${AID_UPPER}_AWS_SECRET_ACCESS_KEY"
+AID_AWS_ACCOUNT_ID_VAR="${AID_UPPER}_AWS_ACCOUNT_ID"
+AID_AUTOMATION_USER_VAR="${AID_UPPER}_AUTOMATION_USER"
+if [[ (-n ${!AID_AWS_ACCOUNT_ID_VAR}) && (-n ${!AID_AUTOMATION_USER_VAR} ]]; then
+    # Assume automation role using automation user access credentials
+    # Note that the value for the user is just a way to obtain the access credentials
+    # and doesn't have to be the same as the IAM user name
+    AID_AWS_ACCESS_KEY_ID_VAR="${!AID_AUTOMATION_USER_VAR}_AWS_ACCESS_KEY_ID"
+    AID_AWS_SECRET_ACCESS_KEY_VAR="${!AID_AUTOMATION_USER_VAR}_AWS_SECRET_ACCESS_KEY"
+    AWS_ACCESS_KEY_ID="${!AID_AWS_ACCESS_KEY_ID_VAR}"
+    AWS_SECRET_ACCESS_KEY="${!AID_AWS_SECRET_ACCESS_KEY_VAR}"
+    aws sts assume-role --role-arn arn:aws:iam:${!AID_AWS_ACCOUNT_ID_VAR}:role/codeontap-automation --output json $WORKSPACE/aws_temp_credential.json
+    AID_TEMP_AWS_ACCESS_KEY_ID=$(cat $WORKSPACE/aws_temp_credential.json | jq -r '.Credentials.AccessKeyId')
+    AID_TEMP_AWS_SECRET_ACCESS_KEY=$(cat $WORKSPACE/aws_temp_credential.json | jq -r '.Credentials.SecretAccessKey')
+    AID_TEMP_AWS_SESSION_TOKEN=$(cat $WORKSPACE/aws_temp_credential.json | jq -r '.Credentials.SessionToken')
+else
+    # Fallback is an access key in the account
+    AID_AWS_ACCESS_KEY_ID_VAR="${AID_UPPER}_AWS_ACCESS_KEY_ID"
+    AID_AWS_SECRET_ACCESS_KEY_VAR="${AID_UPPER}_AWS_SECRET_ACCESS_KEY"
+fi
 
 # Determine the account git provider
 if [[ -z "${AID_GIT_PROVIDER}" ]]; then
@@ -313,6 +330,9 @@ echo "AID_GIT_API_DNS=${AID_GIT_API_DNS}" >> ${WORKSPACE}/context.properties
 
 echo "AID_AWS_ACCESS_KEY_ID_VAR=${AID_AWS_ACCESS_KEY_ID_VAR}" >> ${WORKSPACE}/context.properties
 echo "AID_AWS_SECRET_ACCESS_KEY_VAR=${AID_AWS_SECRET_ACCESS_KEY_VAR}" >> ${WORKSPACE}/context.properties
+echo "AID_TEMP_AWS_ACCESS_KEY_ID=${AID_TEMP_AWS_ACCESS_KEY_ID}" >> ${WORKSPACE}/context.properties
+echo "AID_TEMP_AWS_SECRET_ACCESS_KEY=${AID_TEMP_AWS_SECRET_ACCESS_KEY}" >> ${WORKSPACE}/context.properties
+echo "AID_TEMP_AWS_SESSION_TOKEN=${AID_TEMP_AWS_SESSION_TOKEN}" >> ${WORKSPACE}/context.properties
 
 echo "AID_CONFIG_REPO=${AID_CONFIG_REPO}" >> ${WORKSPACE}/context.properties
 echo "AID_INFRASTRUCTURE_REPO=${AID_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.properties
