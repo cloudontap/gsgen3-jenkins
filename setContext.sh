@@ -101,6 +101,13 @@ GITHUB_API_DNS="${GITHUB_API_DNS:-api.$GITHUB_DNS}"
 DOCKER_DNS="${DOCKER_DNS:-docker.${AID}.gosource.com.au}"
 DOCKER_API_DNS="${DOCKER_API_DNS:-$DOCKER_DNS}"
 
+# Determine who to include as the author if git updates required
+GIT_USER="${GIT_USER:-$BUILD_USER}"
+GIT_USER="${GIT_USER:-$GIT_USER_DEFAULT}"
+GIT_USER="${GIT_USER:-alm}"
+GIT_EMAIL="${GIT_EMAIL:-$BUILD_USER_EMAIL}"
+GIT_EMAIL="${GIT_EMAIL:-$GIT_EMAIL_DEFAULT}"
+
 # Defaults for gsgen
 # TODO: Add ability for AID/PRODUCT override
 GSGEN_GIT_DNS="${GSGEN_GIT_DNS:-github.com}"
@@ -127,10 +134,14 @@ if [[ (-n ${!AID_AWS_ACCOUNT_ID_VAR}) && (-n ${!AID_AUTOMATION_USER_VAR}) ]]; th
     AID_AWS_SECRET_ACCESS_KEY_VAR="${!AID_AUTOMATION_USER_VAR}_AWS_SECRET_ACCESS_KEY"
     AWS_ACCESS_KEY_ID="${!AID_AWS_ACCESS_KEY_ID_VAR}"
     AWS_SECRET_ACCESS_KEY="${!AID_AWS_SECRET_ACCESS_KEY_VAR}"
-    aws sts assume-role --role-arn arn:aws:iam:${!AID_AWS_ACCOUNT_ID_VAR}:role/codeontap-automation --output json $WORKSPACE/aws_temp_credential.json
-    AID_TEMP_AWS_ACCESS_KEY_ID=$(cat $WORKSPACE/aws_temp_credential.json | jq -r '.Credentials.AccessKeyId')
-    AID_TEMP_AWS_SECRET_ACCESS_KEY=$(cat $WORKSPACE/aws_temp_credential.json | jq -r '.Credentials.SecretAccessKey')
-    AID_TEMP_AWS_SESSION_TOKEN=$(cat $WORKSPACE/aws_temp_credential.json | jq -r '.Credentials.SessionToken')
+    TEMP_CREDENTIAL_FILE="$WORKSPACE/temp_aws_credentials.json"
+    aws sts assume-role \
+        --role-arn arn:aws:iam:${!AID_AWS_ACCOUNT_ID_VAR}:role/codeontap-automation \
+        --role-session-name "$(echo $GIT_USER | tr -d ' ' )" \
+        --output json > $TEMP_CREDENTIAL_FILE
+    AID_TEMP_AWS_ACCESS_KEY_ID=$(cat $TEMP_CREDENTIAL_FILE | jq -r '.Credentials.AccessKeyId')
+    AID_TEMP_AWS_SECRET_ACCESS_KEY=$(cat $TEMP_CREDENTIAL_FILE | jq -r '.Credentials.SecretAccessKey')
+    AID_TEMP_AWS_SESSION_TOKEN=$(cat $TEMP_CREDENTIAL_FILE | jq -r '.Credentials.SessionToken')
 else
     # Fallback is an access key in the account
     AID_AWS_ACCESS_KEY_ID_VAR="${AID_UPPER}_AWS_ACCESS_KEY_ID"
@@ -277,13 +288,6 @@ if [[ -z "${PRODUCT_CODE_REPO}" ]]; then
     fi
     PRODUCT_CODE_REPO="${!PRODUCT_CODE_REPO_VAR}"
 fi
-
-# Determine who to include as the author if git updates required
-GIT_USER="${GIT_USER:-$BUILD_USER}"
-GIT_USER="${GIT_USER:-$GIT_USER_DEFAULT}"
-GIT_USER="${GIT_USER:-alm}"
-GIT_EMAIL="${GIT_EMAIL:-$BUILD_USER_EMAIL}"
-GIT_EMAIL="${GIT_EMAIL:-$GIT_EMAIL_DEFAULT}"
 
 # Determine the deployment tag
 if [[ -n "${DEPLOYMENT_NUMBER}" ]]; then
