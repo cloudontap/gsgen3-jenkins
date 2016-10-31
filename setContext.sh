@@ -132,8 +132,8 @@ if [[ (-n ${!AID_AWS_ACCOUNT_ID_VAR}) && (-n ${!AID_AUTOMATION_USER_VAR}) ]]; th
     # and doesn't have to be the same as the IAM user name
     AID_AWS_ACCESS_KEY_ID_VAR="${!AID_AUTOMATION_USER_VAR}_AWS_ACCESS_KEY_ID"
     AID_AWS_SECRET_ACCESS_KEY_VAR="${!AID_AUTOMATION_USER_VAR}_AWS_SECRET_ACCESS_KEY"
-    AWS_ACCESS_KEY_ID="${!AID_AWS_ACCESS_KEY_ID_VAR}"
-    AWS_SECRET_ACCESS_KEY="${!AID_AWS_SECRET_ACCESS_KEY_VAR}"
+    export AWS_ACCESS_KEY_ID="${!AID_AWS_ACCESS_KEY_ID_VAR}"
+    export AWS_SECRET_ACCESS_KEY="${!AID_AWS_SECRET_ACCESS_KEY_VAR}"
     TEMP_CREDENTIAL_FILE="$WORKSPACE/temp_aws_credentials.json"
     aws sts assume-role \
         --role-arn arn:aws:iam:${!AID_AWS_ACCOUNT_ID_VAR}:role/codeontap-automation \
