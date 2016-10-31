@@ -136,7 +136,7 @@ if [[ (-n ${!AID_AWS_ACCOUNT_ID_VAR}) && (-n ${!AID_AUTOMATION_USER_VAR}) ]]; th
     export AWS_SECRET_ACCESS_KEY="${!AID_AWS_SECRET_ACCESS_KEY_VAR}"
     TEMP_CREDENTIAL_FILE="$WORKSPACE/temp_aws_credentials.json"
     aws sts assume-role \
-        --role-arn arn:aws:iam:${!AID_AWS_ACCOUNT_ID_VAR}:role/codeontap-automation \
+        --role-arn arn:aws:iam::${!AID_AWS_ACCOUNT_ID_VAR}:role/codeontap-automation \
         --role-session-name "$(echo $GIT_USER | tr -d ' ' )" \
         --output json > $TEMP_CREDENTIAL_FILE
     AID_TEMP_AWS_ACCESS_KEY_ID=$(cat $TEMP_CREDENTIAL_FILE | jq -r '.Credentials.AccessKeyId')
