@@ -119,7 +119,7 @@ CODE_SLICE=$(echo "${BUILD_SLICE:-NOSLICE}" | tr "-" "_")
 # Determine the account access credentials
 AID_AWS_ACCOUNT_ID_VAR="${AID_UPPER}_AWS_ACCOUNT_ID"
 AID_AUTOMATION_USER_VAR="${AID_UPPER}_AUTOMATION_USER"
-if [[ (-n ${!AID_AWS_ACCOUNT_ID_VAR}) && (-n ${!AID_AUTOMATION_USER_VAR} ]]; then
+if [[ (-n ${!AID_AWS_ACCOUNT_ID_VAR}) && (-n ${!AID_AUTOMATION_USER_VAR}) ]]; then
     # Assume automation role using automation user access credentials
     # Note that the value for the user is just a way to obtain the access credentials
     # and doesn't have to be the same as the IAM user name
