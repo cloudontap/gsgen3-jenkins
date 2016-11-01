@@ -71,5 +71,5 @@ fi
 
 # TODO: Package for AWS Lambda if required - not sure yet what to check for as a marker
 
-echo "GIT_COMMIT=$GIT_COMMIT" >> $WORKSPACE/context.properties
-echo "SLICE=$SLICE" >> $WORKSPACE/context.properties
+echo "GIT_COMMIT=$GIT_COMMIT" >> $WORKSPACE/chain.properties
+echo "SLICE=$SLICE" >> $WORKSPACE/chain.properties
