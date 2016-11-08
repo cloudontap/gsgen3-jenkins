@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-
+JENKINS_DIR=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Check the current reference value
@@ -13,13 +13,13 @@ if [[ "$(cat ${BUILD_FILE})" == "${GIT_COMMIT}" ]]; then
   exit
 fi
 
-# Ensure git knows who we are
-git config user.name  "${GIT_USER}"
-git config user.email "${GIT_EMAIL}"
-
 echo ${GIT_COMMIT} > ${BUILD_FILE}
-git commit -a -m "Change build.ref for ${SEGMENT}/${SLICE} to the value: ${GIT_COMMIT}"
-git push origin ${PRODUCT_CONFIG_REFERENCE}
+
+${JENKINS_DIR}/manageRepo.sh -p \
+    -d . \
+    -n config \
+    -m "Change build.ref for ${SEGMENT}/${SLICE} to the value: ${GIT_COMMIT}" \
+    -b ${PRODUCT_CONFIG_REFERENCE}
 
 if [[ "$AUTODEPLOY" != "true" ]]; then
   echo "AUTODEPLOY is not true, triggering exit ..."
