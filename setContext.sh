@@ -58,7 +58,7 @@ PARTS=()
 COT_PREFIX="cot-"
 for PART in ${JOB_PATH[@]}; do
     if [[ "${PART}" =~ ^${COT_PREFIX}* ]]; then
-        PART+=("${PART#${COT_PREFIX}}")
+        PARTS+=("${PART#${COT_PREFIX}}")
     fi
 done
 PARTS_COUNT="${#PARTS[@]}"
