@@ -48,24 +48,39 @@ while getopts ":a:c:hp:t:" opt; do
      esac
 done
 
-# Determine the product/segment from the job name
+# Determine the tenant/product/segment from the job name
 # if not already defined or provided on the command line
+# Only parts of the jobname starting with "cot-" are
+# considered and the "cot-" prefix is removed to give the
+# actual segment/product/tenant id
 JOB_PATH=($(echo "${JOB_NAME}" | tr "/" " "))
-if [[ "${#JOB_PATH[@]}" -gt 3 ]]; then
-    TENANT=${TENANT:-${JOB_PATH[0]}}
-    PRODUCT=${PRODUCT:-${JOB_PATH[1]}}
-    SEGMENT=${SEGMENT:-${JOB_PATH[2]}}
-else
-    if [[ "${#JOB_PATH[@]}" -gt 2 ]]; then
-        PRODUCT=${PRODUCT:-${JOB_PATH[0]}}
-        SEGMENT=${SEGMENT:-${JOB_PATH[1]}}
-    else
-        if [[ "${#JOB_PATH[@]}" -gt 1 ]]; then
-            PRODUCT=${PRODUCT:-${JOB_PATH[0]}}
-        else
-            PRODUCT=${PRODUCT:-$(echo ${JOB_NAME} | cut -d '-' -f 1)}
-        fi
+PARTS=()
+COT_PREFIX="cot-"
+for PART in ${JOB_PATH[@]}; do
+    if [[ "${PART}" =~ ^${COT_PREFIX}* ]]; then
+        PART+=("${PART#${COT_PREFIX}}")
     fi
+done
+PARTS_COUNT="${#PARTS[@]}"
+
+# Default before folder plugin was for product to be first token in job name
+PRODUCT=${PRODUCT:-$(echo ${JOB_NAME} | cut -d '-' -f 1)}
+
+if [[ "${PARTS_COUNT}" -gt 0 ]]; then
+    # Assume its the product
+    PRODUCT=${PRODUCT:-${PARTS[${PARTS_COUNT}-1]}}
+fi
+
+if [[ "${PARTS_COUNT}" -gt 1 ]]; then
+    # Assume its product and segment
+    PRODUCT=${PRODUCT:-${PARTS[${PARTS_COUNT}-2]}}
+    SEGMENT=${SEGMENT:-${PARTS[${PARTS_COUNT}-1]}}
+fi
+if [[ "${PARTS_COUNT}" -gt 2 ]]; then
+    # Assume its tenant/product/segment
+    TENANT=${TENANT:-${PARTS[${PARTS_COUNT}-3]}}
+    PRODUCT=${PRODUCT:-${PARTS[${PARTS_COUNT}-2]}}
+    SEGMENT=${SEGMENT:-${PARTS[${PARTS_COUNT}-1]}}
 fi
 
 TENANT=${TENANT,,}
