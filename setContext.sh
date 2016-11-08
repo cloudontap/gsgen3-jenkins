@@ -63,25 +63,25 @@ for PART in ${JOB_PATH[@]}; do
 done
 PARTS_COUNT="${#PARTS[@]}"
 
-# Default before folder plugin was for product to be first token in job name
-PRODUCT=${PRODUCT:-$(echo ${JOB_NAME} | cut -d '-' -f 1)}
-
-if [[ "${PARTS_COUNT}" -gt 0 ]]; then
-    # Assume its the product
-    PRODUCT=${PRODUCT:-${PARTS[${PARTS_COUNT}-1]}}
-fi
-
-if [[ "${PARTS_COUNT}" -gt 1 ]]; then
-    # Assume its product and segment
-    PRODUCT=${PRODUCT:-${PARTS[${PARTS_COUNT}-2]}}
-    SEGMENT=${SEGMENT:-${PARTS[${PARTS_COUNT}-1]}}
-fi
 if [[ "${PARTS_COUNT}" -gt 2 ]]; then
     # Assume its tenant/product/segment
     TENANT=${TENANT:-${PARTS[${PARTS_COUNT}-3]}}
     PRODUCT=${PRODUCT:-${PARTS[${PARTS_COUNT}-2]}}
     SEGMENT=${SEGMENT:-${PARTS[${PARTS_COUNT}-1]}}
 fi
+if [[ "${PARTS_COUNT}" -gt 1 ]]; then
+    # Assume its product and segment
+    PRODUCT=${PRODUCT:-${PARTS[${PARTS_COUNT}-2]}}
+    SEGMENT=${SEGMENT:-${PARTS[${PARTS_COUNT}-1]}}
+fi
+if [[ "${PARTS_COUNT}" -gt 0 ]]; then
+    # Assume its the product
+    PRODUCT=${PRODUCT:-${PARTS[${PARTS_COUNT}-1]}}
+else
+    # Default before use of folder plugin was for product to be first token in job name
+    PRODUCT=${PRODUCT:-$(echo ${JOB_NAME} | cut -d '-' -f 1)}
+fi
+
 
 TENANT=${TENANT,,}
 TENANT_UPPER=${TENANT^^}
