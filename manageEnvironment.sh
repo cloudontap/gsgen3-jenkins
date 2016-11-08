@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-
+JENKINS_DIR=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Generate the deployment template for the required slice
@@ -34,16 +34,11 @@ for LEVEL in segment solution; do
         fi
         
 		# Update the infrastructure repo to capture any stack changes
-        cd ${WORKSPACE}/${AID}/infrastructure/${PRODUCT}
-
-        # Ensure git knows who we are
-        git config user.name  "${GIT_USER}"
-        git config user.email "${GIT_EMAIL}"
-
-        # Record changes
-        git add *
-        git commit -m "Stack changes as a result of applying ${MODE} mode to the ${LEVEL} level stack for the ${SLICE} slice of the ${SEGMENT} segment"
-        git push origin master
+        ${JENKINS_DIR}/manageRepo.sh -p \
+            -d ${WORKSPACE}/${AID}/infrastructure/${PRODUCT} \
+            -n infrastructure \
+            -m "Stack changes as a result of applying ${MODE} mode to the ${LEVEL} level stack for the ${SLICE} slice of the ${SEGMENT} segment"
+            
 	    RESULT=$?
         if [[ "${RESULT}" -ne 0 ]]; then
             echo "Unable to save the changes resulting from applying ${MODE} mode to the ${LEVEL} level stack for the ${SLICE} slice of the ${SEGMENT} segment"
