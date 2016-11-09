@@ -29,30 +29,37 @@ if [ $RESULT -ne 0 ]; then
    exit
 fi
 
-# TODO: Confirm if these are needed.
-# npm install -g bower
-# npm install -g grunt
-
-# TODO: Optionally run bower as part of the build
-# bower install --allow-root
-
-# TODO: Confirm if required and add check for error code
-# grunt test
-
-npm install
-RESULT=$?
-if [ $RESULT -ne 0 ]; then
-   echo "npm install failed, exiting..."
-   exit
+# Run bower as part of the build if required
+if [[ -f bower.json ]]; then
+    bower install --allow-root
+    RESULT=$?
+    if [ $RESULT -ne 0 ]; then
+       echo "bower install failed, exiting..."
+       exit
+    fi
 fi
 
-grunt build
-RESULT=$?
-if [ $RESULT -ne 0 ]; then
-   echo "grunt build failed, exiting..."
-   exit
+# Grunt based build
+if [[ -f gruntfile.js ]]; then
+    grunt build
+    RESULT=$?
+    if [ $RESULT -ne 0 ]; then
+       echo "grunt build failed, exiting..."
+       exit
+    fi
 fi
 
+# Gulp based build
+if [[ -f gulpfile.js ]]; then
+    gulp build
+    RESULT=$?
+    if [ $RESULT -ne 0 ]; then
+       echo "gulp build failed, exiting..."
+       exit
+    fi
+fi
+
+# Clean up
 npm prune --production
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
