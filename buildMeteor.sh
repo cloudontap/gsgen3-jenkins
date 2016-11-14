@@ -66,5 +66,5 @@ if [[ -f Dockerfile ]]; then
     fi
 fi
 
-echo "GIT_COMMIT=$GIT_COMMIT" >> $WORKSPACE/context.properties
-echo "SLICE=$SLICE" >> $WORKSPACE/context.properties
+echo "GIT_COMMIT=$GIT_COMMIT" >> $WORKSPACE/chain.properties
+echo "SLICE=$SLICE" >> $WORKSPACE/chain.properties
