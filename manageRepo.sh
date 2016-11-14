@@ -71,7 +71,7 @@ function init() {
 
         # Commit to repo in preparation for first push
         REPO_MESSAGE="${REPO_MESSAGE:-Initial commit}"
-        push()
+        push
     fi
 }
 
@@ -227,15 +227,15 @@ cd "${REPO_DIR}"
 # Perform the required action
 case ${REPO_OPERATION} in
     init)
-        init()
+        init
         ;;
 
     clone)
-        clone()
+        clone
         ;;
         
     push)
-        push()
+        push
         ;;
 esac
 
