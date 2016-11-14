@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-
+JENKINS_DIR=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 PRODUCT_CONFIG_REFERENCE_DEFAULT="master"
@@ -10,13 +10,14 @@ GSGEN_BIN_REFERENCE_DEFAULT="master"
 GSGEN_STARTUP_REFERENCE_DEFAULT="master"
 function usage() {
     echo -e "\nConstruct the account directory tree" 
-    echo -e "\nUsage: $(basename $0) -c CONFIG_REFERENCE -i INFRASTRUCTURE_REFERENCE -g GSGEN_BIN_REFERENCE -s GSGEN_STARTUP_REFERENCE -a -p"
+    echo -e "\nUsage: $(basename $0) -c CONFIG_REFERENCE -i INFRASTRUCTURE_REFERENCE -g GSGEN_BIN_REFERENCE -s GSGEN_STARTUP_REFERENCE -a -p -n"
     echo -e "\nwhere\n"
     echo -e "(o) -a if the account directories should not be included"
     echo -e "(o) -c CONFIG_REFERENCE is the git reference for the config repo"
     echo -e "(o) -g GSGEN_BIN_REFERENCE is the git reference for the GSGEN3 framework bin repo"
     echo -e "    -h shows this text"
     echo -e "(o) -i INFRASTRUCTURE_REFERENCE is the git reference for the config repo"
+    echo -e "(o) -n initialise repos if not already initialised"
     echo -e "(o) -p if the product directories should not be included"
     echo -e "(o) -s GSGEN_STARTUP_REFERENCE is the git reference for the GSGEN3 framework startup repo"
     echo -e "\nDEFAULTS:\n"
@@ -48,6 +49,9 @@ while getopts ":ac:g:hi:ps:" opt; do
             ;;
         i)
             PRODUCT_INFRASTRUCTURE_REFERENCE="${OPTARG}"
+            ;;
+        n)
+            INIT_REPOS="true"
             ;;
         p)
             EXCLUDE_PRODUCT_DIRECTORIES="true"
@@ -84,125 +88,132 @@ fi
 echo "PRODUCT_CONFIG_REFERENCE=${PRODUCT_CONFIG_REFERENCE}" >> ${WORKSPACE}/context.properties
 echo "PRODUCT_INFRASTRUCTURE_REFERENCE=${PRODUCT_INFRASTRUCTURE_REFERENCE}" >> ${WORKSPACE}/context.properties
 
-# Create the top level directory representing the account
-mkdir ${AID}
-cd ${AID}
-mkdir config infrastructure
+# Define the top level directory representing the account
+ROOT_DIR="${WORKSPACE}/${AID}"
 
 if [[ !("${EXCLUDE_PRODUCT_DIRECTORIES}" == "true") ]]; then
-
+    
     # Pull in the product config repo
-    git clone https://${!PRODUCT_GIT_CREDENTIALS_VAR}@${PRODUCT_GIT_DNS}/${PRODUCT_GIT_ORG}/${PRODUCT_CONFIG_REPO} config/temp
+    PRODUCT_URL="https://${!PRODUCT_GIT_CREDENTIALS_VAR}@${PRODUCT_GIT_DNS}/${PRODUCT_GIT_ORG}/${PRODUCT_CONFIG_REPO}"
+    PRODUCT_DIR="${ROOT_DIR}/config/${PRODUCT}"
+    ${JENKINS_DIR}/manageRepo.sh -c -n "product config" -u "${PRODUCT_URL}" \
+        -d "${PRODUCT_DIR}" -b "${PRODUCT_CONFIG_REFERENCE}"
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
- 	    echo "Can't fetch the ${PRODUCT} config repo, exiting..."
  	    exit
     fi
-
-    # Check out the required config information
-    pushd config/temp > /dev/null 2>&1
-    git checkout ${PRODUCT_CONFIG_REFERENCE}
-    RESULT=$?
-    if [[ ${RESULT} -ne 0 ]]; then
-	    echo "Can't checkout ${PRODUCT_CONFIG_REFERENCE} in the config repo, exiting..."
-	    exit
+    
+    # Initialise if necessary
+    if [[ "${INIT_REPOS}" == "true" ]]; then
+        ${JENKINS_DIR}/manageRepo.sh -i -n "product config" -u "${PRODUCT_URL}" \
+            -d "${PRODUCT_DIR}"
+        RESULT=$?
+        if [[ ${RESULT} -ne 0 ]]; then
+            exit
+        fi
     fi
-    echo "PRODUCT_CONFIG_COMMIT=$(git rev-parse HEAD)" >> ${WORKSPACE}/context.properties
-    popd > /dev/null 2>&1
 
-    if [[ -d config/temp/${PRODUCT} ]]; then
-        # Product repo contains the account and product config
-        mv config/temp/* config
-        mv config/temp/.git* config
-        rm -rf config/temp
-    else
-        # Product repo contains only the product config
-        mv config/temp config/${PRODUCT}
-    fi
+    echo "PRODUCT_CONFIG_COMMIT=$(git --git-dir=${PRODUCT_DIR} rev-parse HEAD)" >> ${WORKSPACE}/context.properties
 fi
 
 if [[ !("${EXCLUDE_AID_DIRECTORIES}" == "true") ]]; then
-    if [[ ! -d config/${AID} ]]; then
-        # Pull in the account config repo
-        git clone https://${!AID_GIT_CREDENTIALS_VAR}@${AID_GIT_DNS}/${AID_GIT_ORG}/${AID_CONFIG_REPO} -b master config/${AID}
+
+    # Pull in the account config repo
+    AID_URL="https://${!AID_GIT_CREDENTIALS_VAR}@${AID_GIT_DNS}/${AID_GIT_ORG}/${AID_CONFIG_REPO}"
+    AID_DIR="${ROOT_DIR}/config/${AID}"
+    ${JENKINS_DIR}/manageRepo.sh -c -n "aid config" -u "${AID_URL}" \
+        -d "${AID_DIR}"
+    RESULT=$?
+    if [[ ${RESULT} -ne 0 ]]; then
+        exit
+    fi
+
+    # Initialise if necessary
+    if [[ "${INIT_REPOS}" == "true" ]]; then
+        ${JENKINS_DIR}/manageRepo.sh -i -n "aid config" -u "${AID_URL}" \
+            -d "${AID_DIR}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
-            echo "Can't fetch the ${AID} config repo, exiting..."
             exit
         fi
     fi
 fi
 
-if [[ ! -d config/bin ]]; then
-    # Pull in the default GSGEN repo if not overridden by product
-    if [[ -d config/${PRODUCT}/bin ]]; then
-        mkdir config/bin
-        cp -rp config/${PRODUCT}/bin config/bin
-    else
-        git clone https://${GSGEN_GIT_DNS}/${GSGEN_GIT_ORG}/${GSGEN_BIN_REPO} -b ${GSGEN_BIN_REFERENCE} config/bin
-        RESULT=$?
-        if [[ ${RESULT} -ne 0 ]]; then
-            echo "Can't fetch the GSGEN repo, exiting..."
-            exit
-        fi
+# Pull in the default GSGEN repo if not overridden by product
+GSGEN_DIR="${ROOT_DIR}/config/bin"
+if [[ -d ${ROOT_DIR}/config/${PRODUCT}/bin ]]; then
+    mkdir -p "${GSGEN_DIR}"
+    cp -rp ${ROOT_DIR}/config/${PRODUCT}/bin "${GSGEN_DIR}"
+else
+    GSGEN_URL="https://${GSGEN_GIT_DNS}/${GSGEN_GIT_ORG}/${GSGEN_BIN_REPO}"
+    ${JENKINS_DIR}/manageRepo.sh -c -n "gsgen bin" -u "${GSGEN_URL}" \
+        -d "${GSGEN_DIR}" -b "${GSGEN_BIN_REFERENCE}"
+    RESULT=$?
+    if [[ ${RESULT} -ne 0 ]]; then
+        exit
     fi
 fi
 
 if [[ !("${EXCLUDE_PRODUCT_DIRECTORIES}" == "true") ]]; then
     
     # Pull in the product infrastructure repo
-    git clone https://${!PRODUCT_GIT_CREDENTIALS_VAR}@${PRODUCT_GIT_DNS}/${PRODUCT_GIT_ORG}/${PRODUCT_INFRASTRUCTURE_REPO} infrastructure/temp
+    PRODUCT_URL="https://${!PRODUCT_GIT_CREDENTIALS_VAR}@${PRODUCT_GIT_DNS}/${PRODUCT_GIT_ORG}/${PRODUCT_INFRASTRUCTURE_REPO}"
+    PRODUCT_DIR="${ROOT_DIR}/infrastructure/${PRODUCT}"
+    ${JENKINS_DIR}/manageRepo.sh -c -n "product infrastructure" -u "${PRODUCT_URL}" \
+        -d "${PRODUCT_DIR}" -b "${PRODUCT_INFRASTRUCTURE_REFERENCE}"
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
-	    echo "Can't fetch the ${PRODUCT} infrastructure repo, exiting..."
-	    exit
+ 	    exit
+    fi
+    
+    # Initialise if necessary
+    if [[ "${INIT_REPOS}" == "true" ]]; then
+        ${JENKINS_DIR}/manageRepo.sh -i -n "product infrastructure" -u "${PRODUCT_URL}" \
+            -d "${PRODUCT_DIR}"
+        RESULT=$?
+        if [[ ${RESULT} -ne 0 ]]; then
+            exit
+        fi
     fi
 
-    # Check out the required infrastructure information
-    pushd infrastructure/temp > /dev/null 2>&1
-    git checkout ${PRODUCT_INFRASTRUCTURE_REFERENCE}
-    RESULT=$?
-    if [[ ${RESULT} -ne 0 ]]; then
-	    echo "Can't checkout ${PRODUCT_INFRASTRUCTURE_REFERENCE} in the infrastructure repo, exiting..."
-	    exit
-    fi
-    echo "PRODUCT_INFRASTRUCTURE_COMMIT=$(git rev-parse HEAD)" >> ${WORKSPACE}/context.properties
-    popd > /dev/null 2>&1
-
-    if [[ -d infrastructure/temp/${PRODUCT} ]]; then
-        # Product repo contains the account and product infrastructure
-        mv infrastructure/temp/* config
-        mv infrastructure/temp/.git* config
-        rm -rf infrastructure/temp
-    else
-        # Product repo contains only the product config
-        mv infrastructure/temp infrastructure/${PRODUCT}
-    fi
+    echo "PRODUCT_INFRASTRUCTURE_COMMIT=$(git --git-dir=${PRODUCT_DIR} rev-parse HEAD)" >> ${WORKSPACE}/context.properties
 fi
 
 if [[ !("${EXCLUDE_AID_DIRECTORIES}" == "true") ]]; then
-    if [[ ! -d infrastructure/${AID} ]]; then
-        # Pull in the account infrastructure repo
-        git clone https://${!AID_GIT_CREDENTIALS_VAR}@${AID_GIT_DNS}/${AID_GIT_ORG}/${AID_INFRASTRUCTURE_REPO} -b master infrastructure/${AID}
+
+    # Pull in the account infrastructure repo
+    AID_URL="https://${!AID_GIT_CREDENTIALS_VAR}@${AID_GIT_DNS}/${AID_GIT_ORG}/${AID_INFRASTRUCTURE_REPO}"
+    AID_DIR="${ROOT_DIR}/infrastructure/${AID}"
+    ${JENKINS_DIR}/manageRepo.sh -c -n "aid infrastructure" -u "${AID_URL}" \
+        -d "${AID_DIR}"
+    RESULT=$?
+    if [[ ${RESULT} -ne 0 ]]; then
+        exit
+    fi
+
+    # Initialise if necessary
+    if [[ "${INIT_REPOS}" == "true" ]]; then
+        ${JENKINS_DIR}/manageRepo.sh -i -n "aid infrastructure" -u "${AID_URL}" \
+            -d "${AID_DIR}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
-            echo "Can't fetch the ${AID} infrastructure repo, exiting..."
             exit
         fi
     fi
 fi
 
-if [[ ! -d infrastructure/startup ]]; then
-    # Pull in the default GSGEN startup repo if not overridden by product
-    if [[ -d infrastructure/${PRODUCT}/startup ]]; then
-        cp -rp infrastructure/${PRODUCT}/startup infrastructure/startup
-    else
-        git clone https://${GSGEN_GIT_DNS}/${GSGEN_GIT_ORG}/${GSGEN_STARTUP_REPO} -b ${GSGEN_STARTUP_REFERENCE} infrastructure/startup
-        RESULT=$?
-        if [[ ${RESULT} -ne 0 ]]; then
-            echo "Can't fetch the GSGEN startup repo, exiting..."
-            exit
-        fi
+# Pull in the default GSGEN startup repo if not overridden by product
+GSGEN_DIR="${ROOT_DIR}/infrastructure/startup"
+if [[ -d ${ROOT_DIR}/infrastructure/${PRODUCT}/startup ]]; then
+    mkdir -p "${GSGEN_DIR}"
+    cp -rp ${ROOT_DIR}/infrastructure/${PRODUCT}/startup "${GSGEN_DIR}"
+else
+    GSGEN_URL="https://${GSGEN_GIT_DNS}/${GSGEN_GIT_ORG}/${GSGEN_STARTUP_REPO}"
+    ${JENKINS_DIR}/manageRepo.sh -c -n "gsgen startup" -u "${GSGEN_URL}" \
+        -d "${GSGEN_DIR}" -b "${GSGEN_STARTUP_REFERENCE}"
+    RESULT=$?
+    if [[ ${RESULT} -ne 0 ]]; then
+        exit
     fi
 fi
 
