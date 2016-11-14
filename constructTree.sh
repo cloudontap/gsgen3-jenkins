@@ -113,7 +113,7 @@ if [[ !("${EXCLUDE_PRODUCT_DIRECTORIES}" == "true") ]]; then
         fi
     fi
 
-    echo "PRODUCT_CONFIG_COMMIT=$(git --git-dir=${PRODUCT_DIR} rev-parse HEAD)" >> ${WORKSPACE}/context.properties
+    echo "PRODUCT_CONFIG_COMMIT=$(git -C ${PRODUCT_DIR} rev-parse HEAD)" >> ${WORKSPACE}/context.properties
 fi
 
 if [[ !("${EXCLUDE_AID_DIRECTORIES}" == "true") ]]; then
@@ -176,7 +176,7 @@ if [[ !("${EXCLUDE_PRODUCT_DIRECTORIES}" == "true") ]]; then
         fi
     fi
 
-    echo "PRODUCT_INFRASTRUCTURE_COMMIT=$(git --git-dir=${PRODUCT_DIR} rev-parse HEAD)" >> ${WORKSPACE}/context.properties
+    echo "PRODUCT_INFRASTRUCTURE_COMMIT=$(git -C ${PRODUCT_DIR} rev-parse HEAD)" >> ${WORKSPACE}/context.properties
 fi
 
 if [[ !("${EXCLUDE_AID_DIRECTORIES}" == "true") ]]; then
