@@ -139,7 +139,7 @@ function push() {
 
     # Update upstream repo
     if [[ "${REPO_PUSH_REQUIRED}" == "true" ]]; then
-        git push -u --tags ${REPO_REMOTE}
+        git push --tags ${REPO_REMOTE} ${REPO_BRANCH}
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
             echo "Can't push the ${REPO_NAME} repo changes to upstream repo ${REPO_REMOTE}, exiting..."
