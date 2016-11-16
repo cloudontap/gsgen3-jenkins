@@ -47,7 +47,7 @@ done
 
 # All ok so tag the config repo
 ${JENKINS_DIR}/manageRepo.sh -p \
-    -d . \
+    -d ${WORKSPACE}/${AID}/config/${PRODUCT} \
     -n config \
     -t ${DEPLOYMENT_TAG} \
     -m "${DETAIL_MESSAGE}" \
@@ -57,12 +57,9 @@ if [[ ${RESULT} -ne 0 ]]; then
 	exit
 fi
 
-# Process the infrastructure repo
-cd ${WORKSPACE}/${AID}/infrastructure/${PRODUCT}
-
 # Commit the generated application templates
 ${JENKINS_DIR}/manageRepo.sh -p \
-    -d . \
+    -d ${WORKSPACE}/${AID}/infrastructure/${PRODUCT} \
     -n config \
     -t ${DEPLOYMENT_TAG} \
     -m "${DETAIL_MESSAGE}" \
