@@ -4,9 +4,19 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-# Ensure CODE_TAG have been provided
-if [[ -z "${CODE_TAG}" ]]; then
-	echo "Job requires the code tag, exiting..."
+# Ensure CODE_TAG has been provided is build slice has a code repo
+if [[ (-n "${CODE_TAG}")]]; then
+    if [[ (-z "${PRODUCT_CODE_REPO}") ]]; then
+        echo "No code repo defined for the build slice, exiting..."
+        exit
+    fi
+else
+    if [[ (-n "${PRODUCT_CODE_REPO}") ]]; then
+        echo "Job requires the code tag, exiting..."
+    else
+        # Nothing to do
+        RESULT=0
+    fi
     exit
 fi
 
