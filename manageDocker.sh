@@ -160,9 +160,10 @@ DOCKER_PRODUCT="${DOCKER_PRODUCT:-$PRODUCT}"
 # Default local repository is based on standard image naming conventions
 if [[ (-n "${DOCKER_PRODUCT}") && 
         (-n "${DOCKER_CODE_COMMIT}") ]]; then
-    DOCKER_REPO="${DOCKER_REPO:-${DOCKER_PRODUCT}/${DOCKER_CODE_COMMIT}}"
     if [[ (-n "${DOCKER_SLICE}" ) ]]; then
         DOCKER_REPO="${DOCKER_REPO:-${DOCKER_PRODUCT}/${DOCKER_SLICE}-${DOCKER_CODE_COMMIT}}"
+    else
+        DOCKER_REPO="${DOCKER_REPO:-${DOCKER_PRODUCT}/${DOCKER_CODE_COMMIT}}"
     fi
 fi
 

@@ -55,7 +55,7 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
     ${JENKINS_DIR}/manageDocker.sh -v -s ${SLICE_ARRAY[$INDEX]} -g "${CODE_COMMIT}"
     RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
-        echo -e "\nDocker image for slice ${SLICE_ARRAY[$INDEX]} and commit ${CODE_COMMIT_SHORT} not found. Was the build successful?"
+        echo -e "\nDocker image for slice ${SLICE_ARRAY[$INDEX]} and commit ${CODE_COMMIT} not found. Was the build successful?"
         exit
     fi
 
