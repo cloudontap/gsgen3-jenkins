@@ -6,7 +6,7 @@ trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Ensure DEPLOYMENT_NUMBER have been provided
 if [[ "${DEPLOYMENT_NUMBER}" == "" ]]; then
-	echo "Job requires the deployment number, exiting..."
+	echo -e "\nJob requires the deployment number"
     RESULT=1
     exit
 fi

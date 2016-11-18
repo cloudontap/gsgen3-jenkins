@@ -4,17 +4,17 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-CID_DEFAULT="gs04"
+INTEGRATOR_DEFAULT="integrator"
 function usage() {
-    echo -e "\nDetermine key settings for an integrator" 
-    echo -e "\nUsage: $(basename $0) -c CID -t TID -a AID"
+    echo -e "\nDetermine key settings for an integrator/tenant/account" 
+    echo -e "\nUsage: $(basename $0) -c INTEGRATOR -t TENANT -a ACCOUNT"
     echo -e "\nwhere\n"
-    echo -e "(o) -a AID is the tenant account id e.g. \"env01\""
-    echo -e "(o) -c CID is the integrator cyber account id"
+    echo -e "(o) -a ACCOUNT is the tenant account name e.g. \"env01\""
     echo -e "    -h shows this text"
-    echo -e "(o) -t TID is the tenant id e.g. \"env\""
+    echo -e "(o) -i INTEGRATOR is the integrator cyber account name"
+    echo -e "(o) -t TENANT is the tenant name e.g. \"env\""
     echo -e "\nDEFAULTS:\n"
-    echo -e "CID=${CID_DEFAULT}"
+    echo -e "INTEGRATOR=${INTEGRATOR_DEFAULT}"
     echo -e "\nNOTES:\n"
     echo -e "1. The setting values are saved in context.properties in the current directory"
     echo -e ""
@@ -22,19 +22,19 @@ function usage() {
 }
 
 # Parse options
-while getopts ":a:c:ht:" opt; do
+while getopts ":a:hi:t:" opt; do
     case $opt in
         a)
-            AID="${OPTARG}"
-            ;;
-        c)
-            CID="${OPTARG}"
+            ACCOUNT="${OPTARG}"
             ;;
         h)
             usage
             ;;
+        i)
+            INTEGRATOR="${OPTARG}"
+            ;;
         t)
-            TID="${OPTARG}"
+            TENANT="${OPTARG}"
             ;;
         \?)
             echo -e "\nInvalid option: -$OPTARG"
@@ -47,103 +47,111 @@ while getopts ":a:c:ht:" opt; do
      esac
 done
 
-# Apply defaults
-CID=${CID:-$CID_DEFAULT}
-
-# Determine the tenant/account from the job name
+# Determine the integrator/tenant/account from the job name
 # if not already defined or provided on the command line
 JOB_PATH=($(echo "${JOB_NAME}" | tr "/" " "))
-if [[ "${#JOB_PATH[@]}" -gt 2 ]]; then
-    TID=${TID:-${JOB_PATH[0]}}
-    AID=${AID:-${JOB_PATH[1]}}
-else
-    if [[ "${#JOB_PATH[@]}" -gt 1 ]]; then
-        TID=${TID:-${JOB_PATH[0]}}
-    else
-        TID=${TID:-$(echo ${JOB_NAME} | cut -d '-' -f 1)}
+PARTS=()
+COT_PREFIX="cot-"
+for PART in ${JOB_PATH[@]}; do
+    if [[ "${PART}" =~ ^${COT_PREFIX}* ]]; then
+        PARTS+=("${PART#${COT_PREFIX}}")
     fi
+done
+PARTS_COUNT="${#PARTS[@]}"
+
+if [[ "${PARTS_COUNT}" -gt 2 ]]; then
+    # Assume its integrator/tenant/account
+    INTEGRATOR=${INTEGRATOR:-${PARTS[${PARTS_COUNT}-3]}}
+    TENANT=${TENANT:-${PARTS[${PARTS_COUNT}-2]}}
+    ACCOUNT=${ACCOUNT:-${PARTS[${PARTS_COUNT}-1]}}
+fi
+if [[ "${PARTS_COUNT}" -gt 1 ]]; then
+    # Assume its tenant and account
+    TENANT=${TENANT:-${PARTS[${PARTS_COUNT}-2]}}
+    ACCOUNT=${ACCOUNT:-${PARTS[${PARTS_COUNT}-1]}}
+fi
+if [[ "${PARTS_COUNT}" -gt 0 ]]; then
+    # Assume its the tenant
+    TENANT=${TENANT:-${PARTS[${PARTS_COUNT}-1]}}
 fi
 
-CID=${CID,,}
-CID_UPPER=${CID^^}
+INTEGRATOR=${INTEGRATOR,,:-${INTEGRATOR_DEFAULT}}
+INTEGRATOR_UPPER=${INTEGRATOR^^}
 
-TID=${TID,,}
-TID_UPPER=${TID^^}
+TENANT=${TENANT,,}
+TENANT_UPPER=${TENANT^^}
 
-AID=${AID,,}
-AID_UPPER=${AID^^}
+ACCOUNT=${ACCOUNT,,}
+ACCOUNT_UPPER=${ACCOUNT^^}
 
 # Default "GITHUB" git provider
 GITHUB_DNS="${GITHUB_DNS:-github.com}"
 GITHUB_API_DNS="${GITHUB_API_DNS:-api.$GITHUB_DNS}"
+
+# Determine who to include as the author if git updates required
+GIT_USER="${GIT_USER:-$BUILD_USER}"
+GIT_USER="${GIT_USER:-$GIT_USER_DEFAULT}"
+GIT_USER="${GIT_USER:-alm}"
+GIT_EMAIL="${GIT_EMAIL:-$BUILD_USER_EMAIL}"
+GIT_EMAIL="${GIT_EMAIL:-$GIT_EMAIL_DEFAULT}"
 
 # Defaults for gsgen
 GSGEN_GIT_DNS="${GSGEN_GIT_DNS:-github.com}"
 GSGEN_GIT_ORG="${GSGEN_GIT_ORG:-codeontap}"
 GSGEN_BIN_REPO="${GSGEN_BIN_REPO:-gsgen3.git}"
 
-# Determine the cyber account access credentials
-CID_AWS_ACCESS_KEY_ID_VAR="${CID_UPPER}_AWS_ACCESS_KEY_ID"
-CID_AWS_SECRET_ACCESS_KEY_VAR="${CID_UPPER}_AWS_SECRET_ACCESS_KEY"
-
-# Determine the cyber account git provider
-if [[ -z "${CID_GIT_PROVIDER}" ]]; then
-    CID_GIT_PROVIDER_VAR="${CID_UPPER}_GIT_PROVIDER"
-    CID_GIT_PROVIDER="${!CID_GIT_PROVIDER_VAR}"
-    CID_GIT_PROVIDER="${CID_GIT_PROVIDER:-GITHUB}"
+# Determine the integrator account git provider
+if [[ -z "${INTEGRATOR_GIT_PROVIDER}" ]]; then
+    INTEGRATOR_GIT_PROVIDER_VAR="${INTEGRATOR_UPPER}_GIT_PROVIDER"
+    INTEGRATOR_GIT_PROVIDER="${!INTEGRATOR_GIT_PROVIDER_VAR}"
+    INTEGRATOR_GIT_PROVIDER="${INTEGRATOR_GIT_PROVIDER:-GITHUB}"
 fi
 
-CID_GIT_USER_VAR="${CID_GIT_PROVIDER}_USER"
-CID_GIT_PASSWORD_VAR="${CID_GIT_PROVIDER}_PASSWORD"
-CID_GIT_CREDENTIALS_VAR="${CID_GIT_PROVIDER}_CREDENTIALS"
+INTEGRATOR_GIT_USER_VAR="${INTEGRATOR_GIT_PROVIDER}_USER"
+INTEGRATOR_GIT_PASSWORD_VAR="${INTEGRATOR_GIT_PROVIDER}_PASSWORD"
+INTEGRATOR_GIT_CREDENTIALS_VAR="${INTEGRATOR_GIT_PROVIDER}_CREDENTIALS"
 
-CID_GIT_ORG_VAR="${CID_GIT_PROVIDER}_ORG"
-CID_GIT_ORG="${!CID_GIT_ORG_VAR}"
+INTEGRATOR_GIT_ORG_VAR="${INTEGRATOR_GIT_PROVIDER}_ORG"
+INTEGRATOR_GIT_ORG="${!INTEGRATOR_GIT_ORG_VAR}"
 
-CID_GIT_DNS_VAR="${CID_GIT_PROVIDER}_DNS"
-CID_GIT_DNS="${!CID_GIT_DNS_VAR}"
+INTEGRATOR_GIT_DNS_VAR="${INTEGRATOR_GIT_PROVIDER}_DNS"
+INTEGRATOR_GIT_DNS="${!INTEGRATOR_GIT_DNS_VAR}"
 
-CID_GIT_API_DNS_VAR="${CID_GIT_PROVIDER}_API_DNS"
-CID_GIT_API_DNS="${!CID_GIT_API_DNS_VAR}"
+INTEGRATOR_GIT_API_DNS_VAR="${INTEGRATOR_GIT_PROVIDER}_API_DNS"
+INTEGRATOR_GIT_API_DNS="${!INTEGRATOR_GIT_API_DNS_VAR}"
 
-# Determine cyber account repo
-if [[ -z "${CID_REPO}" ]]; then
-    CID_REPO_VAR="${CID_UPPER}_REPO"
-    CID_REPO="${!CID_REPO_VAR}"
+# Determine integrator account repo
+if [[ -z "${INTEGRATOR_REPO}" ]]; then
+    INTEGRATOR_REPO_VAR="${INTEGRATOR_UPPER}_REPO"
+    INTEGRATOR_REPO="${!INTEGRATOR_REPO_VAR}"
 fi
-
-# Determine who to include as the author if git updates required
-GIT_USER="${GIT_USER:-$BUILD_USER}"
-GIT_USER="${GIT_USER:-$GIT_USER_DEFAULT}"
-GIT_EMAIL="${GIT_EMAIL:-$BUILD_USER_EMAIL}"
-GIT_EMAIL="${GIT_EMAIL:-$GIT_EMAIL_DEFAULT}"
 
 # Basic details for git commits/slack notification (enhanced by other scripts)
-DETAIL_MESSAGE="tenant=${TID}"
-if [[ -n "${AID}" ]]; then DETAIL_MESSAGE="${DETAIL_MESSAGE}, account=${AID}"; fi
+DETAIL_MESSAGE="tenant=${TENANT}"
+if [[ -n "${ACCOUNT}" ]]; then DETAIL_MESSAGE="${DETAIL_MESSAGE}, account=${ACCOUNT}"; fi
 if [[ -n "${GIT_USER}" ]];  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, user=${GIT_USER}"; fi
 
 # Save for future steps
-echo "CID=${CID}" >> ${WORKSPACE}/context.properties
-echo "TID=${TID}" >> ${WORKSPACE}/context.properties
-echo "AID=${AID}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR=${INTEGRATOR}" >> ${WORKSPACE}/context.properties
+echo "TENANT=${TENANT}" >> ${WORKSPACE}/context.properties
+echo "ACCOUNT=${ACCOUNT}" >> ${WORKSPACE}/context.properties
 
 echo "GSGEN_GIT_DNS=${GSGEN_GIT_DNS}" >> ${WORKSPACE}/context.properties
 echo "GSGEN_GIT_ORG=${GSGEN_GIT_ORG}" >> ${WORKSPACE}/context.properties
 echo "GSGEN_BIN_REPO=${GSGEN_BIN_REPO}" >> ${WORKSPACE}/context.properties
 
-echo "CID_GIT_PROVIDER=${CID_GIT_PROVIDER}" >> ${WORKSPACE}/context.properties
-echo "CID_GIT_USER_VAR=${CID_GIT_USER_VAR}" >> ${WORKSPACE}/context.properties
-echo "CID_GIT_PASSWORD_VAR=${CID_GIT_PASSWORD_VAR}" >> ${WORKSPACE}/context.properties
-echo "CID_GIT_CREDENTIALS_VAR=${CID_GIT_CREDENTIALS_VAR}" >> ${WORKSPACE}/context.properties
-echo "CID_GIT_ORG=${CID_GIT_ORG}" >> ${WORKSPACE}/context.properties
-echo "CID_GIT_DNS=${CID_GIT_DNS}" >> ${WORKSPACE}/context.properties
-echo "CID_GIT_API_DNS=${CID_GIT_API_DNS}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_GIT_PROVIDER=${INTEGRATOR_GIT_PROVIDER}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_GIT_USER_VAR=${INTEGRATOR_GIT_USER_VAR}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_GIT_PASSWORD_VAR=${INTEGRATOR_GIT_PASSWORD_VAR}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_GIT_CREDENTIALS_VAR=${INTEGRATOR_GIT_CREDENTIALS_VAR}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_GIT_ORG=${INTEGRATOR_GIT_ORG}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_GIT_DNS=${INTEGRATOR_GIT_DNS}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_GIT_API_DNS=${INTEGRATOR_GIT_API_DNS}" >> ${WORKSPACE}/context.properties
 
-echo "CID_AWS_ACCESS_KEY_ID_VAR=${CID_AWS_ACCESS_KEY_ID_VAR}" >> ${WORKSPACE}/context.properties
-echo "CID_AWS_SECRET_ACCESS_KEY_VAR=${CID_AWS_SECRET_ACCESS_KEY_VAR}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_AWS_ACCESS_KEY_ID_VAR=${INTEGRATOR_AWS_ACCESS_KEY_ID_VAR}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_AWS_SECRET_ACCESS_KEY_VAR=${INTEGRATOR_AWS_SECRET_ACCESS_KEY_VAR}" >> ${WORKSPACE}/context.properties
 
-echo "CID_REPO=${CID_REPO}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_REPO=${INTEGRATOR_REPO}" >> ${WORKSPACE}/context.properties
 
 echo "GIT_USER=${GIT_USER}" >> ${WORKSPACE}/context.properties
 echo "GIT_EMAIL=${GIT_EMAIL}" >> ${WORKSPACE}/context.properties

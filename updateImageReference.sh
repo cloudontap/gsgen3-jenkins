@@ -5,11 +5,10 @@ JENKINS_DIR=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Check the current reference value
-cd ${WORKSPACE}/${AID}/config/${PRODUCT}
+cd ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT}
 BUILD_FILE="appsettings/${SEGMENT}/${SLICE}/build.ref"
 if [[ "$(cat ${BUILD_FILE})" == "${GIT_COMMIT}" ]]; then
-  echo "The current reference is the same, exiting..."
-  RESULT=1
+  echo -e "\nThe current reference is the same"
   exit
 fi
 
@@ -22,7 +21,7 @@ ${JENKINS_DIR}/manageRepo.sh -p \
     -b ${PRODUCT_CONFIG_REFERENCE}
 
 if [[ "$AUTODEPLOY" != "true" ]]; then
-  echo "AUTODEPLOY is not true, triggering exit ..."
+  echo -e "\nAUTODEPLOY is not true, triggering exit"
   RESULT=2
   exit
 fi

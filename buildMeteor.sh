@@ -27,7 +27,7 @@ cd app
 npm install --production
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
-   echo "npm install failed, exiting..."
+   echo -e "\nnpm install failed"
    exit
 fi
 
@@ -35,7 +35,7 @@ fi
 meteor build ../dist --directory
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
-   echo "meteor build failed, exiting..."
+   echo -e "\nmeteor build failed"
    exit
 fi
 cd ..
@@ -44,7 +44,7 @@ cd ..
 (cd dist/bundle/programs/server && npm install --production)
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
-   echo "Installation of app node modules failed, exiting..."
+   echo -e "\nInstallation of app node modules failed"
    exit
 fi
 
@@ -52,14 +52,14 @@ fi
 MAX_METEOR_BUILD_SIZE=${MAX_METEOR_BUILD_SIZE:-100}
 if [[ $(du -s -m ./dist | cut -f 1) -gt ${MAX_METEOR_BUILD_SIZE} ]]; then
     RESULT=1
-    echo "Build size exceeds ${MAX_METEOR_BUILD_SIZE}M"
+    echo -e "\nBuild size exceeds ${MAX_METEOR_BUILD_SIZE}M"
     exit
 fi
 
 
 # Package for docker if required
 if [[ -f Dockerfile ]]; then
-    ${GSGEN_JENKINS}/manageDocker.sh -b -s ${SLICE}
+    ${GSGEN_JENKINS}/manageDocker.sh -b -s ${SLICE} -g ${GIT_COMMIT}
     RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
         exit

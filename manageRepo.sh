@@ -58,7 +58,7 @@ function init() {
         git remote add "${REPO_REMOTE}" "${REPO_URL}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
-            echo "Can't add remote ${REPO_REMOTE} to ${REPO_NAME} repo, exiting..."
+            echo -e "\nCan't add remote ${REPO_REMOTE} to ${REPO_NAME} repo"
             exit
         fi
     fi
@@ -66,7 +66,7 @@ function init() {
     git log -n 1 >/dev/null 2>&1
     if [[ $? -ne 0 ]]; then
         # Create basic files
-        echo "# ${REPO_NAME}" > README.md
+        echo -e "# ${REPO_NAME}" > README.md
         touch .gitignore LICENSE.md
 
         # Commit to repo in preparation for first push
@@ -85,7 +85,7 @@ function clone() {
     git clone -b "${REPO_BRANCH}" "${REPO_URL}" .
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
-        echo "Can't clone ${REPO_NAME} repo, exiting..."
+        echo -e "\nCan't clone ${REPO_NAME} repo"
         exit
     fi
 }
@@ -115,11 +115,11 @@ function push() {
 
     if [[ -n "$(git status --porcelain)" ]]; then
         # Commit changes
-        echo "Committing to the ${REPO_NAME} repo..."
+        echo -e "\nCommitting to the ${REPO_NAME} repo..."
         git commit -m "${REPO_MESSAGE}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
-            echo "Can't commit to the ${REPO_NAME} repo, exiting..."
+            echo -e "\nCan't commit to the ${REPO_NAME} repo"
             exit
         fi
         REPO_PUSH_REQUIRED="true"
@@ -127,11 +127,11 @@ function push() {
 
     # Tag the commit if required
     if [[ -n "${REPO_TAG}" ]]; then
-        echo "Adding tag \"${REPO_TAG}\" to the ${REPO_NAME} repo..."
+        echo -e "\nAdding tag \"${REPO_TAG}\" to the ${REPO_NAME} repo..."
         git tag -a "${REPO_TAG}" -m "${REPO_MESSAGE}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
-            echo "Can't tag the ${REPO_NAME} repo, exiting..."
+            echo -e "\nCan't tag the ${REPO_NAME} repo"
             exit
         fi
         REPO_PUSH_REQUIRED="true"
@@ -142,7 +142,7 @@ function push() {
         git push --tags ${REPO_REMOTE} ${REPO_BRANCH}
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
-            echo "Can't push the ${REPO_NAME} repo changes to upstream repo ${REPO_REMOTE}, exiting..."
+            echo -e "\nCan't push the ${REPO_NAME} repo changes to upstream repo ${REPO_REMOTE}"
             exit
         fi
     fi
@@ -218,7 +218,7 @@ if [[ ! -d "${REPO_DIR}" ]]; then
     mkdir -p "${REPO_DIR}"
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
-        echo "Can't create repo directory ${REPO_DIR}, exiting..."
+        echo -e "\nCan't create repo directory ${REPO_DIR}"
         exit
     fi
 fi

@@ -25,7 +25,7 @@ fi
 npm install --unsafe-perm
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
-   echo "npm install failed, exiting..."
+   echo -e "\nnpm install failed"
    exit
 fi
 
@@ -34,7 +34,7 @@ if [[ -f bower.json ]]; then
     bower install --allow-root
     RESULT=$?
     if [ $RESULT -ne 0 ]; then
-       echo "bower install failed, exiting..."
+       echo -e "\nbower install failed"
        exit
     fi
 fi
@@ -44,7 +44,7 @@ if [[ -f gruntfile.js ]]; then
     grunt build
     RESULT=$?
     if [ $RESULT -ne 0 ]; then
-       echo "grunt build failed, exiting..."
+       echo -e "\ngrunt build failed"
        exit
     fi
 fi
@@ -54,7 +54,7 @@ if [[ -f gulpfile.js ]]; then
     gulp build
     RESULT=$?
     if [ $RESULT -ne 0 ]; then
-       echo "gulp build failed, exiting..."
+       echo -e "\ngulp build failed"
        exit
     fi
 fi
@@ -63,13 +63,13 @@ fi
 npm prune --production
 RESULT=$?
 if [ $RESULT -ne 0 ]; then
-   echo "npm prune failed, exiting..."
+   echo -e "\nnpm prune failed"
    exit
 fi
 
 # Package for docker if required
 if [[ -f Dockerfile ]]; then
-    ${GSGEN_JENKINS}/manageDocker.sh -b -s ${SLICE}
+    ${GSGEN_JENKINS}/manageDocker.sh -b -s ${SLICE} -g ${GIT_COMMIT}
     RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
         exit

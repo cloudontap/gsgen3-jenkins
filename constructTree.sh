@@ -26,7 +26,7 @@ function usage() {
     echo -e "GSGEN_BIN_REFERENCE = ${GSGEN_BIN_REFERENCE_DEFAULT}"
     echo -e "GSGEN_STARTUP_REFERENCE = ${GSGEN_STARTUP_REFERENCE_DEFAULT}"
     echo -e "\nNOTES:\n"
-    echo -e "1. AID/PRODUCT details are assumed to be already defined via environment variables"
+    echo -e "1. ACCOUNT/PRODUCT details are assumed to be already defined via environment variables"
     echo -e ""
     RESULT=1
     exit
@@ -36,7 +36,7 @@ function usage() {
 while getopts ":ac:g:hi:ps:" opt; do
     case $opt in
         a)
-            EXCLUDE_AID_DIRECTORIES="true"
+            EXCLUDE_ACCOUNT_DIRECTORIES="true"
             ;;
         c)
             PRODUCT_CONFIG_REFERENCE="${OPTARG}"
@@ -75,12 +75,12 @@ PRODUCT_CONFIG_REFERENCE="${PRODUCT_CONFIG_REFERENCE:-$PRODUCT_CONFIG_REFERENCE_
 PRODUCT_INFRASTRUCTURE_REFERENCE="${PRODUCT_INFRASTRUCTURE_REFERENCE:-$PRODUCT_INFRASTRUCTURE_REFERENCE_DEFAULT}"
 GSGEN_BIN_REFERENCE="${GSGEN_BIN_REFERENCE:-$GSGEN_BIN_REFERENCE_DEFAULT}"
 GSGEN_STARTUP_REFERENCE="${GSGEN_STARTUP_REFERENCE:-$GSGEN_STARTUP_REFERENCE_DEFAULT}"
-EXCLUDE_AID_DIRECTORIES="${EXCLUDE_AID_DIRECTORIES:-false}"
+EXCLUDE_ACCOUNT_DIRECTORIES="${EXCLUDE_ACCOUNT_DIRECTORIES:-false}"
 EXCLUDE_PRODUCT_DIRECTORIES="${EXCLUDE_PRODUCT_DIRECTORIES:-false}"
 
 # Check for required context
-if [[ -z "${AID}" ]]; then
-    echo "AID not defined"
+if [[ -z "${ACCOUNT}" ]]; then
+    echo "ACCOUNT not defined"
     usage
 fi
 
@@ -89,7 +89,7 @@ echo "PRODUCT_CONFIG_REFERENCE=${PRODUCT_CONFIG_REFERENCE}" >> ${WORKSPACE}/cont
 echo "PRODUCT_INFRASTRUCTURE_REFERENCE=${PRODUCT_INFRASTRUCTURE_REFERENCE}" >> ${WORKSPACE}/context.properties
 
 # Define the top level directory representing the account
-ROOT_DIR="${WORKSPACE}/${AID}"
+ROOT_DIR="${WORKSPACE}/${ACCOUNT}"
 
 if [[ !("${EXCLUDE_PRODUCT_DIRECTORIES}" == "true") ]]; then
     
@@ -116,13 +116,13 @@ if [[ !("${EXCLUDE_PRODUCT_DIRECTORIES}" == "true") ]]; then
     echo "PRODUCT_CONFIG_COMMIT=$(git -C ${PRODUCT_DIR} rev-parse HEAD)" >> ${WORKSPACE}/context.properties
 fi
 
-if [[ !("${EXCLUDE_AID_DIRECTORIES}" == "true") ]]; then
+if [[ !("${EXCLUDE_ACCOUNT_DIRECTORIES}" == "true") ]]; then
 
     # Pull in the account config repo
-    AID_URL="https://${!AID_GIT_CREDENTIALS_VAR}@${AID_GIT_DNS}/${AID_GIT_ORG}/${AID_CONFIG_REPO}"
-    AID_DIR="${ROOT_DIR}/config/${AID}"
-    ${JENKINS_DIR}/manageRepo.sh -c -n "aid config" -u "${AID_URL}" \
-        -d "${AID_DIR}"
+    ACCOUNT_URL="https://${!ACCOUNT_GIT_CREDENTIALS_VAR}@${ACCOUNT_GIT_DNS}/${ACCOUNT_GIT_ORG}/${ACCOUNT_CONFIG_REPO}"
+    ACCOUNT_DIR="${ROOT_DIR}/config/${ACCOUNT}"
+    ${JENKINS_DIR}/manageRepo.sh -c -n "aid config" -u "${ACCOUNT_URL}" \
+        -d "${ACCOUNT_DIR}"
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
         exit
@@ -130,8 +130,8 @@ if [[ !("${EXCLUDE_AID_DIRECTORIES}" == "true") ]]; then
 
     # Initialise if necessary
     if [[ "${INIT_REPOS}" == "true" ]]; then
-        ${JENKINS_DIR}/manageRepo.sh -i -n "aid config" -u "${AID_URL}" \
-            -d "${AID_DIR}"
+        ${JENKINS_DIR}/manageRepo.sh -i -n "aid config" -u "${ACCOUNT_URL}" \
+            -d "${ACCOUNT_DIR}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
             exit
@@ -179,13 +179,13 @@ if [[ !("${EXCLUDE_PRODUCT_DIRECTORIES}" == "true") ]]; then
     echo "PRODUCT_INFRASTRUCTURE_COMMIT=$(git -C ${PRODUCT_DIR} rev-parse HEAD)" >> ${WORKSPACE}/context.properties
 fi
 
-if [[ !("${EXCLUDE_AID_DIRECTORIES}" == "true") ]]; then
+if [[ !("${EXCLUDE_ACCOUNT_DIRECTORIES}" == "true") ]]; then
 
     # Pull in the account infrastructure repo
-    AID_URL="https://${!AID_GIT_CREDENTIALS_VAR}@${AID_GIT_DNS}/${AID_GIT_ORG}/${AID_INFRASTRUCTURE_REPO}"
-    AID_DIR="${ROOT_DIR}/infrastructure/${AID}"
-    ${JENKINS_DIR}/manageRepo.sh -c -n "aid infrastructure" -u "${AID_URL}" \
-        -d "${AID_DIR}"
+    ACCOUNT_URL="https://${!ACCOUNT_GIT_CREDENTIALS_VAR}@${ACCOUNT_GIT_DNS}/${ACCOUNT_GIT_ORG}/${ACCOUNT_INFRASTRUCTURE_REPO}"
+    ACCOUNT_DIR="${ROOT_DIR}/infrastructure/${ACCOUNT}"
+    ${JENKINS_DIR}/manageRepo.sh -c -n "aid infrastructure" -u "${ACCOUNT_URL}" \
+        -d "${ACCOUNT_DIR}"
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
         exit
@@ -193,8 +193,8 @@ if [[ !("${EXCLUDE_AID_DIRECTORIES}" == "true") ]]; then
 
     # Initialise if necessary
     if [[ "${INIT_REPOS}" == "true" ]]; then
-        ${JENKINS_DIR}/manageRepo.sh -i -n "aid infrastructure" -u "${AID_URL}" \
-            -d "${AID_DIR}"
+        ${JENKINS_DIR}/manageRepo.sh -i -n "aid infrastructure" -u "${ACCOUNT_URL}" \
+            -d "${ACCOUNT_DIR}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
             exit

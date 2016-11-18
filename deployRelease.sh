@@ -1,11 +1,14 @@
 #!/bin/bash
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-
+BIN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-BIN_DIR="${WORKSPACE}/${AID}/config/bin"
-cd ${WORKSPACE}/${AID}/config/${PRODUCT}/solutions/${SEGMENT}
+# Add release tag and deployment to details
+DETAIL_MESSAGE="deployment=r${BUILD_NUMBER}-${SEGMENT}, release=${RELEASE_TAG}, ${DETAIL_MESSAGE}"
+echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
+
+cd ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT}/solutions/${SEGMENT}
 
 for CURRENT_SLICE in ${SLICE_LIST}; do
 
@@ -16,11 +19,11 @@ for CURRENT_SLICE in ${SLICE_LIST}; do
 
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
-    	echo "Stack deployment for ${CURRENT_SLICE} slice failed, exiting..."
+    	echo -e "\nStack deployment for ${CURRENT_SLICE} slice failed"
         exit
     fi
 done
 
-#Finished
+# All good
 RESULT=0
 

@@ -4,8 +4,8 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-BIN_DIR="${WORKSPACE}/${AID}/config/bin"
-cd ${WORKSPACE}/${AID}/config/${PRODUCT}/solutions/${SEGMENT}
+BIN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
+cd ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT}/solutions/${SEGMENT}
 
 # Build up the additional enviroment variables required
 ENVS=()
@@ -26,7 +26,7 @@ for CURRENT_TASK in $TASK_LIST; do
     ${BIN_DIR}/runTask.sh -t "${TASK_TIER}" -i "${TASK_COMPONENT}" -w "${CURRENT_TASK}" "${ENVS[@]}"
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
-        echo "Running of task ${CURRENT_TASK} failed, exiting..."
+        echo -e "\nRunning of task ${CURRENT_TASK} failed"
         exit
     fi
 done

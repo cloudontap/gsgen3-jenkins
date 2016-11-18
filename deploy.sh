@@ -4,8 +4,8 @@ if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-BIN_DIR="${WORKSPACE}/${AID}/config/bin"
-cd ${WORKSPACE}/${AID}/config/${PRODUCT}/solutions/${SEGMENT}
+BIN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
+cd ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT}/solutions/${SEGMENT}
 
 for CURRENT_SLICE in ${SLICE_LIST}; do
 
@@ -13,7 +13,7 @@ for CURRENT_SLICE in ${SLICE_LIST}; do
     ${BIN_DIR}/createApplicationTemplate.sh -c ${PRODUCT_CONFIG_COMMIT} -s ${CURRENT_SLICE}
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
-	    echo "Template build for ${CURRENT_SLICE} slice failed, exiting..."
+	    echo -e "\nTemplate build for ${CURRENT_SLICE} slice failed"
 	    exit
     fi
 
@@ -28,7 +28,7 @@ for CURRENT_SLICE in ${SLICE_LIST}; do
     fi
 
     if [[ ${RESULT} -ne 0 ]]; then
-    	echo "Stack deployment for ${CURRENT_SLICE} slice failed, exiting..."
+    	echo -e "\nStack deployment for ${CURRENT_SLICE} slice failed"
 	    exit
     fi
 done
