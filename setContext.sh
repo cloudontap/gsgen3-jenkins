@@ -155,7 +155,7 @@ for CURRENT_SLICE in ${SLICES:-${SLICE}}; do
         
     SLICE_ARRAY+=("${SLICE_PART,,}")
 
-    if [[ (-n "${TAG_PART}") && ( "${CURRENT_SLICE}" =~ *${TAG_SEPARATOR}* ) ]]; then
+    if [[ (-n "${TAG_PART}") && ( "${CURRENT_SLICE}" =~ .+${TAG_SEPARATOR}.+ ) ]]; then
         CODE_TAG_ARRAY+=("${TAG_PART,,}")        
     else
         CODE_TAG_ARRAY+=("?")
