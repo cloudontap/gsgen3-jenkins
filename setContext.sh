@@ -156,25 +156,20 @@ for CURRENT_SLICE in ${SLICES:-${SLICE}}; do
     SLICE_ARRAY+=("${SLICE_PART,,}")
 
     if [[ (-n "${TAG_PART}") && ( "${CURRENT_SLICE}" =~ *${TAG_SEPARATOR}* ) ]]; then
-
-        CODE_TAG_ARRAY+=("${TAG_PART,,}")
-        
-        # Determine code repo for the slice - there may be none
-        CODE_SLICE=$(echo "${SLICE_PART^^}" | tr "-" "_")
-        PRODUCT_CODE_REPO_VAR="${PRODUCT_UPPER}_${CODE_SLICE^^}_CODE_REPO"
-        if [[ -z "${!PRODUCT_CODE_REPO_VAR}" ]]; then
-            PRODUCT_CODE_REPO_VAR="${PRODUCT_UPPER}_CODE_REPO"
-        fi
-        CODE_REPO_PART="${!PRODUCT_CODE_REPO_VAR}"
-        if [[ -n "${CODE_REPO_PART}" ]]; then
-            CODE_REPO_ARRAY+=("${CODE_REPO_PART}")
-        else
-            CODE_REPO_ARRAY+=("\"\"")
-        fi
+        CODE_TAG_ARRAY+=("${TAG_PART,,}")        
     else
         CODE_TAG_ARRAY+=("\"\"")
-        CODE_REPO_ARRAY+=("\"\"")
     fi
+
+    # Determine code repo for the slice - there may be none
+    CODE_SLICE=$(echo "${SLICE_PART^^}" | tr "-" "_")
+    PRODUCT_CODE_REPO_VAR="${PRODUCT_UPPER}_${CODE_SLICE^^}_CODE_REPO"
+    if [[ -z "${!PRODUCT_CODE_REPO_VAR}" ]]; then
+        PRODUCT_CODE_REPO_VAR="${PRODUCT_UPPER}_CODE_REPO"
+    fi
+    CODE_REPO_PART="${!PRODUCT_CODE_REPO_VAR}"
+
+    CODE_REPO_ARRAY+=("${CODE_REPO_PART:-\"\"}")
 done
 
 # Determine the account access credentials
