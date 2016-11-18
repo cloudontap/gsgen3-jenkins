@@ -61,7 +61,7 @@ for PART in ${JOB_PATH[@]}; do
         PARTS_ARRAY+=("${PART#${COT_PREFIX}}")
     fi
 done
-PARTS_COUNT="${#PARTS[@]}"
+PARTS_COUNT="${#PARTS_ARRAY[@]}"
 
 if [[ "${PARTS_COUNT}" -gt 3 ]]; then
     # Assume its integrator/tenant/product/segment
@@ -145,8 +145,8 @@ SLICE_ARRAY=()
 CODE_TAG_ARRAY=()
 CODE_REPO_ARRAY=()
 for CURRENT_SLICE in ${SLICES:-${SLICE}}; do
-    SLICE_PART="${CURRENT_SLICE%%${TAG_SEPARATOR}*"
-    TAG_PART="${CURRENT_SLICE##*${TAG_SEPARATOR}"
+    SLICE_PART="${CURRENT_SLICE%%${TAG_SEPARATOR}*}"
+    TAG_PART="${CURRENT_SLICE##*${TAG_SEPARATOR}}"
     if [[ (-n "${CODE_TAG}") && ("${#SLICE_ARRAY[@]}" -eq 0) ]]; then
         # Permit override of first tag - easier if only one repo involved
         TAG_PART="${CODE_TAG}"
@@ -174,6 +174,7 @@ for CURRENT_SLICE in ${SLICES:-${SLICE}}; do
     else
         CODE_TAG_ARRAY+=("\"\"")
         CODE_REPO_ARRAY+=("\"\"")
+    fi
 done
 
 # Determine the account access credentials

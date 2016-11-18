@@ -121,7 +121,7 @@ if [[ !("${EXCLUDE_ACCOUNT_DIRECTORIES}" == "true") ]]; then
     # Pull in the account config repo
     ACCOUNT_URL="https://${!ACCOUNT_GIT_CREDENTIALS_VAR}@${ACCOUNT_GIT_DNS}/${ACCOUNT_GIT_ORG}/${ACCOUNT_CONFIG_REPO}"
     ACCOUNT_DIR="${ROOT_DIR}/config/${ACCOUNT}"
-    ${JENKINS_DIR}/manageRepo.sh -c -n "aid config" -u "${ACCOUNT_URL}" \
+    ${JENKINS_DIR}/manageRepo.sh -c -n "account config" -u "${ACCOUNT_URL}" \
         -d "${ACCOUNT_DIR}"
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
@@ -130,7 +130,7 @@ if [[ !("${EXCLUDE_ACCOUNT_DIRECTORIES}" == "true") ]]; then
 
     # Initialise if necessary
     if [[ "${INIT_REPOS}" == "true" ]]; then
-        ${JENKINS_DIR}/manageRepo.sh -i -n "aid config" -u "${ACCOUNT_URL}" \
+        ${JENKINS_DIR}/manageRepo.sh -i -n "account config" -u "${ACCOUNT_URL}" \
             -d "${ACCOUNT_DIR}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
@@ -184,7 +184,7 @@ if [[ !("${EXCLUDE_ACCOUNT_DIRECTORIES}" == "true") ]]; then
     # Pull in the account infrastructure repo
     ACCOUNT_URL="https://${!ACCOUNT_GIT_CREDENTIALS_VAR}@${ACCOUNT_GIT_DNS}/${ACCOUNT_GIT_ORG}/${ACCOUNT_INFRASTRUCTURE_REPO}"
     ACCOUNT_DIR="${ROOT_DIR}/infrastructure/${ACCOUNT}"
-    ${JENKINS_DIR}/manageRepo.sh -c -n "aid infrastructure" -u "${ACCOUNT_URL}" \
+    ${JENKINS_DIR}/manageRepo.sh -c -n "account infrastructure" -u "${ACCOUNT_URL}" \
         -d "${ACCOUNT_DIR}"
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
@@ -193,7 +193,7 @@ if [[ !("${EXCLUDE_ACCOUNT_DIRECTORIES}" == "true") ]]; then
 
     # Initialise if necessary
     if [[ "${INIT_REPOS}" == "true" ]]; then
-        ${JENKINS_DIR}/manageRepo.sh -i -n "aid infrastructure" -u "${ACCOUNT_URL}" \
+        ${JENKINS_DIR}/manageRepo.sh -i -n "account infrastructure" -u "${ACCOUNT_URL}" \
             -d "${ACCOUNT_DIR}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
