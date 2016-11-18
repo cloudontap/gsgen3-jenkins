@@ -8,12 +8,14 @@ trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 DETAIL_MESSAGE="release=${RELEASE_TAG}, ${DETAIL_MESSAGE}"
 echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
 
-# Prepare access to build info SLICE_ARRAY=(${SLICE_LIST})
+# Prepare access to build info
+SLICE_ARRAY=(${SLICE_LIST})
+SLICE_LAST_INDEX=$((${#SLICE_ARRAY[@]}-1))
 CODE_TAG_ARRAY=(${CODE_TAG_LIST})
 CODE_COMMIT_ARRAY=(${CODE_COMMIT_LIST})
 
 # Process each requested slice
-for INDEX in $(seq 0 ${#SLICE_ARRAY[@]}); do
+for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
 
     # Next slice to process
     CURRENT_SLICE=${SLICE_ARRAY[$INDEX]}
@@ -27,9 +29,10 @@ for INDEX in $(seq 0 ${#SLICE_ARRAY[@]}); do
 #    fi
     
     # Ensure build.ref (if present) aligns with the requested code tag
-    if [[ -f appsettings/${SEGMENT}/${CURRENT_SLICE}/build.ref ]]; then
+    if [[ ("${CODE_COMMIT_ARRAY[$INDEX]}" != "?")  ]]; then
         BUILD_REFERENCE=$(echo -n "${CODE_COMMIT_ARRAY[$INDEX]} ${CODE_TAG_ARRAY[$INDEX]}")
-        if [[ "$(cat appsettings/${SEGMENT}/${CURRENT_SLICE}/build.ref)" != "${BUILD_REFERENCE}" ]]; then
+        if [[ ( ! -f appsettings/${SEGMENT}/${CURRENT_SLICE}/build.ref) ||
+                ("$(cat appsettings/${SEGMENT}/${CURRENT_SLICE}/build.ref)" != "${BUILD_REFERENCE}") ]]; then
             echo -n "${BUILD_REFERENCE}" > appsettings/${SEGMENT}/${CURRENT_SLICE}/build.ref
         fi
     fi

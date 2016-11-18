@@ -6,26 +6,27 @@ trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Prepare access to build info 
 SLICE_ARRAY=(${SLICE_LIST})
+SLICE_LAST_INDEX=$((${#SLICE_ARRAY[@]}-1))
 CODE_TAG_ARRAY=(${CODE_TAG_LIST})
 CODE_REPO_ARRAY=(${CODE_REPO_LIST})
 CODE_COMMIT_ARRAY=()
 
 # Loop through the slices and check each code tag
-for INDEX in $(seq 0 ${#SLICE_ARRAY[@]}); do
+for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
 
     # Ensure code repo defined if tag provided
-    if [[ (-n "${CODE_TAG_ARRAY[$INDEX]}")]]; then
-        if [[ (-z "${CODE_REPO_ARRAY[$INDEX]}") ]]; then
+    if [[ ("${CODE_TAG_ARRAY[$INDEX]}" != "?")]]; then
+        if [[ ("${CODE_REPO_ARRAY[$INDEX]}" == "?") ]]; then
             echo -e "\nNo code repo defined for slice ${SLICE_ARRAY[$INDEX]}"
             exit
         fi
     else
-        if [[ (-n "${CODE_REPO_ARRAY[$INDEX]}") ]]; then
+        if [[ ("${CODE_REPO_ARRAY[$INDEX]}"  != "?") ]]; then
             echo -e "\nSlice ${SLICE_ARRAY[$INDEX]} requires a code tag"
             exit
         else
             # Nothing to do for this slice - no tag or repo
-            CODE_COMMIT_ARRAY+=("\"\"")
+            CODE_COMMIT_ARRAY+=("?")
             continue
         fi
     fi

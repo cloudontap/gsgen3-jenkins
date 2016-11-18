@@ -158,7 +158,7 @@ for CURRENT_SLICE in ${SLICES:-${SLICE}}; do
     if [[ (-n "${TAG_PART}") && ( "${CURRENT_SLICE}" =~ *${TAG_SEPARATOR}* ) ]]; then
         CODE_TAG_ARRAY+=("${TAG_PART,,}")        
     else
-        CODE_TAG_ARRAY+=("\"\"")
+        CODE_TAG_ARRAY+=("?")
     fi
 
     # Determine code repo for the slice - there may be none
@@ -169,7 +169,7 @@ for CURRENT_SLICE in ${SLICES:-${SLICE}}; do
     fi
     CODE_REPO_PART="${!PRODUCT_CODE_REPO_VAR}"
 
-    CODE_REPO_ARRAY+=("${CODE_REPO_PART:-\"\"}")
+    CODE_REPO_ARRAY+=("${CODE_REPO_PART:-?}")
 done
 
 # Determine the account access credentials
