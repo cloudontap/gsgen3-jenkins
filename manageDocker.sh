@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-
+JENKINS_DIR=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 DOCKER_TAG_DEFAULT="latest"
@@ -42,26 +42,41 @@ function usage() {
 
 # Determine if a docker registry is hosted by AWS
 # $1 = registry
+# $2 = provider
+PROVIDER_REGISTRY_IDS=()
+PROVIDER_AWS_ACCESS_KEY_IDS=()
+PROVIDER_AWS_SECRET_ACCESS_KEYS=()
+PROVIDER_AWS_SESSION_TOKENS=()
+
 function isAWSRegistry() {
     if [[ "${1}" =~ ".amazonaws.com" ]]; then
 
         # Determine the registry account id and region
-        AWS_REGISTRY_ID=$(echo -e "\n${1}" | cut -d '.' -f 1)
-        AWS_REGISTRY_REGION=$(echo -e "\n${1}" | cut -d '.' -f 4)
+        AWS_REGISTRY_ID=$(echo -n "${1}" | cut -d '.' -f 1)
+        AWS_REGISTRY_REGION=$(echo -n "${1}" | cut -d '.' -f 4)
+        
+        for INDEX in seq ( 0 $((${#PROVIDER_REGISTRY_IDS[@]}-1 )) ); do
+            if [[ "${PROVIDER_REGISTRY_IDS[$INDEX]}" == "${AWS_REGISTRY_ID}" ]]; then
+                # Use cached values
+                export AWS_ACCESS_KEY_ID="${PROVIDER_AWS_ACCESS_KEY_IDS[$INDEX]}"
+                export AWS_SECRET_ACCESS_KEY="${PROVIDER_AWS_SECRET_ACCESS_KEYS[$INDEX]}"
+                export AWS_SESSION_TOKEN="${PROVIDER_AWS_SESSION_TOKENS[$INDEX]}"
+                return 0
+            fi
+        done
 
-        # Set up the AWS credentials
-        CHECK_AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-${ACCOUNT_TEMP_AWS_ACCESS_KEY_ID}}"
-        CHECK_AWS_ACCESS_KEY_ID="${CHECK_AWS_ACCESS_KEY_ID:-${!ACCOUNT_AWS_ACCESS_KEY_ID_VAR}}"
-        if [[ -n "${CHECK_AWS_ACCESS_KEY_ID}" ]]; then export AWS_ACCESS_KEY_ID="${CHECK_AWS_ACCESS_KEY_ID}"; fi
+        if [[ -z "$2" ]]; then
+            return 0
+        fi
 
-        CHECK_AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-${ACCOUNT_TEMP_AWS_SECRET_ACCESS_KEY}}"
-        CHECK_AWS_SECRET_ACCESS_KEY="${CHECK_AWS_SECRET_ACCESS_KEY:-${!ACCOUNT_AWS_SECRET_ACCESS_KEY_VAR}}"
-        if [[ -n "${CHECK_AWS_SECRET_ACCESS_KEY}" ]]; then export AWS_SECRET_ACCESS_KEY="${CHECK_AWS_SECRET_ACCESS_KEY}"; fi
+        # New registry - set up the AWS credentials
+        . ${JENKINS_DIR}/setAWSCredentials.sh ${2^^}
 
-        CHECK_AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN:-${ACCOUNT_TEMP_AWS_SESSION_TOKEN}}"
-        CHECK_AWS_SESSION_TOKEN="${CHECK_AWS_SESSION_TOKEN:-${!ACCOUNT_AWS_SESSION_TOKEN_VAR}}"
-        if [[ -n "${CHECK_AWS_SESSION_TOKEN}" ]]; then export AWS_SESSION_TOKEN="${CHECK_AWS_SESSION_TOKEN}"; fi
-
+        # Cache the results
+        PROVIDER_REGISTRY_IDS+=("${AWS_REGISTRY_ID}")
+        PROVIDER_AWS_ACCESS_KEY_IDS+=("${AWS_CRED_TEMP_AWS_ACCESS_KEY_ID:-${!AWS_CRED_AWS_ACCESS_KEY_ID_VAR}}")
+        PROVIDER_AWS_SECRET_ACCESS_KEYS+=("${AWS_CRED_TEMP_AWS_SECRET_ACCESS_KEY:-${!AWS_CRED_AWS_SECRET_ACCESS_KEY_VAR}}")
+        PROVIDER_AWS_SESSION_TOKENS+=("${AWS_CRED_TEMP_AWS_SESSION_TOKEN}")
         return 0
     else
         return 1
@@ -70,14 +85,15 @@ function isAWSRegistry() {
 
 # Perform login logic required depending on the registry implementation
 # $1 = registry
-# $2 = user
-# $3 = password
+# $2 = provider
+# $3 = user
+# $4 = password
 function dockerLogin() {
-    isAWSRegistry $1
+    isAWSRegistry $1 $2
     if [[ $? -eq 0 ]]; then
         $(aws --region ${AWS_REGISTRY_REGION} ecr get-login --registry-ids ${AWS_REGISTRY_ID})
     else
-        docker login -u ${2} -p ${3} ${1}
+        docker login -u ${3} -p ${4} ${1}
     fi
     return $?
 }
@@ -182,7 +198,7 @@ DOCKER_IMAGE="${DOCKER_REPO}:${DOCKER_TAG}"
 FULL_DOCKER_IMAGE="${PRODUCT_DOCKER_DNS}/${DOCKER_IMAGE}"
 
 # Confirm access to the local registry
-dockerLogin ${PRODUCT_DOCKER_DNS} ${!PRODUCT_DOCKER_USER_VAR} ${!PRODUCT_DOCKER_PASSWORD_VAR} 
+dockerLogin ${PRODUCT_DOCKER_DNS} ${PRODUCT_DOCKER_PROVIDER} ${!PRODUCT_DOCKER_USER_VAR} ${!PRODUCT_DOCKER_PASSWORD_VAR}
 RESULT=$?
 if [[ "$RESULT" -ne 0 ]]; then
    echo -e "\nCan't log in to ${PRODUCT_DOCKER_DNS}"
@@ -274,7 +290,7 @@ case ${DOCKER_OPERATION} in
                 FULL_REMOTE_DOCKER_IMAGE="${PRODUCT_REMOTE_DOCKER_DNS}/${REMOTE_DOCKER_IMAGE}"
 
                 # Confirm access to the remote registry
-                dockerLogin ${PRODUCT_REMOTE_DOCKER_DNS} ${!PRODUCT_REMOTE_DOCKER_USER_VAR} ${!PRODUCT_REMOTE_DOCKER_PASSWORD_VAR}
+                dockerLogin ${PRODUCT_REMOTE_DOCKER_DNS} ${PRODUCT_REMOTE_DOCKER_PROVIDER} ${!PRODUCT_REMOTE_DOCKER_USER_VAR} ${!PRODUCT_REMOTE_DOCKER_PASSWORD_VAR}
                 RESULT=$?
                 if [[ "$RESULT" -ne 0 ]]; then
                     echo -e "\nCan't log in to ${PRODUCT_REMOTE_DOCKER_DNS}"
@@ -316,7 +332,6 @@ case ${DOCKER_OPERATION} in
         ;;        
         
     *)
-        # For any other value, use the docker command default = dockerhub
         echo -e "\n Unknown operation \"${DOCKER_OPERATION}\""
         usage
         ;;
