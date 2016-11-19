@@ -57,7 +57,7 @@ function isAWSRegistry() {
         
         for INDEX in $(seq 0 $((${#PROVIDER_REGISTRY_IDS[@]}-1 )) ); do
             if [[ "${PROVIDER_REGISTRY_IDS[$INDEX]}" == "${AWS_REGISTRY_ID}" ]]; then
-                # Use cached values
+                # Use cached credentials
                 export AWS_ACCESS_KEY_ID="${PROVIDER_AWS_ACCESS_KEY_IDS[$INDEX]}"
                 export AWS_SECRET_ACCESS_KEY="${PROVIDER_AWS_SECRET_ACCESS_KEYS[$INDEX]}"
                 export AWS_SESSION_TOKEN="${PROVIDER_AWS_SESSION_TOKENS[$INDEX]}"
@@ -72,11 +72,16 @@ function isAWSRegistry() {
         # New registry - set up the AWS credentials
         . ${JENKINS_DIR}/setAWSCredentials.sh ${2^^}
 
-        # Cache the results
+        # Define the credentials
+        export AWS_ACCESS_KEY_ID="${AWS_CRED_TEMP_AWS_ACCESS_KEY_ID:-${!AWS_CRED_AWS_ACCESS_KEY_ID_VAR}}"
+        export AWS_SECRET_ACCESS_KEY="${AWS_CRED_TEMP_AWS_SECRET_ACCESS_KEY:-${!AWS_CRED_AWS_SECRET_ACCESS_KEY_VAR}}"
+        export AWS_SESSION_TOKEN="${AWS_CRED_TEMP_AWS_SESSION_TOKEN}"
+
+        # Cache the redentials
         PROVIDER_REGISTRY_IDS+=("${AWS_REGISTRY_ID}")
-        PROVIDER_AWS_ACCESS_KEY_IDS+=("${AWS_CRED_TEMP_AWS_ACCESS_KEY_ID:-${!AWS_CRED_AWS_ACCESS_KEY_ID_VAR}}")
-        PROVIDER_AWS_SECRET_ACCESS_KEYS+=("${AWS_CRED_TEMP_AWS_SECRET_ACCESS_KEY:-${!AWS_CRED_AWS_SECRET_ACCESS_KEY_VAR}}")
-        PROVIDER_AWS_SESSION_TOKENS+=("${AWS_CRED_TEMP_AWS_SESSION_TOKEN}")
+        PROVIDER_AWS_ACCESS_KEY_IDS+=("${AWS_ACCESS_KEY_ID}")
+        PROVIDER_AWS_SECRET_ACCESS_KEYS+=("${AWS_SECRET_ACCESS_KEY}")
+        PROVIDER_AWS_SESSION_TOKENS+=("${AWS_SESSION_TOKEN}")
         return 0
     else
         return 1
