@@ -31,7 +31,7 @@ if [[ (-n ${!AWS_CRED_AWS_ACCOUNT_ID_VAR}) && (-n ${!AWS_CRED_AUTOMATION_USER_VA
         AWS_ACCESS_KEY_ID="${AWS_CRED_AWS_ACCESS_KEY_ID}" \
         AWS_SECRET_ACCESS_KEY="${AWS_CRED_AWS_SECRET_ACCESS_KEY}" \
         aws sts assume-role \
-            --role-arn arn:aws:iam::${!ACCOUNT_AWS_ACCOUNT_ID_VAR}:role/${ACCOUNT_AUTOMATION_ROLE} \
+            --role-arn arn:aws:iam::${!AWS_CRED_AWS_ACCOUNT_ID_VAR}:role/${ACCOUNT_AUTOMATION_ROLE} \
             --role-session-name "$(echo $GIT_USER | tr -d ' ' )" \
             --output json > $TEMP_CREDENTIAL_FILE
         AWS_CRED_TEMP_AWS_ACCESS_KEY_ID=$(cat $TEMP_CREDENTIAL_FILE | jq -r '.Credentials.AccessKeyId')
