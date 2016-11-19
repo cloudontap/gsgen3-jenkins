@@ -64,7 +64,7 @@ fi
 # Commit the generated application templates
 ${JENKINS_DIR}/manageRepo.sh -p \
     -d ${WORKSPACE}/${ACCOUNT}/infrastructure/${PRODUCT} \
-    -n config \
+    -n infrastructure \
     -t ${RELEASE_TAG} \
     -m "${DETAIL_MESSAGE}" \
     -b ${PRODUCT_INFRASTRUCTURE_REFERENCE}
