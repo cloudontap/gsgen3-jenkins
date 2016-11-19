@@ -167,6 +167,15 @@ for CURRENT_SLICE in ${SLICES:-${SLICE}}; do
     CODE_REPO_ARRAY+=("${CODE_REPO_PART:-?}")
 done
 
+# Regenerate the slice list in case the first code tag was overriden
+UPDATED_SLICES=
+for INDEX in $( seq 0 $((${#SLICE_ARRAY[@]}-1)) ); do
+    UPDATED_SLICES="${UPDATED_SLICES} ${SLICE_ARRAY[$INDEX]}"
+    if [[ "${CODE_TAG_ARRAY[$INDEX]}" != "?" ]]; then
+        UPDATED_SLICES="${UPDATED_SLICES}!${CODE_TAG_ARRAY[$INDEX]}"
+    fi
+done
+
 # Determine the account access credentials
 . ${JENKINS_DIR}/setAWSCredentials.sh ${ACCOUNT_UPPER}
 
@@ -333,6 +342,7 @@ echo "TENANT=${TENANT}" >> ${WORKSPACE}/context.properties
 echo "ACCOUNT=${ACCOUNT}" >> ${WORKSPACE}/context.properties
 echo "PRODUCT=${PRODUCT}" >> ${WORKSPACE}/context.properties
 if [[ -n "${SEGMENT}" ]]; then echo "SEGMENT=${SEGMENT}" >> ${WORKSPACE}/context.properties; fi
+if [[ -n "${UPDATED_SLICES}" ]]; then echo "SLICES=${UPDATED_SLICES}" >> ${WORKSPACE}/context.properties; fi
 
 echo "GIT_USER=${GIT_USER}" >> ${WORKSPACE}/context.properties
 echo "GIT_EMAIL=${GIT_EMAIL}" >> ${WORKSPACE}/context.properties
