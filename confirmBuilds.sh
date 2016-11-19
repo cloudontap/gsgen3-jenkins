@@ -21,14 +21,13 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
             exit
         fi
     else
-        if [[ ("${CODE_REPO_ARRAY[$INDEX]}"  != "?") ]]; then
-            echo -e "\nSlice ${SLICE_ARRAY[$INDEX]} requires a code tag"
-            exit
-        else
-            # Nothing to do for this slice - no tag or repo
-            CODE_COMMIT_ARRAY+=("?")
-            continue
-        fi
+        # Nothing to do for this slice
+        # Note that it is permissible to not have a tag for a slice
+        # that is associated with a code repo. This situation arises
+        # if application settings are changed and a new release is 
+        # thus required.
+        CODE_COMMIT_ARRAY+=("?")
+        continue
     fi
     
     # Get the commit corresponding to the tag
