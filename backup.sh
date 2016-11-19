@@ -14,10 +14,10 @@ if [[ -n "${SNAPSHOT_AGE}" ]]; then
 fi
 
 # Snapshot the database
-BIN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
+GSGEN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
 cd ${WORKSPACE}/${ACCOUNT}/config/solutions/${PRODUCT}/${SEGMENT}
 
-${BIN_DIR}/snapshotRDSDatabase.sh -i ${COMPONENT} -s b${BUILD_NUMBER} ${SNAPSHOT_OPTS}
+${GSGEN_DIR}/snapshotRDSDatabase.sh -i ${COMPONENT} -s b${BUILD_NUMBER} ${SNAPSHOT_OPTS}
 RESULT=$?
 
 if [[ ${RESULT} -ne 0 ]]; then

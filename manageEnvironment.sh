@@ -2,10 +2,10 @@
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
 JENKINS_DIR=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
+GSGEN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Generate the deployment template for the required slice
-BIN_DIR="${WORKSPACE}/${AID}/config/bin"
 
 # Process the slices
 for LEVEL in segment solution; do
@@ -13,10 +13,10 @@ for LEVEL in segment solution; do
     for SLICE in ${!SLICES}; do
     
     	# Generate the template if required
-        cd ${WORKSPACE}/${AID}/config/${PRODUCT}/solutions/${SEGMENT}
+        cd ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT}/solutions/${SEGMENT}
         case ${MODE} in
             create|update)
-   	            ${BIN_DIR}/create${LEVEL^}Template.sh -s ${SLICE}
+   	            ${GSGEN_DIR}/create${LEVEL^}Template.sh -s ${SLICE}
                 RESULT=$?
                 if [[ "${RESULT}" -ne 0 ]]; then
             	    echo "Generation of the ${LEVEL} level template for the ${SLICE} slice of the ${SEGMENT} segment failed"
@@ -26,7 +26,7 @@ for LEVEL in segment solution; do
         esac
         
         # Manage the stack
-        ${BIN_DIR}/${MODE}Stack.sh -t ${LEVEL} -s ${SLICE}
+        ${GSGEN_DIR}/${MODE}Stack.sh -t ${LEVEL} -s ${SLICE}
 	    RESULT=$?
         if [[ "${RESULT}" -ne 0 ]]; then
             echo "Applying ${MODE} mode to the ${LEVEL} level stack for the ${SLICE} slice of the ${SEGMENT} segment failed"
@@ -35,7 +35,7 @@ for LEVEL in segment solution; do
         
 		# Update the infrastructure repo to capture any stack changes
         ${JENKINS_DIR}/manageRepo.sh -p \
-            -d ${WORKSPACE}/${AID}/infrastructure/${PRODUCT} \
+            -d ${WORKSPACE}/${ACCOUNT}/infrastructure/${PRODUCT} \
             -n infrastructure \
             -m "Stack changes as a result of applying ${MODE} mode to the ${LEVEL} level stack for the ${SLICE} slice of the ${SEGMENT} segment"
             
@@ -49,15 +49,15 @@ done
 
 # Check credentials if required
 if [[ "${CHECK_CREDENTIALS}" == "true" ]]; then
-    cd ${WORKSPACE}/${AID}
+    cd ${WORKSPACE}/${ACCOUNT}
     SEGMENT_OPTION=""
     if [[ -n "${SEGMENT}" ]]; then
        SEGMENT_OPTION="-s ${SEGMENT}"
     fi 
-    ${BIN_DIR}/initProductCredentials.sh -a ${AID} -p ${PRODUCT} ${SEGMENT_OPTION}
+    ${GSGEN_DIR}/initProductCredentials.sh -a ${ACCOUNT} -p ${PRODUCT} ${SEGMENT_OPTION}
 
     # Update the infrastructure repo to capture any credential changes
-    cd ${WORKSPACE}/${AID}/infrastructure/${PRODUCT}
+    cd ${WORKSPACE}/${ACCOUNT}/infrastructure/${PRODUCT}
 
 	# Ensure git knows who we are
     git config user.name  "${GIT_USER}"
@@ -76,8 +76,8 @@ fi
 
 # Update the code and credentials buckets if required
 if [[ "${SYNC_BUCKETS}" == "true" ]]; then
-    cd ${WORKSPACE}/${AID}
-    ${BIN_DIR}/syncAccountBuckets.sh -a ${AID}
+    cd ${WORKSPACE}/${ACCOUNT}
+    ${GSGEN_DIR}/syncAccountBuckets.sh -a ${ACCOUNT}
 fi
 
 

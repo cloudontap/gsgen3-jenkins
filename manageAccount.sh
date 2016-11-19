@@ -1,32 +1,29 @@
 #!/bin/bash
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-
+GSGEN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
-
-# Location of scripts
-BIN_DIR="${WORKSPACE}/${AID}/config/bin"
 
 # Create the account level buckets if required
 if [[ "${CREATE_ACCOUNT_BUCKETS}" == "true" ]]; then
-    cd ${WORKSPACE}/${AID}/config/${AID}
-    ${BIN_DIR}/createAccountTemplate.sh -a ${AID}
+    cd ${WORKSPACE}/${ACCOUNT}/config/${ACCOUNT}
+    ${GSGEN_DIR}/createAccountTemplate.sh -a ${ACCOUNT}
     RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
-        echo "Generation of the account level template for the ${AID} account failed"
+        echo "Generation of the account level template for the ${ACCOUNT} account failed"
         exit
     fi
 
     # Create the stack
-    ${BIN_DIR}/createStack.sh -t account
+    ${GSGEN_DIR}/createStack.sh -t account
 	RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
-        echo "Creation of the account level stack for the ${AID} account failed"
+        echo "Creation of the account level stack for the ${ACCOUNT} account failed"
         exit
     fi
         
     # Update the infrastructure repo to capture any stack changes
-    cd ${WORKSPACE}/${AID}/infrastructure/${AID}
+    cd ${WORKSPACE}/${ACCOUNT}/infrastructure/${ACCOUNT}
 
     # Ensure git knows who we are
     git config user.name  "${BUILD_USER}"
@@ -34,19 +31,19 @@ if [[ "${CREATE_ACCOUNT_BUCKETS}" == "true" ]]; then
 
     # Record changes
     git add *
-    git commit -m "Stack changes as a result of creating the ${AID} account stack"
+    git commit -m "Stack changes as a result of creating the ${ACCOUNT} account stack"
     git push origin master
 	RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
-        echo "Unable to save the changes resulting from creating the ${AID} account stack"
+        echo "Unable to save the changes resulting from creating the ${ACCOUNT} account stack"
         exit
     fi
 fi
 
 # Update the code and credentials buckets if required
 if [[ "${SYNC_ACCOUNT_BUCKETS}" == "true" ]]; then
-    cd ${WORKSPACE}/${AID}
-    ${BIN_DIR}/syncAccountBuckets.sh -a ${AID}
+    cd ${WORKSPACE}/${ACCOUNT}
+    ${GSGEN_DIR}/syncAccountBuckets.sh -a ${ACCOUNT}
 fi
 
 # All good

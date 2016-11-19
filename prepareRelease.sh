@@ -1,7 +1,8 @@
 #!/bin/bash
 
 if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-BIN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
+JENKINS_DIR=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
+GSGEN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Add release number to details
@@ -40,7 +41,7 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
 
     # Generate the application level template
     cd solutions/${SEGMENT}
-	${BIN_DIR}/createApplicationTemplate.sh -c ${RELEASE_TAG} -s ${CURRENT_SLICE}
+	${GSGEN_DIR}/createApplicationTemplate.sh -c ${RELEASE_TAG} -s ${CURRENT_SLICE}
 	RESULT=$?
 	if [[ ${RESULT} -ne 0 ]]; then
  		echo -e "\nCan't generate the template for slice ${CURRENT_SLICE}"
