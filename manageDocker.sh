@@ -55,7 +55,8 @@ function isAWSRegistry() {
         AWS_REGISTRY_ID=$(echo -n "${1}" | cut -d '.' -f 1)
         AWS_REGISTRY_REGION=$(echo -n "${1}" | cut -d '.' -f 4)
         
-        for INDEX in seq ( 0 $((${#PROVIDER_REGISTRY_IDS[@]}-1 )) ); do
+        PROVIDER_LAST_INDEX=$((${#PROVIDER_REGISTRY_IDS[@]}-1))
+        for INDEX in seq ( 0 ${PROVIDER_LAST_INDEX} ); do
             if [[ "${PROVIDER_REGISTRY_IDS[$INDEX]}" == "${AWS_REGISTRY_ID}" ]]; then
                 # Use cached values
                 export AWS_ACCESS_KEY_ID="${PROVIDER_AWS_ACCESS_KEY_IDS[$INDEX]}"
