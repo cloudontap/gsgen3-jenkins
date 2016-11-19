@@ -318,24 +318,21 @@ fi
 
 # Basic details for git commits/slack notification (enhanced by other scripts)
 DETAIL_MESSAGE="product=${PRODUCT}"
-if [[ -n "${ENVIRONMENT}" ]]; then DETAIL_MESSAGE="${DETAIL_MESSAGE}, environment=${ENVIRONMENT}"; fi
-if [[ "${SEGMENT}" != "${ENVIRONMENT}" ]]; then DETAIL_MESSAGE="${DETAIL_MESSAGE}, segment=${SEGMENT}"; fi
-if [[ -n "${TIER}" ]];      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, tier=${TIER}"; fi
-if [[ -n "${COMPONENT}" ]]; then DETAIL_MESSAGE="${DETAIL_MESSAGE}, component=${COMPONENT}"; fi
-if [[ -n "${SLICE}" ]];     then DETAIL_MESSAGE="${DETAIL_MESSAGE}, slice=${SLICE}"; fi
-if [[ -n "${SLICES}" ]];    then DETAIL_MESSAGE="${DETAIL_MESSAGE}, slices=${SLICES}"; fi
-if [[ -n "${TASK}" ]];      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, task=${TASK}"; fi
-if [[ -n "${TASKS}" ]];     then DETAIL_MESSAGE="${DETAIL_MESSAGE}, tasks=${TASKS}"; fi
-if [[ -n "${GIT_USER}" ]];  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, user=${GIT_USER}"; fi
-if [[ -n "${MODE}" ]];      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, mode=${MODE}"; fi
+if [[ -n "${ENVIRONMENT}" ]];               then DETAIL_MESSAGE="${DETAIL_MESSAGE}, environment=${ENVIRONMENT}"; fi
+if [[ "${SEGMENT}" != "${ENVIRONMENT}" ]];  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, segment=${SEGMENT}"; fi
+if [[ -n "${TIER}" ]];                      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, tier=${TIER}"; fi
+if [[ -n "${COMPONENT}" ]];                 then DETAIL_MESSAGE="${DETAIL_MESSAGE}, component=${COMPONENT}"; fi
+if [[ "${#SLICE_ARRAY[@]}" -ne 0 ]];        then DETAIL_MESSAGE="${DETAIL_MESSAGE}, slices=${SLICE_ARRAY[@]}"; fi
+if [[ -n "${TASK}" ]];                      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, task=${TASK}"; fi
+if [[ -n "${TASKS}" ]];                     then DETAIL_MESSAGE="${DETAIL_MESSAGE}, tasks=${TASKS}"; fi
+if [[ -n "${GIT_USER}" ]];                  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, user=${GIT_USER}"; fi
+if [[ -n "${MODE}" ]];                      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, mode=${MODE}"; fi
 
 # Save for future steps
 echo "TENANT=${TENANT}" >> ${WORKSPACE}/context.properties
 echo "ACCOUNT=${ACCOUNT}" >> ${WORKSPACE}/context.properties
 echo "PRODUCT=${PRODUCT}" >> ${WORKSPACE}/context.properties
 if [[ -n "${SEGMENT}" ]]; then echo "SEGMENT=${SEGMENT}" >> ${WORKSPACE}/context.properties; fi
-if [[ -n "${SLICE}" ]]; then echo "SLICE=${SLICE}" >> ${WORKSPACE}/context.properties; fi
-if [[ -n "${SLICES}" ]]; then echo "SLICES=${SLICES}" >> ${WORKSPACE}/context.properties; fi
 
 echo "GIT_USER=${GIT_USER}" >> ${WORKSPACE}/context.properties
 echo "GIT_EMAIL=${GIT_EMAIL}" >> ${WORKSPACE}/context.properties
