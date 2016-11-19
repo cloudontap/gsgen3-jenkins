@@ -55,8 +55,17 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
     ${JENKINS_DIR}/manageDocker.sh -v -s ${SLICE_ARRAY[$INDEX]} -g "${CODE_COMMIT}"
     RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
-        echo -e "\nDocker image for slice ${SLICE_ARRAY[$INDEX]} and commit ${CODE_COMMIT} not found. Was the build successful?"
-        exit
+        if [[ "${PRODUCT_DOCKER_PROVIDER}" != "${PRODUCT_REMOTE_DOCKER_PROVIDER}" ]]; then
+            # Attempt to pull image in from remote docker provider
+            ${JENKINS_DIR}/manageDocker.sh -p -s ${SLICE_ARRAY[$INDEX]} -g "${CODE_COMMIT}"
+            if [[ "${RESULT}" -ne 0 ]]; then
+                echo -e "\nUnable to pull docker image for slice ${SLICE_ARRAY[$INDEX]} and commit ${CODE_COMMIT} from docker provider ${PRODUCT_REMOTE_DOCKER_PROVIDER}. Was the build successful?"
+                exit
+            fi
+        else
+            echo -e "\nDocker image for slice ${SLICE_ARRAY[$INDEX]} and commit ${CODE_COMMIT} not found. Was the build successful?"
+            exit
+        fi
     fi
 
     # Save details of this slice
