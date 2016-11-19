@@ -61,6 +61,9 @@ function isAWSRegistry() {
                 export AWS_ACCESS_KEY_ID="${PROVIDER_AWS_ACCESS_KEY_IDS[$INDEX]}"
                 export AWS_SECRET_ACCESS_KEY="${PROVIDER_AWS_SECRET_ACCESS_KEYS[$INDEX]}"
                 export AWS_SESSION_TOKEN="${PROVIDER_AWS_SESSION_TOKENS[$INDEX]}"
+                if [[ -z "${AWS_SESSION_TOKEN}" ]]; then
+                    unset AWS_SESSION_TOKEN
+                fi
                 return 0
             fi
         done
@@ -76,6 +79,9 @@ function isAWSRegistry() {
         export AWS_ACCESS_KEY_ID="${AWS_CRED_TEMP_AWS_ACCESS_KEY_ID:-${!AWS_CRED_AWS_ACCESS_KEY_ID_VAR}}"
         export AWS_SECRET_ACCESS_KEY="${AWS_CRED_TEMP_AWS_SECRET_ACCESS_KEY:-${!AWS_CRED_AWS_SECRET_ACCESS_KEY_VAR}}"
         export AWS_SESSION_TOKEN="${AWS_CRED_TEMP_AWS_SESSION_TOKEN}"
+        if [[ -z "${AWS_SESSION_TOKEN}" ]]; then
+            unset AWS_SESSION_TOKEN
+        fi
 
         # Cache the redentials
         PROVIDER_REGISTRY_IDS+=("${AWS_REGISTRY_ID}")
