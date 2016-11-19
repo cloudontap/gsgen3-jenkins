@@ -323,7 +323,7 @@ case ${DOCKER_OPERATION} in
             # Tag the image ready to push to the registry
             docker tag ${FULL_REMOTE_DOCKER_IMAGE} ${FULL_DOCKER_IMAGE}
             RESULT=$?
-            if [[ "$?" -ne 0 ]]; then
+            if [[ "$RESULT" -ne 0 ]]; then
                 echo -e "\nCouldn't tag image ${FULL_REMOTE_DOCKER_IMAGE} with ${FULL_DOCKER_IMAGE}"
             else
                 # Push to registry
@@ -334,7 +334,7 @@ case ${DOCKER_OPERATION} in
                 else
                     docker push ${FULL_DOCKER_IMAGE}
                     RESULT=$?
-                    if [[ "$?" -ne 0 ]]; then
+                    if [[ "$RESULT" -ne 0 ]]; then
                         echo -e "\nUnable to push ${DOCKER_IMAGE} to the local registry"
                     fi
                 fi
@@ -358,3 +358,5 @@ if [[ "${IMAGEID}" != "" ]]; then
     docker rmi -f ${IMAGEID}
 fi
 
+# The RESULT variable is not explicitly set here so result of operation
+# can be returned after image cleanup.
