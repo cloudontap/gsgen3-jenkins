@@ -3,18 +3,20 @@
 if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-# Determine the required build image
+# Include the current build image references in the detail message
 cd ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT}
-BUILD_FILE="appsettings/${SEGMENT}/${SLICE}/build.ref"
-if [[ -e ${BUILD_FILE} ]]; then
-    BUILD_REFERENCE="$(cat ${BUILD_FILE})"
-    echo "BUILD_REFERENCE=${BUILD_REFERENCE}" >> ${WORKSPACE}/context.properties
-fi
 
-# Generate the notification message information
-if [[ -n "${BUILD_REFERENCE}" ]]; then
-    echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}, build=${BUILD_REFERENCE}" >> ${WORKSPACE}/context.properties
-fi
+for CURRENT_SLICE in ${SLICE_LIST}; do
+    BUILD_FILE="appsettings/${SEGMENT}/${CURRENT_SLICE}/build.ref"
+    if [[ -e ${BUILD_FILE} ]]; then
+        BUILD_REFERENCE="$(cat ${BUILD_FILE})"
+        if [[ -n "${BUILD_REFERENCE}" ]]; then
+            DETAIL_MESSAGE="${DETAIL_MESSAGE}, ${CURRENT_SLICE}=${BUILD_REFERENCE:0:8}"
+        fi
+    fi
+done
+
+echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
 
 # All good
 RESULT=0

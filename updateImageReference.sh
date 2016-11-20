@@ -5,9 +5,16 @@ trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Check the current reference value
 cd ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT}
+
+if [[ -f "appsettings/${SEGMENT}/${SLICE}/slice.ref" ]]; then
+    REFERENCED_SLICE=$(cat "appsettings/${SEGMENT}/${SLICE}/slice.ref")
+    echo -e "\nSlice references the slice ${REFERENCED_SLICE}"
+    exit
+fi
+
 BUILD_FILE="appsettings/${SEGMENT}/${SLICE}/build.ref"
 if [[ "$(cat ${BUILD_FILE})" == "${GIT_COMMIT}" ]]; then
-  echo -e "\nThe current reference is the same"
+  echo -e "\nThe requested reference value for slice $SLICE is already set"
   exit
 fi
 

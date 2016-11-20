@@ -28,14 +28,15 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
 #    fi
     
     # Ensure build.ref (if present) aligns with the requested code tag
-    if [[ ("${CODE_COMMIT_ARRAY[$INDEX]}" != "?")  ]]; then
+    SLICE_FILE="appsettings/${SEGMENT}/${CURRENT_SLICE}/slice.ref"
+    BUILD_FILE="appsettings/${SEGMENT}/${CURRENT_SLICE}/build.ref"
+    if [[ ( ! -f ${SLICE_FILE}) && ("${CODE_COMMIT_ARRAY[$INDEX]}" != "?") ]]; then
         BUILD_REFERENCE=$(echo -n "${CODE_COMMIT_ARRAY[$INDEX]} ${CODE_TAG_ARRAY[$INDEX]}")
-        if [[ ( ! -f appsettings/${SEGMENT}/${CURRENT_SLICE}/build.ref) ||
-                ("$(cat appsettings/${SEGMENT}/${CURRENT_SLICE}/build.ref)" != "${BUILD_REFERENCE}") ]]; then
-            echo -n "${BUILD_REFERENCE}" > appsettings/${SEGMENT}/${CURRENT_SLICE}/build.ref
+        if [[ ( ! -f ${BUILD_FILE}) ||
+                ("$(cat ${BUILD_FILE})" != "${BUILD_REFERENCE}") ]]; then
+            echo -n "${BUILD_REFERENCE}" > ${BUILD_FILE}
         fi
     fi
-
 
     # Generate the application level template
     cd solutions/${SEGMENT}
