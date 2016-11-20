@@ -38,6 +38,7 @@ function usage() {
 
 
 function init() {
+    echo -e "Initialising the ${REPO_NAME} repo..."
     git status >/dev/null 2>&1
     if [[ $? -ne 0 ]]; then
         # Convert directory into a repo
@@ -75,13 +76,12 @@ function init() {
 }
 
 function clone() {
+    echo -e "Cloning the ${REPO_NAME} repo..."
     if [[ (-z "${REPO_URL}") ||
             (-z "${REPO_BRANCH}") ]]; then
         echo -e "\nInsufficient arguments"
         usage
     fi
-
-    echo -e "Cloning ${REPO_NAME} repo..."
 
     git clone -b "${REPO_BRANCH}" "${REPO_URL}" .
     RESULT=$?
@@ -116,7 +116,7 @@ function push() {
 
     if [[ -n "$(git status --porcelain)" ]]; then
         # Commit changes
-        echo -e "\nCommitting to the ${REPO_NAME} repo..."
+        echo -e "Committing to the ${REPO_NAME} repo..."
         git commit -m "${REPO_MESSAGE}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
@@ -128,7 +128,7 @@ function push() {
 
     # Tag the commit if required
     if [[ -n "${REPO_TAG}" ]]; then
-        echo -e "\nAdding tag \"${REPO_TAG}\" to the ${REPO_NAME} repo..."
+        echo -e "Adding tag \"${REPO_TAG}\" to the ${REPO_NAME} repo..."
         git tag -a "${REPO_TAG}" -m "${REPO_MESSAGE}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
@@ -140,6 +140,7 @@ function push() {
 
     # Update upstream repo
     if [[ "${REPO_PUSH_REQUIRED}" == "true" ]]; then
+        echo -e "Pushing the ${REPO_NAME} repo upstream..."
         git push --tags ${REPO_REMOTE} ${REPO_BRANCH}
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
