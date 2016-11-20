@@ -251,7 +251,7 @@ if [[ "${INCLUDE_ALL_REPOS}" == "true" ]]; then
             exit
         fi
     fi
-    echo "GENERATION_STARTUP_DIR=$({GENERATION_STARTUP_DIR}" >> ${WORKSPACE}/context.properties
+    echo "GENERATION_STARTUP_DIR=${GENERATION_STARTUP_DIR}" >> ${WORKSPACE}/context.properties
 fi
 
 # All good
