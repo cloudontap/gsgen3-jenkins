@@ -81,6 +81,8 @@ function clone() {
         usage
     fi
 
+    echo -e "Cloning ${REPO_NAME} repo..."
+
     git clone -b "${REPO_BRANCH}" "${REPO_URL}" .
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
