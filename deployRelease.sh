@@ -1,7 +1,6 @@
 #!/bin/bash
 
-if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-GSGEN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
+if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Add release tag and deployment to details
@@ -13,9 +12,9 @@ cd ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT}/solutions/${SEGMENT}
 for CURRENT_SLICE in ${SLICE_LIST}; do
 
     # Create the required Cloud Formation stack
-    if [[ "${MODE}" != "update"    ]]; then ${GSGEN_DIR}/deleteStack.sh -t application -i -s ${CURRENT_SLICE}; fi
-    if [[ "${MODE}" == "stopstart" ]]; then ${GSGEN_DIR}/createStack.sh -t application -s ${CURRENT_SLICE}; fi
-    if [[ "${MODE}" == "update"    ]]; then ${GSGEN_DIR}/updateStack.sh -t application -s ${CURRENT_SLICE}; fi
+    if [[ "${MODE}" != "update"    ]]; then ${GENERATION_DIR}/deleteStack.sh -t application -i -s ${CURRENT_SLICE}; fi
+    if [[ "${MODE}" == "stopstart" ]]; then ${GENERATION_DIR}/createStack.sh -t application -s ${CURRENT_SLICE}; fi
+    if [[ "${MODE}" == "update"    ]]; then ${GENERATION_DIR}/updateStack.sh -t application -s ${CURRENT_SLICE}; fi
 
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then

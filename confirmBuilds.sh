@@ -1,7 +1,6 @@
 #!/bin/bash
 
-if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-JENKINS_DIR=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
+if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Prepare access to build info 
@@ -51,7 +50,7 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
     fi
 
     # Confirm the commit built successfully into a docker image
-    ${JENKINS_DIR}/manageDocker.sh -v -s ${SLICE_ARRAY[$INDEX]} -g "${CODE_COMMIT}"
+    ${AUTOMATION_DIR}/manageDocker.sh -v -s ${SLICE_ARRAY[$INDEX]} -g "${CODE_COMMIT}"
     RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
         if [[ "${PRODUCT_DOCKER_PROVIDER}" != "${PRODUCT_REMOTE_DOCKER_PROVIDER}" ]]; then

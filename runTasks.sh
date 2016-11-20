@@ -1,10 +1,8 @@
 #!/bin/bash
 
-if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-
+if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-GSGEN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
 cd ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT}/solutions/${SEGMENT}
 
 # Build up the additional enviroment variables required
@@ -23,7 +21,7 @@ TASK_LIST="${TASK_LIST:-$TASK}"
 
 # run the required tasks
 for CURRENT_TASK in $TASK_LIST; do
-    ${GSGEN_DIR}/runTask.sh -t "${TASK_TIER}" -i "${TASK_COMPONENT}" -w "${CURRENT_TASK}" "${ENVS[@]}"
+    ${GENERATION_DIR}/runTask.sh -t "${TASK_TIER}" -i "${TASK_COMPONENT}" -w "${CURRENT_TASK}" "${ENVS[@]}"
     RESULT=$?
     if [[ ${RESULT} -ne 0 ]]; then
         echo -e "\nRunning of task ${CURRENT_TASK} failed"

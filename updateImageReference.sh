@@ -1,7 +1,6 @@
 #!/bin/bash
 
-if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-JENKINS_DIR=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
+if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Check the current reference value
@@ -14,7 +13,7 @@ fi
 
 echo ${GIT_COMMIT} > ${BUILD_FILE}
 
-${JENKINS_DIR}/manageRepo.sh -p \
+${AUTOMATION_DIR}/manageRepo.sh -p \
     -d . \
     -n config \
     -m "Change build.ref for ${SEGMENT}/${SLICE} to the value: ${GIT_COMMIT}" \

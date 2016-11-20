@@ -8,7 +8,7 @@
 
 AWS_CRED_ACCOUNT="${1^^}"
 
-if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
+if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 
 # Clear any previous results
 unset AWS_CRED_AWS_ACCESS_KEY_ID_VAR
@@ -18,9 +18,12 @@ unset AWS_CRED_TEMP_AWS_SECRET_ACCESS_KEY
 unset AWS_CRED_TEMP_AWS_SESSION_TOKEN
 
 # Determine the account access credentials
+# Support a global automation user/role as well as an account specific override
 AWS_CRED_AWS_ACCOUNT_ID_VAR="${AWS_CRED_ACCOUNT}_AWS_ACCOUNT_ID"
 AWS_CRED_AUTOMATION_USER_VAR="${AWS_CRED_ACCOUNT}_AUTOMATION_USER"
+if [[ -z "${!AWS_CRED_AUTOMATION_USER_VAR}" ]]; then AWS_CRED_AUTOMATION_USER_VAR="AWS_AUTOMATION_USER"; fi
 AWS_CRED_AUTOMATION_ROLE_VAR="${AWS_CRED_ACCOUNT}_AUTOMATION_ROLE"
+if [[ -z "${!AWS_CRED_AUTOMATION_ROLE_VAR}" ]]; then AWS_CRED_AUTOMATION_ROLE_VAR="AWS_AUTOMATION_ROLE"; fi
 
 if [[ (-n ${!AWS_CRED_AWS_ACCOUNT_ID_VAR}) && (-n ${!AWS_CRED_AUTOMATION_USER_VAR}) ]]; then
     # Assume automation role using automation user access credentials

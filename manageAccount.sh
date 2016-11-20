@@ -1,13 +1,12 @@
 #!/bin/bash
 
-if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-GSGEN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
+if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Create the account level buckets if required
 if [[ "${CREATE_ACCOUNT_BUCKETS}" == "true" ]]; then
     cd ${WORKSPACE}/${ACCOUNT}/config/${ACCOUNT}
-    ${GSGEN_DIR}/createAccountTemplate.sh -a ${ACCOUNT}
+    ${GENERATION_DIR}/createAccountTemplate.sh -a ${ACCOUNT}
     RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
         echo "Generation of the account level template for the ${ACCOUNT} account failed"
@@ -15,7 +14,7 @@ if [[ "${CREATE_ACCOUNT_BUCKETS}" == "true" ]]; then
     fi
 
     # Create the stack
-    ${GSGEN_DIR}/createStack.sh -t account
+    ${GENERATION_DIR}/createStack.sh -t account
 	RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
         echo "Creation of the account level stack for the ${ACCOUNT} account failed"
@@ -43,7 +42,7 @@ fi
 # Update the code and credentials buckets if required
 if [[ "${SYNC_ACCOUNT_BUCKETS}" == "true" ]]; then
     cd ${WORKSPACE}/${ACCOUNT}
-    ${GSGEN_DIR}/syncAccountBuckets.sh -a ${ACCOUNT}
+    ${GENERATION_DIR}/syncAccountBuckets.sh -a ${ACCOUNT}
 fi
 
 # All good

@@ -1,8 +1,6 @@
 #!/bin/bash
 
-if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-JENKINS_DIR=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
-GSGEN_DIR="${WORKSPACE}/${ACCOUNT}/config/bin"
+if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Add release number to details
@@ -41,7 +39,7 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
 
     # Generate the application level template
     cd solutions/${SEGMENT}
-	${GSGEN_DIR}/createApplicationTemplate.sh -c ${RELEASE_TAG} -s ${CURRENT_SLICE}
+	${GENERATION_DIR}/createApplicationTemplate.sh -c ${RELEASE_TAG} -s ${CURRENT_SLICE}
 	RESULT=$?
 	if [[ ${RESULT} -ne 0 ]]; then
  		echo -e "\nCan't generate the template for slice ${CURRENT_SLICE}"
@@ -50,7 +48,7 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
 done
 
 # All ok so tag the config repo
-${JENKINS_DIR}/manageRepo.sh -p \
+${AUTOMATION_DIR}/manageRepo.sh -p \
     -d ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT} \
     -n config \
     -t ${RELEASE_TAG} \
@@ -62,7 +60,7 @@ if [[ ${RESULT} -ne 0 ]]; then
 fi
 
 # Commit the generated application templates
-${JENKINS_DIR}/manageRepo.sh -p \
+${AUTOMATION_DIR}/manageRepo.sh -p \
     -d ${WORKSPACE}/${ACCOUNT}/infrastructure/${PRODUCT} \
     -n infrastructure \
     -t ${RELEASE_TAG} \

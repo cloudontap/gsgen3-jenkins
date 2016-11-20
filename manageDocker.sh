@@ -1,7 +1,6 @@
 #!/bin/bash
 
-if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-JENKINS_DIR=$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )
+if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 DOCKER_TAG_DEFAULT="latest"
@@ -73,7 +72,7 @@ function isAWSRegistry() {
         fi
 
         # New registry - set up the AWS credentials
-        . ${JENKINS_DIR}/setAWSCredentials.sh ${2^^}
+        . ${AUTOMATION_DIR}/setCredentials.sh ${2^^}
 
         # Define the credentials
         export AWS_ACCESS_KEY_ID="${AWS_CRED_TEMP_AWS_ACCESS_KEY_ID:-${!AWS_CRED_AWS_ACCESS_KEY_ID_VAR}}"

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-if [[ -n "${GSGEN_DEBUG}" ]]; then set ${GSGEN_DEBUG}; fi
-
+if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 if [[ -z "${SLICE}" ]]; then
@@ -12,7 +11,7 @@ fi
 
 # Perform checks for Docker packaging
 if [[ -f Dockerfile ]]; then
-    ${GSGEN_JENKINS}/manageDocker.sh -v -s ${SLICE}
+    ${AUTOMATION_DIR}/manageDocker.sh -v -s ${SLICE} -g ${GIT_COMMIT}
     RESULT=$?
     if [[ "${RESULT}" -eq 0 ]]; then
         RESULT=1
@@ -40,12 +39,12 @@ cd ../
 
 # Package for docker if required
 if [[ -f Dockerfile ]]; then
-    ${GSGEN_JENKINS}/manageDocker.sh -b -s ${SLICE}
+    ${AUTOMATION_DIR}/manageDocker.sh -b -s ${SLICE} -g ${GIT_COMMIT}
     RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
         exit
     fi
 fi
 
-echo "PRODUCT=$PRODUCT" >> $WORKSPACE/context.properties
-echo "SLICE=$SLICE" >> $WORKSPACE/context.properties
+echo "GIT_COMMIT=$GIT_COMMIT" >> $WORKSPACE/chain.properties
+echo "SLICE=$SLICE" >> $WORKSPACE/chain.properties
