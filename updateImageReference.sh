@@ -13,7 +13,7 @@ if [[ -f "appsettings/${SEGMENT}/${SLICE}/slice.ref" ]]; then
 fi
 
 BUILD_FILE="appsettings/${SEGMENT}/${SLICE}/build.ref"
-if [[ "$(cat ${BUILD_FILE})" == "${GIT_COMMIT}" ]]; then
+if [[ ( -f ${BUILD_FILE}) && ("$(cat ${BUILD_FILE})" == "${GIT_COMMIT}") ]]; then
   echo -e "\nThe requested reference value for slice $SLICE is already set"
   exit
 fi
