@@ -10,7 +10,7 @@ for CURRENT_SLICE in ${SLICE_LIST}; do
 
     EFFECTIVE_SLICE="${CURRENT_SLICE}"
     SLICE_FILE="appsettings/${SEGMENT}/${CURRENT_SLICE}/slice.ref"
-    if [[ -f "${SLICE_FILE} ]]; then
+    if [[ -f "${SLICE_FILE}" ]]; then
         EFFECTIVE_SLICE=$(cat "${SLICE_FILE}")
     fi
 
