@@ -76,7 +76,7 @@ function init() {
 }
 
 function clone() {
-    echo -e "Cloning the ${REPO_NAME} repo..."
+    echo -e "Cloning the ${REPO_NAME} repo and checking out the ${REPO_BRANCH} branch ..."
     if [[ (-z "${REPO_URL}") ||
             (-z "${REPO_BRANCH}") ]]; then
         echo -e "\nInsufficient arguments"

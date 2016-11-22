@@ -150,7 +150,6 @@ GENERATION_STARTUP_REPO="${GENERATION_STARTUP_REPO:-gsgen3-startup.git}"
 
 # Determine the slice list and optional corresponding code tags and repos
 # A slice can be followed by an optional code tag separated by an "!"
-# A code tag will be ignored if no code repo has been defined for the slice
 TAG_SEPARATOR='!'
 SLICE_ARRAY=()
 CODE_TAG_ARRAY=()

@@ -7,7 +7,15 @@ trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 cd ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT}
 
 for CURRENT_SLICE in ${SLICE_LIST}; do
-    BUILD_FILE="appsettings/${SEGMENT}/${CURRENT_SLICE}/build.ref"
+
+    EFFECTIVE_SLICE="${CURRENT_SLICE}"
+    SLICE_FILE="appsettings/${SEGMENT}/${CURRENT_SLICE}/slice.ref"
+    if [[ -f "${SLICE_FILE} ]]; then
+        EFFECTIVE_SLICE=$(cat "${SLICE_FILE}")
+    fi
+
+    BUILD_FILE="appsettings/${SEGMENT}/${EFFECTIVE_SLICE}/build.ref"
+
     if [[ -e ${BUILD_FILE} ]]; then
         BUILD_REFERENCE="$(cat ${BUILD_FILE})"
         if [[ -n "${BUILD_REFERENCE}" ]]; then
