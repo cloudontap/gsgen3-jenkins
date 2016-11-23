@@ -356,8 +356,8 @@ PRODUCT_CODE_GIT_API_DNS="${!PRODUCT_CODE_GIT_API_DNS_VAR:-api.$PRODUCT_CODE_GIT
 
 # Determine the deployment tag
 RELEASE_TAG="r${BUILD_NUMBER}-${SEGMENT}"
-if [[ -n "${RELEASE_NUMBER}" ]]; then
-    RELEASE_TAG="r${RELEASE_NUMBER}-${SEGMENT}"
+if [[ -n "${RELEASE_IDENTIFIER}" ]]; then
+    RELEASE_TAG="r${RELEASE_IDENTIFIER}-${SEGMENT}"
 fi
 
 # Basic details for git commits/slack notification (enhanced by other scripts)

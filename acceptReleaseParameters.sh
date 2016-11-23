@@ -3,9 +3,9 @@
 if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-# Ensure RELEASE_NUMBER have been provided
-if [[ "${RELEASE_NUMBER}" == "" ]]; then
-	echo -e "\nJob requires the release number to be accepted"
+# Ensure RELEASE_IDENTIFIER have been provided
+if [[ -z "${RELEASE_IDENTIFIER}" ]]; then
+	echo -e "\nJob requires the release identifier to be accepted"
     exit
 fi
 
