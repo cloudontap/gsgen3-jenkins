@@ -167,11 +167,11 @@ while getopts ":bd:g:hki:l:pr:s:t:u:v" opt; do
             DOCKER_OPERATION="verify"
             ;;
         \?)
-            echo -e "\nInvalid option: -$OPTARG"
+            echo -e "\nInvalid option: -${OPTARG}"
             usage
             ;;
         :)
-            echo -e "\nOption -$OPTARG requires an argument"
+            echo -e "\nOption -${OPTARG} requires an argument"
             usage
             ;;
      esac

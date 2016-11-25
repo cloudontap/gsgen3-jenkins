@@ -193,11 +193,11 @@ while getopts ":b:cd:e:him:n:pr:s:t:u:" opt; do
             REPO_URL="${OPTARG}"
             ;;
         \?)
-            echo -e "\nInvalid option: -$OPTARG"
+            echo -e "\nInvalid option: -${OPTARG}"
             usage
             ;;
         :)
-            echo -e "\nOption -$OPTARG requires an argument"
+            echo -e "\nOption -${OPTARG} requires an argument"
             usage
             ;;
      esac
