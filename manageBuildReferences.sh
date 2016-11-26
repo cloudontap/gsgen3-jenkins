@@ -269,7 +269,7 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
             # Construct the build reference
             BUILD_REFERENCE="{\"commit\": \"${CODE_COMMIT}\""
             if [[ "${CODE_TAG}" != "?" ]]; then 
-                BUILD_REFERENCE="${BUILD_REFERENCE}, \"tag\": \"${CODE_TAG}\"}"
+                BUILD_REFERENCE="${BUILD_REFERENCE}, \"tag\": \"${CODE_TAG}\""
             fi
             # format attribute is in readiness for supporting multiple image types e.g. docker, lambda
             BUILD_REFERENCE="${BUILD_REFERENCE}, \"format\": \"docker\"}"
