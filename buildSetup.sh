@@ -7,12 +7,13 @@ trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 # slice.ref is legacy - always use slices.ref even if one slice
 if [[ -z "${SLICE_LIST}" ]]; then
     if [ -e slices.ref ]; then
-        SLICE_LIST=`cat slices.ref`
+        export SLICE_LIST=`cat slices.ref`
     else
         if [ -e slice.ref ]; then
-            SLICE_LIST=`cat slice.ref`
+            export SLICE_LIST=`cat slice.ref`
         fi
     fi
+    echo "SLICE_LIST=${SLICE_LIST}" >> ${AUTOMATION_DATA_DIR}/context.properties
 fi
 
 SLICE_ARRAY=(${SLICE_LIST})
