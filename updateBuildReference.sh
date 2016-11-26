@@ -17,6 +17,8 @@ ${AUTOMATION_DIR}/manageRepo.sh -p \
     -n config \
     -m "${DETAIL_MESSAGE}" \
     -b ${PRODUCT_CONFIG_REFERENCE}
+RESULT=$?
+if [[ ${RESULT} -ne 0 ]]; then exit; fi
 
 if [[ "$AUTODEPLOY" != "true" ]]; then
   echo -e "\nAUTODEPLOY is not true, triggering exit"
