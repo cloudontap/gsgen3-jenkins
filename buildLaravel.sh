@@ -22,6 +22,4 @@ fi
 cd ../
 
 . ${AUTOMATION_DIR}/manageImages.sh
-
-# All good
-RESULT=0
+RESULT=$?

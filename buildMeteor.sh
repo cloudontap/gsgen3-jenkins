@@ -40,6 +40,4 @@ if [[ $(du -s -m ./dist | cut -f 1) -gt ${MAX_METEOR_BUILD_SIZE} ]]; then
 fi
 
 . ${AUTOMATION_DIR}/manageImages.sh
-
-# All good
-RESULT=0
+RESULT=$?

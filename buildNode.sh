@@ -49,6 +49,4 @@ if [ $RESULT -ne 0 ]; then
 fi
 
 . ${AUTOMATION_DIR}/manageImages.sh
-
-# All good
-RESULT=0
+RESULT=$?
