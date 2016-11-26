@@ -23,7 +23,7 @@ echo "GIT_COMMIT=${CODE_COMMIT_ARRAY[0]}" >> $AUTOMATION_DATA_DIR/chain.properti
 echo "SLICES=${SLICE_LIST}" >> $AUTOMATION_DATA_DIR/chain.properties
 
 # Include the build information in the detail message
-${AUTOMATION_DIR}/manageBuildReferences -l
+${AUTOMATION_DIR}/manageBuildReferences.sh -l
 RESULT=$?
 if [[ "${RESULT}" -eq 0 ]]; then exit; fi
 
