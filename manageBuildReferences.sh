@@ -213,7 +213,7 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
     fi
     BUILD_FILE="appsettings/${SEGMENT}/${EFFECTIVE_SLICE}/build.json"
     if [[ ! -f "${BUILD_FILE}" ]]; then
-        # Legacy format
+        # Legacy file naming
         BUILD_FILE="appsettings/${SEGMENT}/${EFFECTIVE_SLICE}/build.ref"
     fi
         
