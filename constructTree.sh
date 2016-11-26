@@ -97,11 +97,11 @@ if [[ -z "${ACCOUNT}" ]]; then
 fi
 
 # Save for later steps
-echo "PRODUCT_CONFIG_REFERENCE=${PRODUCT_CONFIG_REFERENCE}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_INFRASTRUCTURE_REFERENCE=${PRODUCT_INFRASTRUCTURE_REFERENCE}" >> ${WORKSPACE}/context.properties
+echo "PRODUCT_CONFIG_REFERENCE=${PRODUCT_CONFIG_REFERENCE}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_INFRASTRUCTURE_REFERENCE=${PRODUCT_INFRASTRUCTURE_REFERENCE}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
 # Define the top level directory representing the account
-BASE_DIR="${WORKSPACE}/${ACCOUNT}"
+BASE_DIR="${AUTOMATION_DATA_DIR}/${ACCOUNT}"
 
 if [[ !("${EXCLUDE_PRODUCT_DIRECTORIES}" == "true") ]]; then
     
@@ -125,7 +125,7 @@ if [[ !("${EXCLUDE_PRODUCT_DIRECTORIES}" == "true") ]]; then
         fi
     fi
 
-    echo "PRODUCT_CONFIG_COMMIT=$(git -C ${PRODUCT_DIR} rev-parse HEAD)" >> ${WORKSPACE}/context.properties
+    echo "PRODUCT_CONFIG_COMMIT=$(git -C ${PRODUCT_DIR} rev-parse HEAD)" >> ${AUTOMATION_DATA_DIR}/context.properties
 fi
 
 if [[ !("${EXCLUDE_ACCOUNT_DIRECTORIES}" == "true") ]]; then
@@ -165,8 +165,8 @@ else
         exit
     fi
 fi
-# echo "GENERATION_DIR=${GENERATION_DIR}/${ACCOUNT_PROVIDER}" >> ${WORKSPACE}/context.properties
-echo "GENERATION_DIR=${GENERATION_DIR}" >> ${WORKSPACE}/context.properties
+# echo "GENERATION_DIR=${GENERATION_DIR}/${ACCOUNT_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "GENERATION_DIR=${GENERATION_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
 
 # Pull in the patterns repo if not overridden by product
@@ -184,8 +184,8 @@ if [[ "${INCLUDE_ALL_REPOS}" == "true" ]]; then
             exit
         fi
     fi
-#    echo "GENERATION_PATTERNS_DIR=${GENERATION_PATTERNS_DIR}/${ACCOUNT_PROVIDER}" >> ${WORKSPACE}/context.properties
-    echo "GENERATION_PATTERNS_DIR=${GENERATION_PATTERNS_DIR}" >> ${WORKSPACE}/context.properties
+#    echo "GENERATION_PATTERNS_DIR=${GENERATION_PATTERNS_DIR}/${ACCOUNT_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+    echo "GENERATION_PATTERNS_DIR=${GENERATION_PATTERNS_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
 fi
 
 if [[ !("${EXCLUDE_PRODUCT_DIRECTORIES}" == "true") ]]; then
@@ -210,7 +210,7 @@ if [[ !("${EXCLUDE_PRODUCT_DIRECTORIES}" == "true") ]]; then
         fi
     fi
 
-    echo "PRODUCT_INFRASTRUCTURE_COMMIT=$(git -C ${PRODUCT_DIR} rev-parse HEAD)" >> ${WORKSPACE}/context.properties
+    echo "PRODUCT_INFRASTRUCTURE_COMMIT=$(git -C ${PRODUCT_DIR} rev-parse HEAD)" >> ${AUTOMATION_DATA_DIR}/context.properties
 fi
 
 if [[ !("${EXCLUDE_ACCOUNT_DIRECTORIES}" == "true") ]]; then
@@ -251,7 +251,7 @@ if [[ "${INCLUDE_ALL_REPOS}" == "true" ]]; then
             exit
         fi
     fi
-    echo "GENERATION_STARTUP_DIR=${GENERATION_STARTUP_DIR}" >> ${WORKSPACE}/context.properties
+    echo "GENERATION_STARTUP_DIR=${GENERATION_STARTUP_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
 fi
 
 # All good

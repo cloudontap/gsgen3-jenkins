@@ -5,52 +5,21 @@ trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Add release number to details
 DETAIL_MESSAGE="release=${RELEASE_TAG}, ${DETAIL_MESSAGE}"
-echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
+echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-# Prepare access to build info
-SLICE_ARRAY=(${SLICE_LIST})
-SLICE_LAST_INDEX=$((${#SLICE_ARRAY[@]}-1))
-CODE_TAG_ARRAY=(${CODE_TAG_LIST})
-CODE_COMMIT_ARRAY=(${CODE_COMMIT_LIST})
+# Update build references
+${AUTOMATION_DIR}/manageBuildReferences.sh -u
+RESULT=$?
+if [[ ${RESULT} -ne 0 ]]; then exit; fi
 
-# Process each requested slice
-for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
-
-    # Next slice to process
-    CURRENT_SLICE=${SLICE_ARRAY[$INDEX]}
-    cd ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT}
-    
-    # As we are now supporting multiple build updates in one release
-    # assume that if updates to the build for the referenced slice are required,
-    # it will be included in the slice list for the release
-#    if [[ -f appsettings/${SEGMENT}/${CURRENT_SLICE}/slice.ref ]]; then
-#        CURRENT_SLICE="$(cat appsettings/${SEGMENT}/${CURRENT_SLICE}/slice.ref)"
-#    fi
-    
-    # Ensure build.ref (if present) aligns with the requested code tag
-    SLICE_FILE="appsettings/${SEGMENT}/${CURRENT_SLICE}/slice.ref"
-    BUILD_FILE="appsettings/${SEGMENT}/${CURRENT_SLICE}/build.ref"
-    if [[ ( ! -f ${SLICE_FILE}) && ("${CODE_COMMIT_ARRAY[$INDEX]}" != "?") ]]; then
-        BUILD_REFERENCE=$(echo -n "${CODE_COMMIT_ARRAY[$INDEX]} ${CODE_TAG_ARRAY[$INDEX]}")
-        if [[ ( ! -f ${BUILD_FILE}) ||
-                ("$(cat ${BUILD_FILE})" != "${BUILD_REFERENCE}") ]]; then
-            echo -n "${BUILD_REFERENCE}" > ${BUILD_FILE}
-        fi
-    fi
-
-    # Generate the application level template
-    cd solutions/${SEGMENT}
-	${GENERATION_DIR}/createApplicationTemplate.sh -c ${RELEASE_TAG} -s ${CURRENT_SLICE}
-	RESULT=$?
-	if [[ ${RESULT} -ne 0 ]]; then
- 		echo -e "\nCan't generate the template for slice ${CURRENT_SLICE}"
- 		exit
-	fi
-done
+# Create the templates
+${AUTOMATION_DIR}/createTemplates.sh -t Application -c ${RELEASE_TAG}
+RESULT=$?
+if [[ ${RESULT} -ne 0 ]]; then exit; fi
 
 # All ok so tag the config repo
 ${AUTOMATION_DIR}/manageRepo.sh -p \
-    -d ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT} \
+    -d ${AUTOMATION_DATA_DIR}/${ACCOUNT}/config/${PRODUCT} \
     -n config \
     -t ${RELEASE_TAG} \
     -m "${DETAIL_MESSAGE}" \
@@ -62,7 +31,7 @@ fi
 
 # Commit the generated application templates
 ${AUTOMATION_DIR}/manageRepo.sh -p \
-    -d ${WORKSPACE}/${ACCOUNT}/infrastructure/${PRODUCT} \
+    -d ${AUTOMATION_DATA_DIR}/${ACCOUNT}/infrastructure/${PRODUCT} \
     -n infrastructure \
     -t ${RELEASE_TAG} \
     -m "${DETAIL_MESSAGE}" \

@@ -11,7 +11,7 @@ for LEVEL in segment solution; do
     for SLICE in ${!SLICES}; do
     
     	# Generate the template if required
-        cd ${WORKSPACE}/${ACCOUNT}/config/${PRODUCT}/solutions/${SEGMENT}
+        cd ${AUTOMATION_DATA_DIR}/${ACCOUNT}/config/${PRODUCT}/solutions/${SEGMENT}
         case ${MODE} in
             create|update)
    	            ${GENERATION_DIR}/create${LEVEL^}Template.sh -s ${SLICE}
@@ -33,7 +33,7 @@ for LEVEL in segment solution; do
         
 		# Update the infrastructure repo to capture any stack changes
         ${AUTOMATION_DIR}/manageRepo.sh -p \
-            -d ${WORKSPACE}/${ACCOUNT}/infrastructure/${PRODUCT} \
+            -d ${AUTOMATION_DATA_DIR}/${ACCOUNT}/infrastructure/${PRODUCT} \
             -n infrastructure \
             -m "Stack changes as a result of applying ${MODE} mode to the ${LEVEL} level stack for the ${SLICE} slice of the ${SEGMENT} segment"
             
@@ -47,7 +47,7 @@ done
 
 # Check credentials if required
 if [[ "${CHECK_CREDENTIALS}" == "true" ]]; then
-    cd ${WORKSPACE}/${ACCOUNT}
+    cd ${AUTOMATION_DATA_DIR}/${ACCOUNT}
     SEGMENT_OPTION=""
     if [[ -n "${SEGMENT}" ]]; then
        SEGMENT_OPTION="-s ${SEGMENT}"
@@ -55,7 +55,7 @@ if [[ "${CHECK_CREDENTIALS}" == "true" ]]; then
     ${GENERATION_DIR}/initProductCredentials.sh -a ${ACCOUNT} -p ${PRODUCT} ${SEGMENT_OPTION}
 
     # Update the infrastructure repo to capture any credential changes
-    cd ${WORKSPACE}/${ACCOUNT}/infrastructure/${PRODUCT}
+    cd ${AUTOMATION_DATA_DIR}/${ACCOUNT}/infrastructure/${PRODUCT}
 
 	# Ensure git knows who we are
     git config user.name  "${GIT_USER}"
@@ -74,7 +74,7 @@ fi
 
 # Update the code and credentials buckets if required
 if [[ "${SYNC_BUCKETS}" == "true" ]]; then
-    cd ${WORKSPACE}/${ACCOUNT}
+    cd ${AUTOMATION_DATA_DIR}/${ACCOUNT}
     ${GENERATION_DIR}/syncAccountBuckets.sh -a ${ACCOUNT}
 fi
 

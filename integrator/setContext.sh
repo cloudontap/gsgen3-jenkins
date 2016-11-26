@@ -131,30 +131,30 @@ if [[ -n "${ACCOUNT}" ]]; then DETAIL_MESSAGE="${DETAIL_MESSAGE}, account=${ACCO
 if [[ -n "${GIT_USER}" ]];  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, user=${GIT_USER}"; fi
 
 # Save for future steps
-echo "INTEGRATOR=${INTEGRATOR}" >> ${WORKSPACE}/context.properties
-echo "TENANT=${TENANT}" >> ${WORKSPACE}/context.properties
-echo "ACCOUNT=${ACCOUNT}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR=${INTEGRATOR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "TENANT=${TENANT}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "ACCOUNT=${ACCOUNT}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "GSGEN_GIT_DNS=${GSGEN_GIT_DNS}" >> ${WORKSPACE}/context.properties
-echo "GSGEN_GIT_ORG=${GSGEN_GIT_ORG}" >> ${WORKSPACE}/context.properties
-echo "GSGEN_BIN_REPO=${GSGEN_BIN_REPO}" >> ${WORKSPACE}/context.properties
+echo "GSGEN_GIT_DNS=${GSGEN_GIT_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "GSGEN_GIT_ORG=${GSGEN_GIT_ORG}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "GSGEN_BIN_REPO=${GSGEN_BIN_REPO}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "INTEGRATOR_GIT_PROVIDER=${INTEGRATOR_GIT_PROVIDER}" >> ${WORKSPACE}/context.properties
-echo "INTEGRATOR_GIT_USER_VAR=${INTEGRATOR_GIT_USER_VAR}" >> ${WORKSPACE}/context.properties
-echo "INTEGRATOR_GIT_PASSWORD_VAR=${INTEGRATOR_GIT_PASSWORD_VAR}" >> ${WORKSPACE}/context.properties
-echo "INTEGRATOR_GIT_CREDENTIALS_VAR=${INTEGRATOR_GIT_CREDENTIALS_VAR}" >> ${WORKSPACE}/context.properties
-echo "INTEGRATOR_GIT_ORG=${INTEGRATOR_GIT_ORG}" >> ${WORKSPACE}/context.properties
-echo "INTEGRATOR_GIT_DNS=${INTEGRATOR_GIT_DNS}" >> ${WORKSPACE}/context.properties
-echo "INTEGRATOR_GIT_API_DNS=${INTEGRATOR_GIT_API_DNS}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_GIT_PROVIDER=${INTEGRATOR_GIT_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "INTEGRATOR_GIT_USER_VAR=${INTEGRATOR_GIT_USER_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "INTEGRATOR_GIT_PASSWORD_VAR=${INTEGRATOR_GIT_PASSWORD_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "INTEGRATOR_GIT_CREDENTIALS_VAR=${INTEGRATOR_GIT_CREDENTIALS_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "INTEGRATOR_GIT_ORG=${INTEGRATOR_GIT_ORG}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "INTEGRATOR_GIT_DNS=${INTEGRATOR_GIT_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "INTEGRATOR_GIT_API_DNS=${INTEGRATOR_GIT_API_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "INTEGRATOR_AWS_ACCESS_KEY_ID_VAR=${INTEGRATOR_AWS_ACCESS_KEY_ID_VAR}" >> ${WORKSPACE}/context.properties
-echo "INTEGRATOR_AWS_SECRET_ACCESS_KEY_VAR=${INTEGRATOR_AWS_SECRET_ACCESS_KEY_VAR}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_AWS_ACCESS_KEY_ID_VAR=${INTEGRATOR_AWS_ACCESS_KEY_ID_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "INTEGRATOR_AWS_SECRET_ACCESS_KEY_VAR=${INTEGRATOR_AWS_SECRET_ACCESS_KEY_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "INTEGRATOR_REPO=${INTEGRATOR_REPO}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_REPO=${INTEGRATOR_REPO}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "GIT_USER=${GIT_USER}" >> ${WORKSPACE}/context.properties
-echo "GIT_EMAIL=${GIT_EMAIL}" >> ${WORKSPACE}/context.properties
-echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
+echo "GIT_USER=${GIT_USER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "GIT_EMAIL=${GIT_EMAIL}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
 # All good
 RESULT=0

@@ -48,10 +48,10 @@ INTEGRATOR_REFERENCE="${INTEGRATOR_REFERENCE:-$INTEGRATOR_REFERENCE_DEFAULT}"
 GENERATION_BIN_REFERENCE="${GENERATION_BIN_REFERENCE:-$GENERATION_BIN_REFERENCE_DEFAULT}"
 
 # Save for later steps
-echo "INTEGRATOR_REFERENCE=${INTEGRATOR_REFERENCE}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_REFERENCE=${INTEGRATOR_REFERENCE}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
 # Define the top level directory representing the account
-BASE_DIR="${WORKSPACE}"
+BASE_DIR="${AUTOMATION_DATA_DIR}"
 
 # Pull in the integrator repo
 INTEGRATOR_DIR="${BASE_DIR}/${INTEGRATOR}"
@@ -61,7 +61,7 @@ if [[ ${RESULT} -ne 0 ]]; then
     echo -e "\nCan't fetch the integrator repo"
     exit
 fi
-echo "INTEGRATOR_DIR=${INTEGRATOR_DIR}" >> ${WORKSPACE}/context.properties
+echo "INTEGRATOR_DIR=${INTEGRATOR_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
 # Pull in the default generation repo
 GENERATION_DIR="${BASE_DIR}/bin"
@@ -71,8 +71,8 @@ if [[ ${RESULT} -ne 0 ]]; then
     echo -e "\nCan't fetch the GENERATION repo"
     exit
 fi
-# echo "GENERATION_DIR=${GENERATION_DIR}/${ACCOUNT_PROVIDER}" >> ${WORKSPACE}/context.properties
-echo "GENERATION_DIR=${GENERATION_DIR}" >> ${WORKSPACE}/context.properties
+# echo "GENERATION_DIR=${GENERATION_DIR}/${ACCOUNT_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "GENERATION_DIR=${GENERATION_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
 # All good
 RESULT=0

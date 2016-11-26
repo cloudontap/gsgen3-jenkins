@@ -63,7 +63,7 @@ case ${AUTOMATION_PROVIDER} in
         # if not already defined or provided on the command line
         # Only parts of the jobname starting with "cot-" are
         # considered and the "cot-" prefix is removed to give the
-        # actual segment/product/tenant id
+        # actual segment/product/tenant name
         JOB_PATH=($(echo "${JOB_NAME}" | tr "/" " "))
         PARTS_ARRAY=()
         COT_PREFIX="cot-"
@@ -103,9 +103,11 @@ case ${AUTOMATION_PROVIDER} in
         # Use the user info for git commits
         GIT_USER="${GIT_USER:-$BUILD_USER}"
         GIT_EMAIL="${GIT_EMAIL:-$BUILD_USER_EMAIL}"
+
+        # Working directory
+        AUTOMATION_DATA_DIR="${WORKSPACE}"
         ;;
 esac
-
 
 TENANT=${TENANT,,}
 TENANT_UPPER=${TENANT^^}
@@ -152,24 +154,37 @@ GENERATION_STARTUP_REPO="${GENERATION_STARTUP_REPO:-gsgen3-startup.git}"
 # A slice can be followed by an optional code tag separated by an "!"
 TAG_SEPARATOR='!'
 SLICE_ARRAY=()
+CODE_COMMIT_ARRAY=()
 CODE_TAG_ARRAY=()
 CODE_REPO_ARRAY=()
 for CURRENT_SLICE in ${SLICES:-${SLICE}}; do
     SLICE_PART="${CURRENT_SLICE%%${TAG_SEPARATOR}*}"
+    # Note that if there is no tag, then TAG_PART = SLICE_PART
     TAG_PART="${CURRENT_SLICE##*${TAG_SEPARATOR}}"
-    if [[ (-n "${CODE_TAG}") && ("${#SLICE_ARRAY[@]}" -eq 0) ]]; then
-        # Permit override of first tag - easier if only one repo involved
-        TAG_PART="${CODE_TAG}"
-        CURRENT_SLICE="${SLICE_PART}${TAG_SEPARATOR}${TAG_PART}"
+    COMMIT_PART="?"
+    if [[ "${#SLICE_ARRAY[@]}" -eq 0 ]]; then
+        # Processing the first slice
+        if [[ -n "${CODE_TAG}" ]]; then
+            # Permit separate commit/tag value - easier if only one repo involved
+            TAG_PART="${CODE_TAG}"
+            CURRENT_SLICE="${SLICE_PART}${TAG_SEPARATOR}${TAG_PART}"
+        fi
     fi
         
     SLICE_ARRAY+=("${SLICE_PART,,}")
 
     if [[ (-n "${TAG_PART}") && ( "${CURRENT_SLICE}" =~ .+${TAG_SEPARATOR}.+ ) ]]; then
-        CODE_TAG_ARRAY+=("${TAG_PART,,}")        
+        if [[ "${#TAG_PART}" -eq 40 ]]; then
+            # Assume its a full commit ids - at this stage we don't accept short commit ids
+            COMMIT_PART="${TAG_PART}"
+            TAG_PART="?"
+        fi
     else
-        CODE_TAG_ARRAY+=("?")
+        TAG_PART="?"
     fi
+
+    CODE_COMMIT_ARRAY+=("${TAG_PART,,}")
+    CODE_TAG_ARRAY+=("${COMMIT_PART,,}")
 
     # Determine code repo for the slice - there may be none
     CODE_SLICE=$(echo "${SLICE_PART^^}" | tr "-" "_")
@@ -177,18 +192,33 @@ for CURRENT_SLICE in ${SLICES:-${SLICE}}; do
     if [[ -z "${!PRODUCT_CODE_REPO_VAR}" ]]; then
         PRODUCT_CODE_REPO_VAR="${PRODUCT_UPPER}_CODE_REPO"
     fi
-    CODE_REPO_PART="${!PRODUCT_CODE_REPO_VAR}"
+    CODE_REPO="${!PRODUCT_CODE_REPO_VAR}"
 
-    CODE_REPO_ARRAY+=("${CODE_REPO_PART:-?}")
+    CODE_REPO_ARRAY+=("${CODE_REPO:-?}")
 done
 
-# Regenerate the slice list in case the first code tag was overriden
+# Capture any provided git commit
+case ${AUTOMATION_PROVIDER} in
+    jenkins)
+        if [[ -n "${GIT_COMMIT}" ]]; then
+            CODE_COMMIT_ARRAY[0]="${GIT_COMMIT}"
+        fi
+        ;;
+esac
+
+# Regenerate the slice list in case the first code commit/tag was overriden
 UPDATED_SLICES=
+SLICE_SEPARATOR=""
 for INDEX in $( seq 0 $((${#SLICE_ARRAY[@]}-1)) ); do
-    UPDATED_SLICES="${UPDATED_SLICES} ${SLICE_ARRAY[$INDEX]}"
+    UPDATED_SLICES="${UPDATED_SLICES}${SLICE_SEPARATOR}${SLICE_ARRAY[$INDEX]}"
     if [[ "${CODE_TAG_ARRAY[$INDEX]}" != "?" ]]; then
         UPDATED_SLICES="${UPDATED_SLICES}!${CODE_TAG_ARRAY[$INDEX]}"
+    else
+        if [[ "${CODE_COMMIT_ARRAY[$INDEX]}" != "?" ]]; then
+            UPDATED_SLICES="${UPDATED_SLICES}!${CODE_COMMIT_ARRAY[$INDEX]}"
+        fi
     fi
+    SLICE_SEPARATOR=" "
 done
 
 # Determine the account provider
@@ -366,91 +396,92 @@ if [[ -n "${ENVIRONMENT}" ]];               then DETAIL_MESSAGE="${DETAIL_MESSAG
 if [[ "${SEGMENT}" != "${ENVIRONMENT}" ]];  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, segment=${SEGMENT}"; fi
 if [[ -n "${TIER}" ]];                      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, tier=${TIER}"; fi
 if [[ -n "${COMPONENT}" ]];                 then DETAIL_MESSAGE="${DETAIL_MESSAGE}, component=${COMPONENT}"; fi
-if [[ "${#SLICE_ARRAY[@]}" -ne 0 ]];        then DETAIL_MESSAGE="${DETAIL_MESSAGE}, slices=${SLICE_ARRAY[@]}"; fi
+if [[ "${#SLICE_ARRAY[@]}" -ne 0 ]];        then DETAIL_MESSAGE="${DETAIL_MESSAGE}, slices=${UPDATED_SLICES}"; fi
 if [[ -n "${TASK}" ]];                      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, task=${TASK}"; fi
 if [[ -n "${TASKS}" ]];                     then DETAIL_MESSAGE="${DETAIL_MESSAGE}, tasks=${TASKS}"; fi
 if [[ -n "${GIT_USER}" ]];                  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, user=${GIT_USER}"; fi
-if [[ -n "${MODE}" ]];                      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, mode=${MODE}"; fi
+if [[ -n "${MODE}" ]];                      then DETAIL_MESSAGE=    ; fi
 
 # Save for future steps
-echo "TENANT=${TENANT}" >> ${WORKSPACE}/context.properties
-echo "ACCOUNT=${ACCOUNT}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT=${PRODUCT}" >> ${WORKSPACE}/context.properties
-if [[ -n "${SEGMENT}" ]]; then echo "SEGMENT=${SEGMENT}" >> ${WORKSPACE}/context.properties; fi
-if [[ -n "${UPDATED_SLICES}" ]]; then echo "SLICES=${UPDATED_SLICES}" >> ${WORKSPACE}/context.properties; fi
+echo "TENANT=${TENANT}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "ACCOUNT=${ACCOUNT}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT=${PRODUCT}" >> ${AUTOMATION_DATA_DIR}/context.properties
+if [[ -n "${SEGMENT}" ]]; then echo "SEGMENT=${SEGMENT}" >> ${AUTOMATION_DATA_DIR}/context.properties; fi
+if [[ -n "${UPDATED_SLICES}" ]]; then echo "SLICES=${UPDATED_SLICES}" >> ${AUTOMATION_DATA_DIR}/context.properties; fi
 
-echo "GIT_USER=${GIT_USER}" >> ${WORKSPACE}/context.properties
-echo "GIT_EMAIL=${GIT_EMAIL}" >> ${WORKSPACE}/context.properties
+echo "GIT_USER=${GIT_USER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "GIT_EMAIL=${GIT_EMAIL}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "GENERATION_GIT_DNS=${GENERATION_GIT_DNS}" >> ${WORKSPACE}/context.properties
-echo "GENERATION_GIT_ORG=${GENERATION_GIT_ORG}" >> ${WORKSPACE}/context.properties
-echo "GENERATION_BIN_REPO=${GENERATION_BIN_REPO}" >> ${WORKSPACE}/context.properties
-echo "GENERATION_PATTERNS_REPO=${GENERATION_PATTERNS_REPO}" >> ${WORKSPACE}/context.properties
-echo "GENERATION_STARTUP_REPO=${GENERATION_STARTUP_REPO}" >> ${WORKSPACE}/context.properties
+echo "GENERATION_GIT_DNS=${GENERATION_GIT_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "GENERATION_GIT_ORG=${GENERATION_GIT_ORG}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "GENERATION_BIN_REPO=${GENERATION_BIN_REPO}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "GENERATION_PATTERNS_REPO=${GENERATION_PATTERNS_REPO}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "GENERATION_STARTUP_REPO=${GENERATION_STARTUP_REPO}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "SLICE_LIST=${SLICE_ARRAY[@]}" >> ${WORKSPACE}/context.properties
-echo "CODE_TAG_LIST=${CODE_TAG_ARRAY[@]}" >> ${WORKSPACE}/context.properties
-echo "CODE_REPO_LIST=${CODE_REPO_ARRAY[@]}" >> ${WORKSPACE}/context.properties
+echo "SLICE_LIST=${SLICE_ARRAY[@]}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "CODE_COMMIT_LIST=${CODE_COMMIT_ARRAY[@]}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "CODE_TAG_LIST=${CODE_TAG_ARRAY[@]}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "CODE_REPO_LIST=${CODE_REPO_ARRAY[@]}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "ACCOUNT_PROVIDER=${ACCOUNT_PROVIDER}" >> ${WORKSPACE}/context.properties
+echo "ACCOUNT_PROVIDER=${ACCOUNT_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "ACCOUNT_GIT_PROVIDER=${ACCOUNT_GIT_PROVIDER}" >> ${WORKSPACE}/context.properties
-echo "ACCOUNT_GIT_USER_VAR=${ACCOUNT_GIT_USER_VAR}" >> ${WORKSPACE}/context.properties
-echo "ACCOUNT_GIT_PASSWORD_VAR=${ACCOUNT_GIT_PASSWORD_VAR}" >> ${WORKSPACE}/context.properties
-echo "ACCOUNT_GIT_CREDENTIALS_VAR=${ACCOUNT_GIT_CREDENTIALS_VAR}" >> ${WORKSPACE}/context.properties
-echo "ACCOUNT_GIT_ORG=${ACCOUNT_GIT_ORG}" >> ${WORKSPACE}/context.properties
-echo "ACCOUNT_GIT_DNS=${ACCOUNT_GIT_DNS}" >> ${WORKSPACE}/context.properties
-echo "ACCOUNT_GIT_API_DNS=${ACCOUNT_GIT_API_DNS}" >> ${WORKSPACE}/context.properties
+echo "ACCOUNT_GIT_PROVIDER=${ACCOUNT_GIT_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "ACCOUNT_GIT_USER_VAR=${ACCOUNT_GIT_USER_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "ACCOUNT_GIT_PASSWORD_VAR=${ACCOUNT_GIT_PASSWORD_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "ACCOUNT_GIT_CREDENTIALS_VAR=${ACCOUNT_GIT_CREDENTIALS_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "ACCOUNT_GIT_ORG=${ACCOUNT_GIT_ORG}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "ACCOUNT_GIT_DNS=${ACCOUNT_GIT_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "ACCOUNT_GIT_API_DNS=${ACCOUNT_GIT_API_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "ACCOUNT_CONFIG_REPO=${ACCOUNT_CONFIG_REPO}" >> ${WORKSPACE}/context.properties
-echo "ACCOUNT_INFRASTRUCTURE_REPO=${ACCOUNT_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.properties
+echo "ACCOUNT_CONFIG_REPO=${ACCOUNT_CONFIG_REPO}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "ACCOUNT_INFRASTRUCTURE_REPO=${ACCOUNT_INFRASTRUCTURE_REPO}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "PRODUCT_GIT_PROVIDER=${PRODUCT_GIT_PROVIDER}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_GIT_USER_VAR=${PRODUCT_GIT_USER_VAR}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_GIT_PASSWORD_VAR=${PRODUCT_GIT_PASSWORD_VAR}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_GIT_CREDENTIALS_VAR=${PRODUCT_GIT_CREDENTIALS_VAR}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_GIT_ORG=${PRODUCT_GIT_ORG}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_GIT_DNS=${PRODUCT_GIT_DNS}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_GIT_API_DNS=${PRODUCT_GIT_API_DNS}" >> ${WORKSPACE}/context.properties
+echo "PRODUCT_GIT_PROVIDER=${PRODUCT_GIT_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_GIT_USER_VAR=${PRODUCT_GIT_USER_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_GIT_PASSWORD_VAR=${PRODUCT_GIT_PASSWORD_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_GIT_CREDENTIALS_VAR=${PRODUCT_GIT_CREDENTIALS_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_GIT_ORG=${PRODUCT_GIT_ORG}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_GIT_DNS=${PRODUCT_GIT_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_GIT_API_DNS=${PRODUCT_GIT_API_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "PRODUCT_DOCKER_PROVIDER=${PRODUCT_DOCKER_PROVIDER}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_DOCKER_USER_VAR=${PRODUCT_DOCKER_USER_VAR}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_DOCKER_PASSWORD_VAR=${PRODUCT_DOCKER_PASSWORD_VAR}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_DOCKER_DNS=${PRODUCT_DOCKER_DNS}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_DOCKER_API_DNS=${PRODUCT_DOCKER_API_DNS}" >> ${WORKSPACE}/context.properties
+echo "PRODUCT_DOCKER_PROVIDER=${PRODUCT_DOCKER_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_DOCKER_USER_VAR=${PRODUCT_DOCKER_USER_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_DOCKER_PASSWORD_VAR=${PRODUCT_DOCKER_PASSWORD_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_DOCKER_DNS=${PRODUCT_DOCKER_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_DOCKER_API_DNS=${PRODUCT_DOCKER_API_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "PRODUCT_REMOTE_DOCKER_PROVIDER=${PRODUCT_REMOTE_DOCKER_PROVIDER}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_REMOTE_DOCKER_USER_VAR=${PRODUCT_REMOTE_DOCKER_USER_VAR}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_REMOTE_DOCKER_PASSWORD_VAR=${PRODUCT_REMOTE_DOCKER_PASSWORD_VAR}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_REMOTE_DOCKER_DNS=${PRODUCT_REMOTE_DOCKER_DNS}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_REMOTE_DOCKER_API_DNS=${PRODUCT_REMOTE_DOCKER_API_DNS}" >> ${WORKSPACE}/context.properties
+echo "PRODUCT_REMOTE_DOCKER_PROVIDER=${PRODUCT_REMOTE_DOCKER_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_REMOTE_DOCKER_USER_VAR=${PRODUCT_REMOTE_DOCKER_USER_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_REMOTE_DOCKER_PASSWORD_VAR=${PRODUCT_REMOTE_DOCKER_PASSWORD_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_REMOTE_DOCKER_DNS=${PRODUCT_REMOTE_DOCKER_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_REMOTE_DOCKER_API_DNS=${PRODUCT_REMOTE_DOCKER_API_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "PRODUCT_CONFIG_REPO=${PRODUCT_CONFIG_REPO}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_INFRASTRUCTURE_REPO=${PRODUCT_INFRASTRUCTURE_REPO}" >> ${WORKSPACE}/context.properties
+echo "PRODUCT_CONFIG_REPO=${PRODUCT_CONFIG_REPO}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_INFRASTRUCTURE_REPO=${PRODUCT_INFRASTRUCTURE_REPO}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "PRODUCT_CODE_GIT_PROVIDER=${PRODUCT_CODE_GIT_PROVIDER}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_CODE_GIT_USER_VAR=${PRODUCT_CODE_GIT_USER_VAR}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_CODE_GIT_PASSWORD_VAR=${PRODUCT_CODE_GIT_PASSWORD_VAR}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_CODE_GIT_CREDENTIALS_VAR=${PRODUCT_CODE_GIT_CREDENTIALS_VAR}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_CODE_GIT_ORG=${PRODUCT_CODE_GIT_ORG}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_CODE_GIT_DNS=${PRODUCT_CODE_GIT_DNS}" >> ${WORKSPACE}/context.properties
-echo "PRODUCT_CODE_GIT_API_DNS=${PRODUCT_CODE_GIT_API_DNS}" >> ${WORKSPACE}/context.properties
+echo "PRODUCT_CODE_GIT_PROVIDER=${PRODUCT_CODE_GIT_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_CODE_GIT_USER_VAR=${PRODUCT_CODE_GIT_USER_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_CODE_GIT_PASSWORD_VAR=${PRODUCT_CODE_GIT_PASSWORD_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_CODE_GIT_CREDENTIALS_VAR=${PRODUCT_CODE_GIT_CREDENTIALS_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_CODE_GIT_ORG=${PRODUCT_CODE_GIT_ORG}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_CODE_GIT_DNS=${PRODUCT_CODE_GIT_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "PRODUCT_CODE_GIT_API_DNS=${PRODUCT_CODE_GIT_API_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "RELEASE_TAG=${RELEASE_TAG}" >> ${WORKSPACE}/context.properties
-echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${WORKSPACE}/context.properties
+echo "RELEASE_TAG=${RELEASE_TAG}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
-echo "AUTOMATION_BASE_DIR=${AUTOMATION_BASE_DIR}" >> ${WORKSPACE}/context.properties
-echo "AUTOMATION_PROVIDER=${AUTOMATION_PROVIDER}" >> ${WORKSPACE}/context.properties
-echo "AUTOMATION_PROVIDER_DIR=${AUTOMATION_PROVIDER_DIR}" >> ${WORKSPACE}/context.properties
-echo "AUTOMATION_DIR=${AUTOMATION_DIR}" >> ${WORKSPACE}/context.properties
+echo "AUTOMATION_BASE_DIR=${AUTOMATION_BASE_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "AUTOMATION_PROVIDER=${AUTOMATION_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "AUTOMATION_PROVIDER_DIR=${AUTOMATION_PROVIDER_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "AUTOMATION_DIR=${AUTOMATION_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
 case ${ACCOUNT_PROVIDER} in
     aws)
-        echo "ACCOUNT_AWS_ACCESS_KEY_ID_VAR=${AWS_CRED_AWS_ACCESS_KEY_ID_VAR}" >> ${WORKSPACE}/context.properties
-        echo "ACCOUNT_AWS_SECRET_ACCESS_KEY_VAR=${AWS_CRED_AWS_SECRET_ACCESS_KEY_VAR}" >> ${WORKSPACE}/context.properties
-        echo "ACCOUNT_TEMP_AWS_ACCESS_KEY_ID=${AWS_CRED_TEMP_AWS_ACCESS_KEY_ID}" >> ${WORKSPACE}/context.properties
-        echo "ACCOUNT_TEMP_AWS_SECRET_ACCESS_KEY=${AWS_CRED_TEMP_AWS_SECRET_ACCESS_KEY}" >> ${WORKSPACE}/context.properties
-        echo "ACCOUNT_TEMP_AWS_SESSION_TOKEN=${AWS_CRED_TEMP_AWS_SESSION_TOKEN}" >> ${WORKSPACE}/context.properties
+        echo "ACCOUNT_AWS_ACCESS_KEY_ID_VAR=${AWS_CRED_AWS_ACCESS_KEY_ID_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+        echo "ACCOUNT_AWS_SECRET_ACCESS_KEY_VAR=${AWS_CRED_AWS_SECRET_ACCESS_KEY_VAR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+        echo "ACCOUNT_TEMP_AWS_ACCESS_KEY_ID=${AWS_CRED_TEMP_AWS_ACCESS_KEY_ID}" >> ${AUTOMATION_DATA_DIR}/context.properties
+        echo "ACCOUNT_TEMP_AWS_SECRET_ACCESS_KEY=${AWS_CRED_TEMP_AWS_SECRET_ACCESS_KEY}" >> ${AUTOMATION_DATA_DIR}/context.properties
+        echo "ACCOUNT_TEMP_AWS_SESSION_TOKEN=${AWS_CRED_TEMP_AWS_SESSION_TOKEN}" >> ${AUTOMATION_DATA_DIR}/context.properties
         ;;
 esac
 

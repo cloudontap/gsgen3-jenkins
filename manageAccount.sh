@@ -5,7 +5,7 @@ trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
 # Create the account level buckets if required
 if [[ "${CREATE_ACCOUNT_BUCKETS}" == "true" ]]; then
-    cd ${WORKSPACE}/${ACCOUNT}/config/${ACCOUNT}
+    cd ${AUTOMATION_DATA_DIR}/${ACCOUNT}/config/${ACCOUNT}
     ${GENERATION_DIR}/createAccountTemplate.sh -a ${ACCOUNT}
     RESULT=$?
     if [[ "${RESULT}" -ne 0 ]]; then
@@ -22,7 +22,7 @@ if [[ "${CREATE_ACCOUNT_BUCKETS}" == "true" ]]; then
     fi
         
     # Update the infrastructure repo to capture any stack changes
-    cd ${WORKSPACE}/${ACCOUNT}/infrastructure/${ACCOUNT}
+    cd ${AUTOMATION_DATA_DIR}/${ACCOUNT}/infrastructure/${ACCOUNT}
 
     # Ensure git knows who we are
     git config user.name  "${BUILD_USER}"
@@ -41,7 +41,7 @@ fi
 
 # Update the code and credentials buckets if required
 if [[ "${SYNC_ACCOUNT_BUCKETS}" == "true" ]]; then
-    cd ${WORKSPACE}/${ACCOUNT}
+    cd ${AUTOMATION_DATA_DIR}/${ACCOUNT}
     ${GENERATION_DIR}/syncAccountBuckets.sh -a ${ACCOUNT}
 fi
 

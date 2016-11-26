@@ -3,7 +3,7 @@
 if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-cd ${WORKSPACE}/${INTEGRATOR}
+cd ${AUTOMATION_DATA_DIR}/${INTEGRATOR}
 
 # Add the tenant
 ${GENERATION_DIR}/integrator/addTenant.sh

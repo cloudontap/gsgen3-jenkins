@@ -41,7 +41,7 @@ else
         AWS_CRED_AWS_ACCESS_KEY_ID="${!AWS_CRED_AWS_ACCESS_KEY_ID_VAR}"
         AWS_CRED_AWS_SECRET_ACCESS_KEY="${!AWS_CRED_AWS_SECRET_ACCESS_KEY_VAR}"
         if [[ (-n ${AWS_CRED_AWS_ACCESS_KEY_ID}) && (-n ${AWS_CRED_AWS_SECRET_ACCESS_KEY}) ]]; then
-            TEMP_CREDENTIAL_FILE="$WORKSPACE/temp_aws_credentials.json"
+            TEMP_CREDENTIAL_FILE="${AUTOMATION_DATA_DIR}/temp_aws_credentials.json"
             export AWS_ACCESS_KEY_ID="${AWS_CRED_AWS_ACCESS_KEY_ID}"
             export AWS_SECRET_ACCESS_KEY="${AWS_CRED_AWS_SECRET_ACCESS_KEY}"
             unset AWS_SESSION_TOKEN
