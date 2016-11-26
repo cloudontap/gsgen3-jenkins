@@ -92,7 +92,7 @@ function formatBuildReference() {
 }
 
 # Parse options
-while getopts ":a:c:fhl:r:s:t:uv" opt; do
+while getopts ":a:c:fhlr:s:t:uv:" opt; do
     case $opt in
         a)
             REFERENCE_OPERATION="${REFERENCE_OPERATION_ACCEPT}"
