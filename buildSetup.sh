@@ -25,7 +25,7 @@ echo "SLICES=${SLICE_LIST}" >> $AUTOMATION_DATA_DIR/chain.properties
 # Include the build information in the detail message
 ${AUTOMATION_DIR}/manageBuildReferences.sh -l
 RESULT=$?
-if [[ "${RESULT}" -eq 0 ]]; then exit; fi
+if [[ "${RESULT}" -ne 0 ]]; then exit; fi
 
 # Perform checks for Docker packaging
 if [[ -f Dockerfile ]]; then
