@@ -220,7 +220,7 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
     case ${REFERENCE_OPERATION} in
         ${REFERENCE_OPERATION_ACCEPT})
             # Tag builds with an acceptance tag
-            ${AUTOMATION_DIR}/manageDocker.sh -k -r "${ACCEPTANCE_TAG}"
+            ${AUTOMATION_DIR}/manageDocker.sh -k -s ${SLICE_ARRAY[$INDEX]} -g "${CODE_COMMIT}" -r "${ACCEPTANCE_TAG}"
             RESULT=$?
             if [[ "${RESULT}" -ne 0 ]]; then exit; fi
            ;;
