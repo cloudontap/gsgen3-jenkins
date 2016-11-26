@@ -39,3 +39,6 @@ if [[ -f Dockerfile ]]; then
 fi
 
 # TODO: Perform checks for AWS Lambda packaging - not sure yet what to check for as a marker
+
+# All good
+RESULT=0
