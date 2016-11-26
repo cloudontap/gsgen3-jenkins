@@ -3,10 +3,6 @@
 if [[ -n "${AUTOMATION_DEBUG}" ]]; then set ${AUTOMATION_DEBUG}; fi
 trap 'exit ${RESULT:-1}' EXIT SIGHUP SIGINT SIGTERM
 
-# Add release number to details
-DETAIL_MESSAGE="release=${RELEASE_TAG}, ${DETAIL_MESSAGE}"
-echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${AUTOMATION_DATA_DIR}/context.properties
-
 # Update build references
 ${AUTOMATION_DIR}/manageBuildReferences.sh -u
 RESULT=$?
@@ -25,9 +21,7 @@ ${AUTOMATION_DIR}/manageRepo.sh -p \
     -m "${DETAIL_MESSAGE}" \
     -b ${PRODUCT_CONFIG_REFERENCE}
 RESULT=$?
-if [[ ${RESULT} -ne 0 ]]; then
-	exit
-fi
+if [[ ${RESULT} -ne 0 ]]; then exit; fi
 
 # Commit the generated application templates
 ${AUTOMATION_DIR}/manageRepo.sh -p \
@@ -37,9 +31,7 @@ ${AUTOMATION_DIR}/manageRepo.sh -p \
     -m "${DETAIL_MESSAGE}" \
     -b ${PRODUCT_INFRASTRUCTURE_REFERENCE}
 RESULT=$?
-if [[ ${RESULT} -ne 0 ]]; then
-	exit
-fi
+if [[ ${RESULT} -ne 0 ]]; then exit; fi
 
 # All good
 RESULT=0
