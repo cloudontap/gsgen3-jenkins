@@ -9,7 +9,7 @@ RESULT=$?
 if [[ ${RESULT} -ne 0 ]]; then exit; fi
 
 # Create the templates
-${AUTOMATION_DIR}/createTemplates.sh -t application -c ${RELEASE_TAG}
+${AUTOMATION_DIR}/createTemplates.sh -t application -c "${RELEASE_TAG}"
 RESULT=$?
 if [[ ${RESULT} -ne 0 ]]; then exit; fi
 

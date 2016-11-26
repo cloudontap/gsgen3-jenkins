@@ -183,8 +183,8 @@ for CURRENT_SLICE in ${SLICES:-${SLICE}}; do
         TAG_PART="?"
     fi
 
-    CODE_COMMIT_ARRAY+=("${TAG_PART,,}")
-    CODE_TAG_ARRAY+=("${COMMIT_PART,,}")
+    CODE_COMMIT_ARRAY+=("${COMMIT_PART,,}")
+    CODE_TAG_ARRAY+=("${TAG_PART,,}")
 
     # Determine code repo for the slice - there may be none
     CODE_SLICE=$(echo "${SLICE_PART^^}" | tr "-" "_")
