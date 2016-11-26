@@ -13,7 +13,7 @@ SLICE_ARRAY=(${SLICE_LIST})
 CODE_COMMIT_ARRAY=(${CODE_COMMIT_LIST})
 
 ${AUTOMATION_DIR}/manageRepo.sh -p \
-    -d . \
+    -d ${AUTOMATION_DATA_DIR}/${ACCOUNT}/config/${PRODUCT} \
     -n config \
     -m "${DETAIL_MESSAGE}" \
     -b ${PRODUCT_CONFIG_REFERENCE}
