@@ -21,7 +21,7 @@ fi
 
 cd ../
 
-. ${AUTOMATION_DIR}/createImages.sh
+. ${AUTOMATION_DIR}/manageImages.sh
 
 # All good
 RESULT=0

@@ -39,7 +39,7 @@ if [[ $(du -s -m ./dist | cut -f 1) -gt ${MAX_METEOR_BUILD_SIZE} ]]; then
     exit
 fi
 
-. ${AUTOMATION_DIR}/createImages.sh
+. ${AUTOMATION_DIR}/manageImages.sh
 
 # All good
 RESULT=0
