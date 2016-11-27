@@ -59,45 +59,78 @@ AUTOMATION_PROVIDER_DIR="${AUTOMATION_BASE_DIR}"
 
 case ${AUTOMATION_PROVIDER} in
     jenkins)
-        # Determine the tenant/product/segment from the job name
-        # if not already defined or provided on the command line
-        # Only parts of the jobname starting with "cot-" are
-        # considered and the "cot-" prefix is removed to give the
-        # actual segment/product/tenant name
+        # Determine the integrator/tenant/product/environment/segment from 
+        # the job name if not already defined or provided on the command line
+        # Only parts of the jobname starting with "cot-" or "int-" are
+        # considered and this prefix is removed to give the actual name.
+        # "int-" denotes an integrator setup, while "cot-" denotes a tenant setup 
         JOB_PATH=($(echo "${JOB_NAME}" | tr "/" " "))
-        PARTS_ARRAY=()
-        COT_PREFIX="cot-"
+        INTEGRATOR_PARTS_ARRAY=()
+        TENANT_PARTS_ARRAY=()
+        INTEGRATOR_PREFIX="int-"
+        TENANT_PREFIX="cot-"
         for PART in ${JOB_PATH[@]}; do
-            if [[ "${PART}" =~ ^${COT_PREFIX}* ]]; then
-                PARTS_ARRAY+=("${PART#${COT_PREFIX}}")
+            if [[ "${PART}" =~ ^${INTEGRATOR_PREFIX}* ]]; then
+                INTEGRATOR_PARTS_ARRAY+=("${PART#${INTEGRATOR_PREFIX}}")
+            fi
+            if [[ "${PART}" =~ ^${TENANT_PREFIX}* ]]; then
+                TENANT_PARTS_ARRAY+=("${PART#${TENANT_PREFIX}}")
             fi
         done
-        PARTS_COUNT="${#PARTS_ARRAY[@]}"
-        
-        if [[ "${PARTS_COUNT}" -gt 3 ]]; then
-            # Assume its integrator/tenant/product/segment
-            INTEGRATOR=${INTEGRATOR:-${PARTS_ARRAY[${PARTS_COUNT}-4]}}
-            TENANT=${TENANT:-${PARTS_ARRAY[${PARTS_COUNT}-3]}}
-            PRODUCT=${PRODUCT:-${PARTS_ARRAY[${PARTS_COUNT}-2]}}
-            SEGMENT=${SEGMENT:-${PARTS_ARRAY[${PARTS_COUNT}-1]}}
-        fi
-        if [[ "${PARTS_COUNT}" -gt 2 ]]; then
-            # Assume its integrator/tenant/product
-            INTEGRATOR=${INTEGRATOR:-${PARTS_ARRAY[${PARTS_COUNT}-3]}}
-            TENANT=${TENANT:-${PARTS_ARRAY[${PARTS_COUNT}-2]}}
-            PRODUCT=${PRODUCT:-${PARTS_ARRAY[${PARTS_COUNT}-1]}}
-        fi
-        if [[ "${PARTS_COUNT}" -gt 1 ]]; then
-            # Assume its product and segment
-            PRODUCT=${PRODUCT:-${PARTS_ARRAY[${PARTS_COUNT}-2]}}
-            SEGMENT=${SEGMENT:-${PARTS_ARRAY[${PARTS_COUNT}-1]}}
-        fi
-        if [[ "${PARTS_COUNT}" -gt 0 ]]; then
-            # Assume its the product
-            PRODUCT=${PRODUCT:-${PARTS_ARRAY[${PARTS_COUNT}-1]}}
+        if [[ "${#INTEGRATOR_PARTS_ARRAY[@]}" -ne 0 ]]; then
+            INTEGRATOR_PARTS_COUNT="${#INTEGRATOR_PARTS_ARRAY[@]}"
+
+            if [[ "${INTEGRATOR_PARTS_COUNT}" -gt 4 ]]; then
+                # integrator/tenant/product/environment/segment
+                INTEGRATOR=${INTEGRATOR:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-5]}}
+                TENANT=${TENANT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-4]}}
+                PRODUCT=${PRODUCT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-3]}}
+                ENVIRONMENT=${ENVIRONMENT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-2]}}
+                SEGMENT=${SEGMENT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-1]}}
+            fi
+            if [[ "${INTEGRATOR_PARTS_COUNT}" -gt 3 ]]; then
+                # tenant/product/environment/segment
+                TENANT=${TENANT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-4]}}
+                PRODUCT=${PRODUCT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-3]}}
+                ENVIRONMENT=${ENVIRONMENT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-2]}}
+                SEGMENT=${SEGMENT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-1]}}
+            fi
+            if [[ "${INTEGRATOR_PARTS_COUNT}" -gt 2 ]]; then
+                # tenant/product/environment
+                TENANT=${TENANT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-3]}}
+                PRODUCT=${PRODUCT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-2]}}
+                ENVIRONMENT=${ENVIRONMENT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-1]}}
+            fi
+            if [[ "${INTEGRATOR_PARTS_COUNT}" -gt 1 ]]; then
+                # tenant/product
+                TENANT=${TENANT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-2]}}
+                PRODUCT=${PRODUCT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-1]}}
+            fi
+            if [[ "${INTEGRATOR_PARTS_COUNT}" -gt 0 ]]; then
+                # product
+                TENANT=${TENANT:-${INTEGRATOR_PARTS_ARRAY[${INTEGRATOR_PARTS_COUNT}-2]}}
+            fi
         else
-            # Default before use of folder plugin was for product to be first token in job name
-            PRODUCT=${PRODUCT:-$(echo ${JOB_NAME} | cut -d '-' -f 1)}
+            TENANT_PARTS_COUNT="${#TENANT_PARTS_ARRAY[@]}"
+
+            if [[ "${TENANT_PARTS_COUNT}" -gt 2 ]]; then
+                # product/environment/segment
+                PRODUCT=${PRODUCT:-${TENANT_PARTS_ARRAY[${TENANT_PARTS_COUNT}-3]}}
+                ENVIRONMENT=${ENVIRONMENT:-${TENANT_PARTS_ARRAY[${TENANT_PARTS_COUNT}-2]}}
+                SEGMENT=${SEGMENT:-${TENANT_PARTS_ARRAY[${TENANT_PARTS_COUNT}-1]}}
+            fi
+            if [[ "${TENANT_PARTS_COUNT}" -gt 1 ]]; then
+                # product/environment
+                PRODUCT=${PRODUCT:-${TENANT_PARTS_ARRAY[${TENANT_PARTS_COUNT}-2]}}
+                ENVIRONMENT=${ENVIRONMENT:-${TENANT_PARTS_ARRAY[${TENANT_PARTS_COUNT}-1]}}
+            fi
+            if [[ "${TENANT_PARTS_COUNT}" -gt 0 ]]; then
+                # product
+                PRODUCT=${PRODUCT:-${TENANT_PARTS_ARRAY[${TENANT_PARTS_COUNT}-1]}}
+            else
+                # Default before use of folder plugin was for product to be first token in job name
+                PRODUCT=${PRODUCT:-$(echo ${JOB_NAME} | cut -d '-' -f 1)}
+            fi
         fi
 
         # Use the user info for git commits
@@ -115,8 +148,9 @@ TENANT_UPPER=${TENANT^^}
 PRODUCT=${PRODUCT,,}
 PRODUCT_UPPER=${PRODUCT^^}
 
-# Determine the SEGMENT - normally the same as the environment
-SEGMENT=${SEGMENT:-$ENVIRONMENT}
+# Default SEGMENT and ENVIRONMENT - normally they are the same
+SEGMENT=${SEGMENT:-${ENVIRONMENT}}
+ENVIRONMENT=${ENVIRONMENT:-${SEGMENT}}
 
 SEGMENT=${SEGMENT,,}
 SEGMENT_UPPER=${SEGMENT^^}
@@ -404,7 +438,7 @@ if [[ "${#SLICE_ARRAY[@]}" -ne 0 ]];        then DETAIL_MESSAGE="${DETAIL_MESSAG
 if [[ -n "${TASK}" ]];                      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, task=${TASK}"; fi
 if [[ -n "${TASKS}" ]];                     then DETAIL_MESSAGE="${DETAIL_MESSAGE}, tasks=${TASKS}"; fi
 if [[ -n "${GIT_USER}" ]];                  then DETAIL_MESSAGE="${DETAIL_MESSAGE}, user=${GIT_USER}"; fi
-if [[ -n "${MODE}" ]];                      then DETAIL_MESSAGE=    ; fi
+if [[ -n "${MODE}" ]];                      then DETAIL_MESSAGE="${DETAIL_MESSAGE}, mode=${MODE}"; fi
 
 # Save for future steps
 echo "TENANT=${TENANT}" >> ${AUTOMATION_DATA_DIR}/context.properties
