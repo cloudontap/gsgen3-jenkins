@@ -422,6 +422,13 @@ PRODUCT_CODE_GIT_API_DNS="${!PRODUCT_CODE_GIT_API_DNS_VAR:-api.$PRODUCT_CODE_GIT
 RELEASE_TAG="r${BUILD_NUMBER}-${SEGMENT}"
 if [[ -n "${RELEASE_IDENTIFIER}" ]]; then
     RELEASE_TAG="${RELEASE_IDENTIFIER}-${SEGMENT}"
+    if [[ "${RELEASE_IDENTIFIER}" =~ ^-?[0-9]+$ ]]; then
+        # It is a number - assume identifier defaulted to build number
+        # Note that this won't work is user decides to use their own
+        # integer based scheme. Advise is thus to add a non-numeric prefix/suffix
+        # as long as its not a prefix of "r"
+        RELEASE_TAG="r${RELEASE_TAG}"
+    fi
 fi
 
 if [[ -n "${ACCEPTANCE_IDENTIFIER}" ]]; then
