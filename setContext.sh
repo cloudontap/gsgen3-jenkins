@@ -376,6 +376,16 @@ PRODUCT_REMOTE_DOCKER_DNS="${!PRODUCT_REMOTE_DOCKER_DNS_VAR}"
 PRODUCT_REMOTE_DOCKER_API_DNS_VAR="${PRODUCT_REMOTE_DOCKER_PROVIDER_UPPER}_API_DNS"
 PRODUCT_REMOTE_DOCKER_API_DNS="${!PRODUCT_REMOTE_DOCKER_API_DNS_VAR:-$PRODUCT_REMOTE_DOCKER_DNS}"
 
+# Determine the suffix to add to verification identifiers to form the remote tag
+# used when sourcing new images
+if [[ -z "${PRODUCT_REMOTE_DOCKER_TAG_SUFFIX}" ]]; then
+    PRODUCT_REMOTE_DOCKER_TAG_SUFFIX_VAR="${PRODUCT_UPPER}_${SEGMENT_UPPER}_REMOTE_DOCKER_TAG_SUFFIX"
+    if [[ -z "${!PRODUCT_REMOTE_DOCKER_TAG_SUFFIX_VAR}" ]]; then
+        PRODUCT_REMOTE_DOCKER_TAG_SUFFIX_VAR="${PRODUCT_UPPER}_REMOTE_DOCKER_TAG_SUFFIX"
+    fi
+    PRODUCT_REMOTE_DOCKER_TAG_SUFFIX="${!PRODUCT_REMOTE_DOCKER_TAG_SUFFIX_VAR}"
+fi
+
 # Determine product repos
 if [[ -z "${PRODUCT_CONFIG_REPO}" ]]; then
     PRODUCT_CONFIG_REPO_VAR="${PRODUCT_UPPER}_${SEGMENT_UPPER}_CONFIG_REPO"
@@ -418,7 +428,7 @@ PRODUCT_CODE_GIT_DNS="${!PRODUCT_CODE_GIT_DNS_VAR}"
 PRODUCT_CODE_GIT_API_DNS_VAR="${PRODUCT_CODE_GIT_PROVIDER_UPPER}_API_DNS"
 PRODUCT_CODE_GIT_API_DNS="${!PRODUCT_CODE_GIT_API_DNS_VAR:-api.$PRODUCT_CODE_GIT_DNS}"
 
-# Determine the release and acceptance tags
+# Determine the release and verification tag
 RELEASE_TAG="r${BUILD_NUMBER}-${SEGMENT}"
 if [[ -n "${RELEASE_IDENTIFIER}" ]]; then
     RELEASE_TAG="${RELEASE_IDENTIFIER}-${SEGMENT}"
@@ -431,8 +441,15 @@ if [[ -n "${RELEASE_IDENTIFIER}" ]]; then
     fi
 fi
 
-if [[ -n "${ACCEPTANCE_IDENTIFIER}" ]]; then
-    ACCEPTANCE_TAG="${ACCEPTANCE_IDENTIFIER}-${SEGMENT}"
+if [[ -n "${VERIFICATION_IDENTIFIER}" ]]; then
+    VERIFICATION_TAG="${VERIFICATION_IDENTIFIER}${PRODUCT_REMOTE_DOCKER_TAG_SUFFIX}"
+    if [[ "${VERIFICATION_IDENTIFIER}" =~ ^-?[0-9]+$ ]]; then
+        # It is a number - assume identifier defaulted to build number
+        # Note that this won't work is user decides to use their own
+        # integer based scheme. Advise is thus to add a non-numeric prefix/suffix
+        # as long as its not a prefix of "r"
+        VERIFICATION_TAG="r${VERIFICATION_TAG}"
+    fi
 fi
 
 # Basic details for git commits/slack notification (enhanced by other scripts)
@@ -513,7 +530,7 @@ echo "PRODUCT_CODE_GIT_DNS=${PRODUCT_CODE_GIT_DNS}" >> ${AUTOMATION_DATA_DIR}/co
 echo "PRODUCT_CODE_GIT_API_DNS=${PRODUCT_CODE_GIT_API_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
 echo "RELEASE_TAG=${RELEASE_TAG}" >> ${AUTOMATION_DATA_DIR}/context.properties
-echo "ACCEPTANCE_TAG=${ACCEPTANCE_TAG}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "VERIFICATION_TAG=${VERIFICATION_TAG}" >> ${AUTOMATION_DATA_DIR}/context.properties
 echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
 echo "AUTOMATION_BASE_DIR=${AUTOMATION_BASE_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
