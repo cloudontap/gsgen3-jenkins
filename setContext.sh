@@ -384,10 +384,14 @@ PRODUCT_CODE_GIT_DNS="${!PRODUCT_CODE_GIT_DNS_VAR}"
 PRODUCT_CODE_GIT_API_DNS_VAR="${PRODUCT_CODE_GIT_PROVIDER_UPPER}_API_DNS"
 PRODUCT_CODE_GIT_API_DNS="${!PRODUCT_CODE_GIT_API_DNS_VAR:-api.$PRODUCT_CODE_GIT_DNS}"
 
-# Determine the deployment tag
+# Determine the release and acceptance tags
 RELEASE_TAG="r${BUILD_NUMBER}-${SEGMENT}"
 if [[ -n "${RELEASE_IDENTIFIER}" ]]; then
-    RELEASE_TAG="r${RELEASE_IDENTIFIER}-${SEGMENT}"
+    RELEASE_TAG="${RELEASE_IDENTIFIER}-${SEGMENT}"
+fi
+
+if [[ -n "${ACCEPTANCE_IDENTIFIER}" ]]; then
+    ACCEPTANCE_TAG="${ACCEPTANCE_IDENTIFIER}-${SEGMENT}"
 fi
 
 # Basic details for git commits/slack notification (enhanced by other scripts)
@@ -468,6 +472,7 @@ echo "PRODUCT_CODE_GIT_DNS=${PRODUCT_CODE_GIT_DNS}" >> ${AUTOMATION_DATA_DIR}/co
 echo "PRODUCT_CODE_GIT_API_DNS=${PRODUCT_CODE_GIT_API_DNS}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
 echo "RELEASE_TAG=${RELEASE_TAG}" >> ${AUTOMATION_DATA_DIR}/context.properties
+echo "ACCEPTANCE_TAG=${ACCEPTANCE_TAG}" >> ${AUTOMATION_DATA_DIR}/context.properties
 echo "DETAIL_MESSAGE=${DETAIL_MESSAGE}" >> ${AUTOMATION_DATA_DIR}/context.properties
 
 echo "AUTOMATION_BASE_DIR=${AUTOMATION_BASE_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
