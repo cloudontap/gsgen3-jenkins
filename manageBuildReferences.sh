@@ -211,10 +211,12 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
     if [[ -f "${SLICE_FILE}" ]]; then
         EFFECTIVE_SLICE=$(cat "${SLICE_FILE}")
     fi
-    BUILD_FILE="appsettings/${SEGMENT}/${EFFECTIVE_SLICE}/build.json"
+    NEW_BUILD_FILE="appsettings/${SEGMENT}/${EFFECTIVE_SLICE}/build.json"
+    BUILD_FILE="${NEW_BUILD_FILE}"
     if [[ ! -f "${BUILD_FILE}" ]]; then
         # Legacy file naming
-        BUILD_FILE="appsettings/${SEGMENT}/${EFFECTIVE_SLICE}/build.ref"
+        LEGACY_BUILD_FILE="appsettings/${SEGMENT}/${EFFECTIVE_SLICE}/build.ref"
+        BUILD_FILE="${LEGACY_BUILD_FILE}"
     fi
         
     case ${REFERENCE_OPERATION} in
@@ -276,7 +278,9 @@ for INDEX in $(seq 0 ${SLICE_LAST_INDEX}); do
         
         
             # Update the build reference
-            echo -n "${BUILD_REFERENCE}" > ${BUILD_FILE}
+            # Use newer naming and clean up legacy named build reference files
+            echo -n "${BUILD_REFERENCE}" > "${NEW_BUILD_FILE}"
+            if [[ -e "${LEGACY_BUILD_FILE}" ]]; then rm "${LEGACY_BUILD_FILE}"
             ;;
     
         ${REFERENCE_OPERATION_VERIFY})
