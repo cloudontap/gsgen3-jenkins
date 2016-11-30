@@ -151,41 +151,44 @@ if [[ !("${EXCLUDE_ACCOUNT_DIRECTORIES}" == "true") ]]; then
     fi
 fi
 
-# Pull in the default generation repo if not overridden by product
-GENERATION_DIR="${BASE_DIR}/config/bin"
-if [[ -d ${BASE_DIR}/config/${PRODUCT}/bin ]]; then
-    mkdir -p "${GENERATION_DIR}"
-    cp -rp ${BASE_DIR}/config/${PRODUCT}/bin "${GENERATION_DIR}"
-else
-    GENERATION_URL="https://${GENERATION_GIT_DNS}/${GENERATION_GIT_ORG}/${GENERATION_BIN_REPO}"
-    ${AUTOMATION_DIR}/manageRepo.sh -c -n "generation bin" -u "${GENERATION_URL}" \
-        -d "${GENERATION_DIR}" -b "${GENERATION_BIN_REFERENCE}"
-    RESULT=$?
-    if [[ ${RESULT} -ne 0 ]]; then
-        exit
-    fi
-fi
-# echo "GENERATION_DIR=${GENERATION_DIR}/${ACCOUNT_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
-echo "GENERATION_DIR=${GENERATION_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
-
-
-# Pull in the patterns repo if not overridden by product
-if [[ "${INCLUDE_ALL_REPOS}" == "true" ]]; then
-    GENERATION_PATTERNS_DIR="${BASE_DIR}/config/patterns"
-    if [[ -d ${BASE_DIR}/config/${PRODUCT}/patterns ]]; then
-        mkdir -p "${GENERATION_PATTERNS_DIR}"
-        cp -rp ${BASE_DIR}/config/${PRODUCT}/patterns "${GENERATION_PATTERNS_DIR}"
+# Pull in the default generation repo if not overridden by product or locally installed
+if [[ -z "${GENERATION_DIR}" ]]; then
+    GENERATION_DIR="${BASE_DIR}/config/bin"
+    if [[ -d ${BASE_DIR}/config/${PRODUCT}/bin ]]; then
+        mkdir -p "${GENERATION_DIR}"
+        cp -rp ${BASE_DIR}/config/${PRODUCT}/bin "${GENERATION_DIR}"
     else
-        GENERATION_URL="https://${GENERATION_GIT_DNS}/${GENERATION_GIT_ORG}/${GENERATION_PATTERNS_REPO}"
-        ${AUTOMATION_DIR}/manageRepo.sh -c -n "generation patterns" -u "${GENERATION_URL}" \
-            -d "${GENERATION_PATTERNS_DIR}" -b "${GENERATION_PATTERNS_REFERENCE}"
+        GENERATION_URL="https://${GENERATION_GIT_DNS}/${GENERATION_GIT_ORG}/${GENERATION_BIN_REPO}"
+        ${AUTOMATION_DIR}/manageRepo.sh -c -n "generation bin" -u "${GENERATION_URL}" \
+            -d "${GENERATION_DIR}" -b "${GENERATION_BIN_REFERENCE}"
         RESULT=$?
         if [[ ${RESULT} -ne 0 ]]; then
             exit
         fi
     fi
-#    echo "GENERATION_PATTERNS_DIR=${GENERATION_PATTERNS_DIR}/${ACCOUNT_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
-    echo "GENERATION_PATTERNS_DIR=${GENERATION_PATTERNS_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+    # echo "GENERATION_DIR=${GENERATION_DIR}/${ACCOUNT_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+    echo "GENERATION_DIR=${GENERATION_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+fi
+
+# Pull in the patterns repo if not overridden by product or locally installed
+if [[ -z "${GENERATION_PATTERNS_DIR}" ]]; then
+    if [[ "${INCLUDE_ALL_REPOS}" == "true" ]]; then
+        GENERATION_PATTERNS_DIR="${BASE_DIR}/config/patterns"
+        if [[ -d ${BASE_DIR}/config/${PRODUCT}/patterns ]]; then
+            mkdir -p "${GENERATION_PATTERNS_DIR}"
+            cp -rp ${BASE_DIR}/config/${PRODUCT}/patterns "${GENERATION_PATTERNS_DIR}"
+        else
+            GENERATION_URL="https://${GENERATION_GIT_DNS}/${GENERATION_GIT_ORG}/${GENERATION_PATTERNS_REPO}"
+            ${AUTOMATION_DIR}/manageRepo.sh -c -n "generation patterns" -u "${GENERATION_URL}" \
+                -d "${GENERATION_PATTERNS_DIR}" -b "${GENERATION_PATTERNS_REFERENCE}"
+            RESULT=$?
+            if [[ ${RESULT} -ne 0 ]]; then
+                exit
+            fi
+        fi
+    #    echo "GENERATION_PATTERNS_DIR=${GENERATION_PATTERNS_DIR}/${ACCOUNT_PROVIDER}" >> ${AUTOMATION_DATA_DIR}/context.properties
+        echo "GENERATION_PATTERNS_DIR=${GENERATION_PATTERNS_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
+    fi
 fi
 
 if [[ !("${EXCLUDE_PRODUCT_DIRECTORIES}" == "true") ]]; then
@@ -236,22 +239,24 @@ if [[ !("${EXCLUDE_ACCOUNT_DIRECTORIES}" == "true") ]]; then
     fi
 fi
 
-# Pull in the default generation startup repo if not overridden by product
-if [[ "${INCLUDE_ALL_REPOS}" == "true" ]]; then
-    GENERATION_STARTUP_DIR="${BASE_DIR}/infrastructure/startup"
-    if [[ -d ${BASE_DIR}/infrastructure/${PRODUCT}/startup ]]; then
-        mkdir -p "${GENERATION_STARTUP_DIR}"
-        cp -rp ${BASE_DIR}/infrastructure/${PRODUCT}/startup "${GENERATION_STARTUP_DIR}"
-    else
-        GENERATION_URL="https://${GENERATION_GIT_DNS}/${GENERATION_GIT_ORG}/${GENERATION_STARTUP_REPO}"
-        ${AUTOMATION_DIR}/manageRepo.sh -c -n "generation startup" -u "${GENERATION_URL}" \
-            -d "${GENERATION_STARTUP_DIR}" -b "${GENERATION_STARTUP_REFERENCE}"
-        RESULT=$?
-        if [[ ${RESULT} -ne 0 ]]; then
-            exit
+# Pull in the default generation startup repo if not overridden by product or locally installed
+if [[ -z "${GENERATION_STARTUP_DIR}" ]]; then
+    if [[ "${INCLUDE_ALL_REPOS}" == "true" ]]; then
+        GENERATION_STARTUP_DIR="${BASE_DIR}/infrastructure/startup"
+        if [[ -d ${BASE_DIR}/infrastructure/${PRODUCT}/startup ]]; then
+            mkdir -p "${GENERATION_STARTUP_DIR}"
+            cp -rp ${BASE_DIR}/infrastructure/${PRODUCT}/startup "${GENERATION_STARTUP_DIR}"
+        else
+            GENERATION_URL="https://${GENERATION_GIT_DNS}/${GENERATION_GIT_ORG}/${GENERATION_STARTUP_REPO}"
+            ${AUTOMATION_DIR}/manageRepo.sh -c -n "generation startup" -u "${GENERATION_URL}" \
+                -d "${GENERATION_STARTUP_DIR}" -b "${GENERATION_STARTUP_REFERENCE}"
+            RESULT=$?
+            if [[ ${RESULT} -ne 0 ]]; then
+                exit
+            fi
         fi
+        echo "GENERATION_STARTUP_DIR=${GENERATION_STARTUP_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
     fi
-    echo "GENERATION_STARTUP_DIR=${GENERATION_STARTUP_DIR}" >> ${AUTOMATION_DATA_DIR}/context.properties
 fi
 
 # All good
